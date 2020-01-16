@@ -8,7 +8,7 @@ import (
 	"github.com/go-pg/pg/orm"
 )
 
-// Database implements a wrapper of pg.DB
+// Database implements a wrapper of golang ORM with focus on PostgreSQL
 type Database struct {
 	*pg.DB
 }
@@ -20,7 +20,7 @@ func Connect(cfg *config.Config) *Database {
 		Addr:     cfg.DB.Host + ":" + string(cfg.DB.Port),
 		User:     cfg.DB.User,
 		Password: cfg.DB.Password,
-		Database: cfg.DB.Name,
+		Database: cfg.DB.Table,
 	})
 
 	return &Database{db}
