@@ -68,6 +68,7 @@ func ParseConfig() Config {
 		cfg.Market = &MarketConfig{
 			viper.GetString("mainnet.market.coingecko_endpoint"),
 		}
+
 	case "testnet":
 		cfg.Node = &NodeConfig{
 			RPCNode:     viper.GetString("testnet.node.rpc_node"),
@@ -83,6 +84,7 @@ func ParseConfig() Config {
 		cfg.Market = &MarketConfig{
 			viper.GetString("testnet.market.coingecko_endpoint"),
 		}
+
 	default:
 		log.Fatal("active can be either mainnet or testnet.")
 	}

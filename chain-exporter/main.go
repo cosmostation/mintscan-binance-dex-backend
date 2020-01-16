@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/exporter"
 )
 
 func main() {
-	fmt.Println("Chain Exporter of Mintscan Binance DEX")
+	exporter := exporter.NewExporter()
+	exporter.StartSyncing()
 }
