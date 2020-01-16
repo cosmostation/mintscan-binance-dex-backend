@@ -1,50 +1,90 @@
 package config
 
 import (
-	"io/ioutil"
 	"log"
 
-	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
+
+	"github.com/spf13/viper"
 )
 
 // Config defines all necessary juno configuration parameters.
 type Config struct {
-	Node NodeConfig     `toml:"node"`
-	DB   DatabaseConfig `toml:"database"`
+	Node   *NodeConfig   `yaml:"node"`
+	DB     *DBConfig     `yaml:"database"`
+	Market *MarketConfig `yaml:"market"`
 }
 
 // NodeConfig defines endpoints for both RPC node and LCD REST API server
 type NodeConfig struct {
-	RPCEndpoint string `toml:"rpc_endpoint"`
-	LCDEndpoint string `toml:"lcd_endpoint"`
+	RPCNode     string `yaml:"rpc_node"`
+	LCDEndpoint string `yaml:"lcd_endpoint"`
 }
 
-// DatabaseConfig defines all database connection configuration parameters.
-type DatabaseConfig struct {
-	Host     string `toml:"host"`
-	Port     uint64 `toml:"port"`
-	Name     string `toml:"name"`
-	User     string `toml:"user"`
-	Password string `toml:"password"`
-	SSLMode  string `toml:"ssl_mode"`
+// DBConfig defines all database connection configuration parameters.
+type DBConfig struct {
+	Host     string `yaml:"host"`
+	Port     int64  `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Table    string `yaml:"table"`
+}
+
+// MarketConfig defines endpoints where you parse market data from
+type MarketConfig struct {
+	CoinGeckoEndpoint string `yaml:"coingecko_endpoint"`
 }
 
 // ParseConfig attempts to read and parse chain-exporter config from the given configPath.
 // An error reading or parsing the config results in a panic.
-func ParseConfig(configPath string) Config {
-	if configPath == "" {
-		log.Fatal("invalid configuration file")
-	}
+func ParseConfig() Config {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("./")
 
-	configData, err := ioutil.ReadFile(configPath)
-	if err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(errors.Wrap(err, "failed to read config"))
 	}
 
-	var cfg Config
-	if _, err := toml.Decode(string(configData), &cfg); err != nil {
-		log.Fatal(errors.Wrap(err, "failed to decode config"))
+	cfg := Config{}
+
+	if viper.GetString("active") == "" {
+		log.Fatal("define active param in your config file.")
+	}
+
+	switch viper.GetString("active") {
+	case "mainnet":
+		cfg.Node = &NodeConfig{
+			RPCNode:     viper.GetString("mainnet.node.rpc_node"),
+			LCDEndpoint: viper.GetString("mainnet.node.lcd_endpoint"),
+		}
+		cfg.DB = &DBConfig{
+			Host:     viper.GetString("mainnet.database.host"),
+			Port:     viper.GetInt64("mainnet.database.port"),
+			User:     viper.GetString("mainnet.database.user"),
+			Password: viper.GetString("mainnet.database.password"),
+			Table:    viper.GetString("mainnet.database.table"),
+		}
+		cfg.Market = &MarketConfig{
+			viper.GetString("mainnet.market.coingecko_endpoint"),
+		}
+	case "testnet":
+		cfg.Node = &NodeConfig{
+			RPCNode:     viper.GetString("testnet.node.rpc_node"),
+			LCDEndpoint: viper.GetString("testnet.node.lcd_endpoint"),
+		}
+		cfg.DB = &DBConfig{
+			Host:     viper.GetString("testnet.database.host"),
+			Port:     viper.GetInt64("testnet.database.port"),
+			User:     viper.GetString("testnet.database.user"),
+			Password: viper.GetString("testnet.database.password"),
+			Table:    viper.GetString("testnet.database.table"),
+		}
+		cfg.Market = &MarketConfig{
+			viper.GetString("testnet.market.coingecko_endpoint"),
+		}
+	default:
+		log.Fatal("active can be either mainnet or testnet.")
 	}
 
 	return cfg
