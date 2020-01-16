@@ -18,28 +18,43 @@ type Exporter struct {
 func NewExporter() Exporter {
 	cfg := config.ParseConfig()
 	client := rpc.NewClient(cfg.Node.RPCNode, cfg.Node.LCDEndpoint)
-	db := db.Connect(&cfg)
+	db := db.Connect(cfg.DB)
 
 	return Exporter{client, db}
 }
 
-// StartSyncing starts syncing blockchain data on the active chain
-func (ex *Exporter) StartSyncing() {
-	height, _ := ex.client.LatestBlockHeight()
+// StartSyncing compares block height between the height saved in database and
+// latest block height on the active chain and starts syncing blockchain.
+func (ex *Exporter) StartSyncing() error {
+	// Create database schemas
+	err := ex.db.CreateTables()
+	if err != nil {
+		return fmt.Errorf("failed to create database tables: %t", err)
+	}
 
-	fmt.Println("height: ", height)
+	dbHeight, err := ex.db.QueryLatestBlockHeight()
+	if err != nil {
+		return fmt.Errorf("failed to query latest block height in database: %t", err)
+	}
+
+	latestBlockHeight, _ := ex.client.LatestBlockHeight()
+
+	fmt.Println("dbHeight: ", dbHeight)
+	fmt.Println("latestBlockHeight: ", latestBlockHeight)
+
+	return nil
 }
 
-// cp, err := client.New(cfg.RPCNode, cfg.ClientNode)
-// if err != nil {
-// 	return errors.Wrap(err, "failed to start RPC client")
-// }
+func (ex *Exporter) process() {
 
-// defer cp.Stop() // nolint: errcheck
+}
 
-// db, err := db.OpenDB(cfg)
-// if err != nil {
-// 	return errors.Wrap(err, "failed to open database connection")
-// }
+//
+//
+//
 
-// defer db.Close()
+type Queue chan string
+
+func NewQueue() Queue {
+	return make(chan string)
+}

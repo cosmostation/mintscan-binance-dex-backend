@@ -10,9 +10,9 @@ import (
 
 // Config defines all necessary juno configuration parameters.
 type Config struct {
-	Node   *NodeConfig   `yaml:"node"`
-	DB     *DBConfig     `yaml:"database"`
-	Market *MarketConfig `yaml:"market"`
+	Node   NodeConfig   `yaml:"node"`
+	DB     DBConfig     `yaml:"database"`
+	Market MarketConfig `yaml:"market"`
 }
 
 // NodeConfig defines endpoints for both RPC node and LCD REST API server
@@ -24,7 +24,7 @@ type NodeConfig struct {
 // DBConfig defines all database connection configuration parameters.
 type DBConfig struct {
 	Host     string `yaml:"host"`
-	Port     int64  `yaml:"port"`
+	Port     string `yaml:"port"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
 	Table    string `yaml:"table"`
@@ -54,34 +54,34 @@ func ParseConfig() Config {
 
 	switch viper.GetString("active") {
 	case "mainnet":
-		cfg.Node = &NodeConfig{
+		cfg.Node = NodeConfig{
 			RPCNode:     viper.GetString("mainnet.node.rpc_node"),
 			LCDEndpoint: viper.GetString("mainnet.node.lcd_endpoint"),
 		}
-		cfg.DB = &DBConfig{
+		cfg.DB = DBConfig{
 			Host:     viper.GetString("mainnet.database.host"),
-			Port:     viper.GetInt64("mainnet.database.port"),
+			Port:     viper.GetString("mainnet.database.port"),
 			User:     viper.GetString("mainnet.database.user"),
 			Password: viper.GetString("mainnet.database.password"),
 			Table:    viper.GetString("mainnet.database.table"),
 		}
-		cfg.Market = &MarketConfig{
+		cfg.Market = MarketConfig{
 			viper.GetString("mainnet.market.coingecko_endpoint"),
 		}
 
 	case "testnet":
-		cfg.Node = &NodeConfig{
+		cfg.Node = NodeConfig{
 			RPCNode:     viper.GetString("testnet.node.rpc_node"),
 			LCDEndpoint: viper.GetString("testnet.node.lcd_endpoint"),
 		}
-		cfg.DB = &DBConfig{
+		cfg.DB = DBConfig{
 			Host:     viper.GetString("testnet.database.host"),
-			Port:     viper.GetInt64("testnet.database.port"),
+			Port:     viper.GetString("testnet.database.port"),
 			User:     viper.GetString("testnet.database.user"),
 			Password: viper.GetString("testnet.database.password"),
 			Table:    viper.GetString("testnet.database.table"),
 		}
-		cfg.Market = &MarketConfig{
+		cfg.Market = MarketConfig{
 			viper.GetString("testnet.market.coingecko_endpoint"),
 		}
 

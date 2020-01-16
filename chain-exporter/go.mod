@@ -3,7 +3,6 @@ module github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter
 go 1.13
 
 require (
-	github.com/BurntSushi/toml v0.3.1
 	github.com/binance-chain/go-sdk v1.2.1
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/jinzhu/inflection v1.0.0 // indirect
