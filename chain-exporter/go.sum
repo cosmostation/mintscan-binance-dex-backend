@@ -145,6 +145,7 @@ github.com/tendermint/btcd v0.0.0-20180816174608-e5840949ff4f h1:R0wLxgASGMoRQTF
 github.com/tendermint/btcd v0.0.0-20180816174608-e5840949ff4f/go.mod h1:DC6/m53jtQzr/NFmMNEu0rxf18/ktVoVtMrnDD5pN+U=
 github.com/tendermint/tendermint v0.32.3 h1:GEnWpGQ795h5oTFNbfBLsY0LW/CW2j6p6HtiYNfxsgg=
 github.com/tendermint/tendermint v0.32.3/go.mod h1:ZK2c29jl1QRYznIRyRWRDsmm1yvtPzBRT00x4t1JToY=
+github.com/tendermint/tendermint v0.33.0 h1:TW1g9sQs3YSqKM8o1+opL3/VmBy4Ke/VKV9MxYpqNbI=
 github.com/tendermint/tm-db v0.1.1 h1:G3Xezy3sOk9+ekhjZ/kjArYIs1SmwV+1OUgNkj7RgV0=
 github.com/tendermint/tm-db v0.1.1/go.mod h1:0cPKWu2Mou3IlxecH+MEUSYc1Ch537alLe6CpFrKzgw=
 github.com/zondax/hid v0.9.0 h1:eiT3P6vNxAEVxXMw66eZUAAnU2zD33JBkfG/EnfAKl8=

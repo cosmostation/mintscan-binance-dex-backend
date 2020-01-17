@@ -29,7 +29,6 @@ func Connect(cfg config.DBConfig) *Database {
 // CreateTables creates database tables using object relational mapping (ORM)
 func (db *Database) CreateTables() error {
 	for _, model := range []interface{}{(*schema.BlockInfo)(nil), (*schema.PreCommitInfo)(nil), (*schema.TransactionInfo)(nil)} {
-
 		// Disable pluralization
 		orm.SetTableNameInflector(func(s string) string {
 			return s
@@ -48,8 +47,7 @@ func (db *Database) CreateTables() error {
 	// RunInTransaction creates indexes to reduce the cost of lookup queries in case of server traffic jams.
 	// If function returns an error transaction is rollbacked, otherwise transaction is committed.
 	err := db.RunInTransaction(func(tx *pg.Tx) error {
-		var err error
-		_, err = db.Model(schema.BlockInfo{}).Exec(`CREATE INDEX block_info_height_idx ON block_info USING btree(height);`)
+		_, err := db.Model(schema.BlockInfo{}).Exec(`CREATE INDEX block_info_height_idx ON block_info USING btree(height);`)
 		if err != nil {
 			return err
 		}

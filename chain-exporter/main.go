@@ -6,5 +6,5 @@ import (
 
 func main() {
 	exporter := exporter.NewExporter()
-	exporter.StartSyncing()
+	exporter.Start()
 }
