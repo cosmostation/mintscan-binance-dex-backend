@@ -3,6 +3,7 @@ package exporter
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/client"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/config"
@@ -22,17 +23,15 @@ func NewExporter() Exporter {
 	client := client.NewClient(cfg.Node.RPCNode, cfg.Node.LCDEndpoint)
 	db := db.Connect(cfg.DB)
 
+	// Create database tables
+	db.CreateTables() // TODO: handle index already exists error
+
 	return Exporter{client, db}
 }
 
 // Start creates database tables and indexes using Postgres ORM library go-pg and
 // starts syncing blockchain.
 func (ex *Exporter) Start() error {
-	// Create database tables
-	ex.db.CreateTables() // TODO: handle index already exists error
-
-	ex.sync()
-
 	go func() {
 		for {
 			fmt.Println("start - sync blockchain")
@@ -41,10 +40,13 @@ func (ex *Exporter) Start() error {
 				fmt.Printf("error - sync blockchain: %v\n", err)
 			}
 			fmt.Println("finish - sync blockchain")
+			time.Sleep(time.Second)
 		}
 	}()
 
-	return nil
+	for {
+		select {}
+	}
 }
 
 // sync compares block height between the height saved in your database and
@@ -75,17 +77,20 @@ func (ex *Exporter) sync() error {
 	return nil
 }
 
-// process
 func (ex *Exporter) process(height int64) error {
+	block, err := ex.client.Block(height)
+	if err != nil {
+		fmt.Printf("failed to get block information: %t\n", err)
+		return err
+	}
+
+	txs, err := ex.client.Txs(block)
+	if err != nil {
+		fmt.Printf("failed to get transactions in a block: %t\n", err)
+		return err
+	}
+
+	fmt.Println(txs)
+
 	return nil
-}
-
-//
-// Create a buffered channel to process blocks
-//
-
-type Queue chan string
-
-func NewQueue() Queue {
-	return make(chan string)
 }
