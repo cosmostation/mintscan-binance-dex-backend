@@ -6,13 +6,18 @@ import (
 	"time"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/client"
+	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/codec"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/config"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/db"
+
 	"github.com/pkg/errors"
+
+	amino "github.com/tendermint/go-amino"
 )
 
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
+	cdc    *amino.Codec
 	client client.Client
 	db     *db.Database
 }
@@ -26,7 +31,7 @@ func NewExporter() Exporter {
 	// Create database tables
 	db.CreateTables() // TODO: handle index already exists error
 
-	return Exporter{client, db}
+	return Exporter{codec.Codec, client, db}
 }
 
 // Start creates database tables and indexes using Postgres ORM library go-pg and
@@ -65,6 +70,11 @@ func (ex *Exporter) sync() error {
 		log.Fatal(errors.Wrap(err, "failed to query the latest block height on the active network."))
 	}
 
+	// skip the first block since it has no pre-commits
+	if dbHeight == 0 {
+		dbHeight = 1
+	}
+
 	// Ingest all blocks up to the best height
 	for i := dbHeight + 1; i <= latestBlockHeight; i++ {
 		err = ex.process(i)
@@ -80,17 +90,43 @@ func (ex *Exporter) sync() error {
 func (ex *Exporter) process(height int64) error {
 	block, err := ex.client.Block(height)
 	if err != nil {
-		fmt.Printf("failed to get block information: %t\n", err)
-		return err
+		return fmt.Errorf("failed to query block using rpc client: %t", err)
 	}
 
-	txs, err := ex.client.Txs(block)
+	prevBlock, err := ex.client.Block(block.Block.LastCommit.Height())
 	if err != nil {
-		fmt.Printf("failed to get transactions in a block: %t\n", err)
-		return err
+		return fmt.Errorf("failed to query block using rpc client: %t", err)
 	}
 
-	fmt.Println(txs)
+	vals, err := ex.client.Validators(block.Block.LastCommit.Height())
+	if err != nil {
+		return fmt.Errorf("failed to query validators using rpc client: %t", err)
+	}
+
+	resultBlock, err := ex.getBlock(block) // TODO: Fees and RewardsTo Addr
+	if err != nil {
+		return fmt.Errorf("failed to get block: %t", err)
+	}
+
+	resultTxs, err := ex.getTxs(block)
+	if err != nil {
+		return fmt.Errorf("failed to get transactions: %t", err)
+	}
+
+	resultValidators, err := ex.getValidators(prevBlock, vals)
+	if err != nil {
+		return fmt.Errorf("failed to get validators: %t", err)
+	}
+
+	resultPreCommits, err := ex.getPreCommits(block.Block.LastCommit, vals)
+	if err != nil {
+		return fmt.Errorf("failed to get precommits: %t", err)
+	}
+
+	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators, resultPreCommits)
+	if err != nil {
+		return fmt.Errorf("failed to insert exporterd data: %t", err)
+	}
 
 	return nil
 }
