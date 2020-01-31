@@ -26,6 +26,16 @@ func Connect(cfg config.DBConfig) *Database {
 	return &Database{db}
 }
 
+// Ping returns a database connection handle or an error if the connection fails.
+func (db *Database) Ping() error {
+	_, err := db.Exec("SELECT 1")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CreateTables creates database tables using object relational mapping (ORM)
 func (db *Database) CreateTables() error {
 	for _, model := range []interface{}{(*schema.Block)(nil), (*schema.PreCommit)(nil), (*schema.Transaction)(nil), (*schema.Validator)(nil)} {
