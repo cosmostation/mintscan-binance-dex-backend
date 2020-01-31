@@ -19,8 +19,8 @@ type Client struct {
 }
 
 // NewClient returns Client
-func NewClient(rpcNode, lcdEndpoint string) Client {
-	return Client{rpc.NewRPCClient(rpcNode, cmtypes.TestNetwork), lcdEndpoint, codec.Codec}
+func NewClient(rpcNode, lcdEndpoint string, networkType cmtypes.ChainNetwork) Client {
+	return Client{rpc.NewRPCClient(rpcNode, networkType), lcdEndpoint, codec.Codec}
 }
 
 // Block queries for a block by height. An error is returned if the query fails.

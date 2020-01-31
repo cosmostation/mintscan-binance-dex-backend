@@ -25,8 +25,16 @@ type Exporter struct {
 // NewExporter returns Exporter
 func NewExporter() Exporter {
 	cfg := config.ParseConfig()
-	client := client.NewClient(cfg.Node.RPCNode, cfg.Node.LCDEndpoint)
+
+	client := client.NewClient(cfg.Node.RPCNode, cfg.Node.LCDEndpoint, cfg.Node.NetworkType)
+
 	db := db.Connect(cfg.DB)
+
+	// Ping database to verify connection is succeeded
+	err := db.Ping()
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "failed to ping database."))
+	}
 
 	// Create database tables
 	db.CreateTables() // TODO: handle index already exists error

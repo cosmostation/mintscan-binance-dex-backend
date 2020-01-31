@@ -6,6 +6,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/spf13/viper"
+
+	cmtypes "github.com/binance-chain/go-sdk/common/types"
 )
 
 // Config defines all necessary juno configuration parameters.
@@ -17,8 +19,9 @@ type Config struct {
 
 // NodeConfig defines endpoints for both RPC node and LCD REST API server
 type NodeConfig struct {
-	RPCNode     string `yaml:"rpc_node"`
-	LCDEndpoint string `yaml:"lcd_endpoint"`
+	RPCNode     string               `yaml:"rpc_node"`
+	LCDEndpoint string               `yaml:"lcd_endpoint"`
+	NetworkType cmtypes.ChainNetwork `yaml:"network_type"`
 }
 
 // DBConfig defines all database connection configuration parameters.
@@ -57,6 +60,7 @@ func ParseConfig() Config {
 		cfg.Node = NodeConfig{
 			RPCNode:     viper.GetString("mainnet.node.rpc_node"),
 			LCDEndpoint: viper.GetString("mainnet.node.lcd_endpoint"),
+			NetworkType: cmtypes.ProdNetwork,
 		}
 		cfg.DB = DBConfig{
 			Host:     viper.GetString("mainnet.database.host"),
@@ -73,6 +77,7 @@ func ParseConfig() Config {
 		cfg.Node = NodeConfig{
 			RPCNode:     viper.GetString("testnet.node.rpc_node"),
 			LCDEndpoint: viper.GetString("testnet.node.lcd_endpoint"),
+			NetworkType: cmtypes.TestNetwork,
 		}
 		cfg.DB = DBConfig{
 			Host:     viper.GetString("testnet.database.host"),
