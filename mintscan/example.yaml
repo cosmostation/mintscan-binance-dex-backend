@@ -1,0 +1,31 @@
+active: "testnet"
+
+mainnet:
+  node: 
+    rpc_node: "" 
+    lcd_endpoint: ""
+  database:
+    host: ""
+    port: 5432
+    user: ""
+    password: ""
+    table: ""
+  web:
+    port: 5000
+  market:
+    coingecko_endpoint: ""
+
+testnet:
+  node: 
+    rpc_node: "" 
+    lcd_endpoint: ""
+  database:
+    host: ""
+    port: 5432
+    user: ""
+    password: ""
+    table: ""
+  web:
+    port: 5000
+  market:
+    coingecko_endpoint: ""

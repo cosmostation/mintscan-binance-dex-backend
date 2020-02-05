@@ -15,21 +15,30 @@ type Database struct {
 
 // Connect opens a database connections with the given database connection info from config.
 // It returns a database connection handle or an error if the connection fails.
-func Connect(cfg *config.Config) *Database {
+func Connect(cfg config.DBConfig) *Database {
 	db := pg.Connect(&pg.Options{
-		Addr:     cfg.DB.Host + ":" + string(cfg.DB.Port),
-		User:     cfg.DB.User,
-		Password: cfg.DB.Password,
-		Database: cfg.DB.Table,
+		Addr:     cfg.Host + ":" + cfg.Port,
+		User:     cfg.User,
+		Password: cfg.Password,
+		Database: cfg.Table,
 	})
 
 	return &Database{db}
 }
 
-// CreateSchema creates database tables using object relational mapping (ORM)
-func (db *Database) CreateSchema() error {
-	for _, model := range []interface{}{(*schema.BlockInfo)(nil), (*schema.TransactionInfo)(nil)} {
+// Ping returns a database connection handle or an error if the connection fails.
+func (db *Database) Ping() error {
+	_, err := db.Exec("SELECT 1")
+	if err != nil {
+		return err
+	}
 
+	return nil
+}
+
+// CreateTables creates database tables using object relational mapping (ORM)
+func (db *Database) CreateTables() error {
+	for _, model := range []interface{}{(*schema.Block)(nil), (*schema.PreCommit)(nil), (*schema.Transaction)(nil), (*schema.Validator)(nil)} {
 		// Disable pluralization
 		orm.SetTableNameInflector(func(s string) string {
 			return s
@@ -37,8 +46,9 @@ func (db *Database) CreateSchema() error {
 
 		err := db.CreateTable(model, &orm.CreateTableOptions{
 			IfNotExists: true,
-			Varchar:     100, // replaces PostgreSQL data type `text` with `varchar(n)`
+			Varchar:     20000, // replaces data type from `text` to `varchar(n)`
 		})
+
 		if err != nil {
 			return err
 		}
@@ -47,11 +57,27 @@ func (db *Database) CreateSchema() error {
 	// RunInTransaction creates indexes to reduce the cost of lookup queries in case of server traffic jams.
 	// If function returns an error transaction is rollbacked, otherwise transaction is committed.
 	err := db.RunInTransaction(func(tx *pg.Tx) error {
-		_, err := db.Model(schema.BlockInfo{}).Exec(`CREATE INDEX block_info_height_idx ON block_info USING btree(height);`)
+		_, err := db.Model(schema.Block{}).Exec(`CREATE INDEX block_height_idx ON block USING btree(height);`)
 		if err != nil {
 			return err
 		}
-		_, err = db.Model(schema.TransactionInfo{}).Exec(`CREATE INDEX transaction_info_height_idx ON transaction_info USING btree(height);`)
+		_, err = db.Model(schema.PreCommit{}).Exec(`CREATE INDEX pre_commit_height_idx ON pre_commit USING btree(height);`)
+		if err != nil {
+			return err
+		}
+		_, err = db.Model(schema.PreCommit{}).Exec(`CREATE INDEX pre_commit_validator_address_idx ON pre_commit USING btree(validator_address);`)
+		if err != nil {
+			return err
+		}
+		_, err = db.Model(schema.Transaction{}).Exec(`CREATE INDEX transaction_height_idx ON transaction USING btree(height);`)
+		if err != nil {
+			return err
+		}
+		_, err = db.Model(schema.Transaction{}).Exec(`CREATE INDEX transaction_tx_hash_idx ON transaction USING btree(tx_hash);`)
+		if err != nil {
+			return err
+		}
+		_, err = db.Model(schema.Validator{}).Exec(`CREATE INDEX validator_validator_address_idx ON validator USING btree(validator_address);`)
 		if err != nil {
 			return err
 		}

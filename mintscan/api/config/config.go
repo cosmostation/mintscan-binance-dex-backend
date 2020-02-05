@@ -14,6 +14,7 @@ import (
 type Config struct {
 	Node   NodeConfig   `yaml:"node"`
 	DB     DBConfig     `yaml:"database"`
+	Web    WebConfig    `yaml:"web"`
 	Market MarketConfig `yaml:"market"`
 }
 
@@ -33,6 +34,11 @@ type DBConfig struct {
 	Table    string `yaml:"table"`
 }
 
+// WebConfig wraps port number of this project
+type WebConfig struct {
+	Port string `yaml:"port"`
+}
+
 // MarketConfig defines endpoints where you parse market data from
 type MarketConfig struct {
 	CoinGeckoEndpoint string `yaml:"coingecko_endpoint"`
@@ -40,7 +46,7 @@ type MarketConfig struct {
 
 // ParseConfig attempts to read and parse chain-exporter config from the given configPath.
 // An error reading or parsing the config results in a panic.
-func ParseConfig() Config {
+func ParseConfig() *Config {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./")
@@ -69,6 +75,9 @@ func ParseConfig() Config {
 			Password: viper.GetString("mainnet.database.password"),
 			Table:    viper.GetString("mainnet.database.table"),
 		}
+		cfg.Web = WebConfig{
+			Port: viper.GetString("mainnet.web.port"),
+		}
 		cfg.Market = MarketConfig{
 			viper.GetString("mainnet.market.coingecko_endpoint"),
 		}
@@ -86,6 +95,9 @@ func ParseConfig() Config {
 			Password: viper.GetString("testnet.database.password"),
 			Table:    viper.GetString("testnet.database.table"),
 		}
+		cfg.Web = WebConfig{
+			Port: viper.GetString("testnet.web.port"),
+		}
 		cfg.Market = MarketConfig{
 			viper.GetString("testnet.market.coingecko_endpoint"),
 		}
@@ -94,5 +106,5 @@ func ParseConfig() Config {
 		log.Fatal("active can be either mainnet or testnet.")
 	}
 
-	return cfg
+	return &cfg
 }

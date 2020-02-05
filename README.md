@@ -1,12 +1,13 @@
 # Mintscan Backend for Binance DEX 
 
-> This repo is Mintscan Block Explorer's Backend for Binance DEX. This project will be developed over the next three months and is still a work-in-progress.
+This repository is for Mintscan Block Explorer's Backend for Binance DEX. This will be developed over the next three months and is still a work-in-progress.
 
 ## # Structure
 
-- api
+- chain-exporter: watches a full node of Binance Chain and export data.
 
-- chain-exporter
+- mintscan: is where all custom APIs are located.
+
 
 ## # Install
 
@@ -16,6 +17,12 @@ Both `api` and `chain-exporter` use [Tom's Obvious Minimal Language](https://git
 
 Reference `example.toml` inside both `api` and `chain-exporter`
 
+## # Configuration
+
+The configuration needs to be passed in via `config.yaml` file inside each folder.
+
+Example configuration file is provided in `example.yaml`
+
 ## # Database Schemas
 
 - BlockInfo
@@ -24,9 +31,7 @@ Reference `example.toml` inside both `api` and `chain-exporter`
 
 ## # Contributing
 
-Contributions, improvements, and suggestions are always welcome!
-
-Please open an issue or pull request for any changes.
+We encourage and support an active, healthy community of contributors — any contribution, improvements, and suggestions are always welcome! Details are in the [contribution guide](https://github.com/cosmostation/mintscan-binance-dex-backend/docs/CONTRIBUTING.md)
 
 ## # Cosmostation's Services and Community 
 
@@ -39,4 +44,4 @@ Please open an issue or pull request for any changes.
 
 ## # License
 
-[MIT License](https://github.com/cosmostation/mintscan-binance-dex-backend/LICENSE)
+Released under the [MIT License](https://github.com/cosmostation/mintscan-binance-dex-backend/LICENSE)
