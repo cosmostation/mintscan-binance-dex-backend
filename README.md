@@ -1,39 +1,79 @@
-# Mintscan Backend for Binance DEX 
+<p align="center">
+  <a href="https://www.cosmostation.io" target="_blank" rel="noopener noreferrer"><img width="100" src="https://user-images.githubusercontent.com/20435620/55696624-d7df2e00-59f8-11e9-9126-edf9a40b11a8.png" alt="Cosmostation logo"></a>
+</p>
 
-This repository is for Mintscan Block Explorer's Backend for Binance DEX. This will be developed over the next three months and is still a work-in-progress.
+<h2 align="center">
+    Mintscan Explorer's Backend for Binance Chain 
+</h2>
 
-## # Structure
+*:star: Developed / Developing by [Cosmostation](https://www.cosmostation.io/)*
 
-- chain-exporter: watches a full node of Binance Chain and export data.
+## Overview
 
-- mintscan: is where all custom APIs are located.
+This project is sponsored by [Binance X Fellowship Program](https://binancex.dev/fellowship.html).
 
+This repository provides backend code for [Mintscan Block Explorer for Binance Chain](https://binance.mintscan.io/).
 
-## # Install
+- [chain-exporter](https://github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter) watches a full node of Binance Chain and export data into PostgreSQL database.
+
+- [mintscan](https://github.com/cosmostation/mintscan-binance-dex-backend/mintscan) is where all custom APIs are located.
+
+**_Note that this repository is currently being developed meaning that most likely there will be many breaking changes._**
+
+## Prerequisite
+
+- Endpoints for [Binance Chain Node RPC](https://docs.binance.org/api-reference/node-rpc.html) and [API Server](https://docs.binance.org/api-reference/api-server.html)
+
+- PostgreSQL Database
+
+## Install
 
 **Note:** Requires [Go 1.13+](https://golang.org/dl/)
 
-Both `api` and `chain-exporter` use [Tom's Obvious Minimal Language](https://github.com/toml-lang/toml) configuration file format.
+Git clone this repo
+```shell
+git clone https://github.com/cosmostation/mintscan-binance-dex-backend.git
+```
 
-Reference `example.toml` inside both `api` and `chain-exporter`
+Chain Exporter
+```shell
+cd mintscan-binance-dex-backend/chain-exporter
+go run main.go
+```
 
-## # Configuration
+Mintscan API
+```shell
+cd mintscan-binance-dex-backend/chain-exporter
+go run application.go
+```
 
-The configuration needs to be passed in via `config.yaml` file inside each folder.
+**_Makefile will be supported soon._**
 
-Example configuration file is provided in `example.yaml`
+## Configuration
 
-## # Database Schemas
+It uses human readable data-serialization configuration file format, [YAML](https://en.wikipedia.org/wiki/YAML).
 
-- BlockInfo
+Reference `example.yaml` inside both `chain-exporter` and `mintscan`.
 
-- TransactionInfo
+The configuration needs to be passed in via `config.yaml` file, so make sure to change the name to `config.yaml`.
 
-## # Contributing
+## Database 
+
+This project uses [Golang ORM with focus on PostgreSQL features and performance](https://github.com/go-pg/pg).
+
+Database tables are:
+
+- Block
+- PreCommit
+- Transaction
+- Validator
+- More to add...
+
+## Contributing
 
 We encourage and support an active, healthy community of contributors — any contribution, improvements, and suggestions are always welcome! Details are in the [contribution guide](https://github.com/cosmostation/mintscan-binance-dex-backend/docs/CONTRIBUTING.md)
 
-## # Cosmostation's Services and Community 
+## Our Services and Community 
 
 - [Official Website](https://www.cosmostation.io)
 - [Mintscan Explorer](https://www.mintscan.io)
@@ -42,6 +82,6 @@ We encourage and support an active, healthy community of contributors — any co
 - [iOS Wallet](https://apple.co/2IAM3Xm)
 - [Telegram - International](https://t.me/cosmostation)
 
-## # License
+## License
 
-Released under the [MIT License](https://github.com/cosmostation/mintscan-binance-dex-backend/LICENSE)
+Released under the [MIT License](https://github.com/cosmostation/mintscan-binance-dex-backend/LICENSE).
