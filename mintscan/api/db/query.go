@@ -83,3 +83,22 @@ func (db *Database) QueryTxs(limit int, before int, after int, offset int) ([]sc
 
 	return txs, nil
 }
+
+// QueryTx queries particular transaction with height
+func (db *Database) QueryTx(height int64) ([]schema.Transaction, error) {
+	txs := make([]schema.Transaction, 0)
+
+	err := db.Model(&txs).
+		Where("height = ?", height).
+		Select()
+
+	if err == pg.ErrNoRows {
+		return txs, fmt.Errorf("no rows in block table: %t", err)
+	}
+
+	if err != nil {
+		return txs, fmt.Errorf("unexpected database error: %t", err)
+	}
+
+	return txs, nil
+}

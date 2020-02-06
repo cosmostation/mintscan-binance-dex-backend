@@ -48,19 +48,14 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	switch {
 	case before > 0:
 		txs, err = db.QueryTxs(limit, before, after, offset)
-		if err != nil {
-			fmt.Println(err)
-		}
 	case after > 0:
 		txs, err = db.QueryTxs(limit, before, after, offset)
-		if err != nil {
-			fmt.Println(err)
-		}
 	case offset >= 0:
 		txs, err = db.QueryTxs(limit, before, after, offset)
-		if err != nil {
-			fmt.Println(err)
-		}
+	}
+
+	if err != nil {
+		fmt.Printf("failed to query txs due to: %t\n", err)
 	}
 
 	result := make([]*models.ResultTxs, 0)
