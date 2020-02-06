@@ -77,6 +77,7 @@ func setRouter() *mux.Router {
 // setControllers sets controllers
 func (a *App) setControllers() {
 	controllers.BlockController(a.cdc, a.cfg, a.db, a.router, a.rpcClient)
+	controllers.TxController(a.cdc, a.cfg, a.db, a.router, a.rpcClient)
 }
 
 // Run the app

@@ -22,8 +22,9 @@ const (
 	DuplicateAccount  ErrorCode = 201
 	InvalidFormat     ErrorCode = 202
 	NotExist          ErrorCode = 203
-	FailedConversion  ErrorCode = 204
-	NotExistValidator ErrorCode = 205
+	NotAllowed        ErrorCode = 204
+	FailedConversion  ErrorCode = 205
+	NotExistValidator ErrorCode = 206
 
 	OverMaxLimit                      ErrorCode = 301
 	FailedUnmarshalJSON               ErrorCode = 302
@@ -43,6 +44,8 @@ func ErrorCodeToErrorMsg(code ErrorCode) ErrorMsg {
 		return "NotExist"
 	case NotExistValidator:
 		return "NotExistValidator"
+	case NotAllowed:
+		return "NotAllowed"
 	case FailedConversion:
 		return "FailedConversion"
 	case OverMaxLimit:
@@ -96,6 +99,14 @@ func ErrNotExistValidator(w http.ResponseWriter, statusCode int) {
 	wrapError := WrapError{
 		ErrorCode: NotExistValidator,
 		ErrorMsg:  ErrorCodeToErrorMsg(NotExistValidator),
+	}
+	PrintException(w, statusCode, wrapError)
+}
+
+func ErrNotAllowed(w http.ResponseWriter, statusCode int) {
+	wrapError := WrapError{
+		ErrorCode: NotAllowed,
+		ErrorMsg:  ErrorCodeToErrorMsg(NotAllowed),
 	}
 	PrintException(w, statusCode, wrapError)
 }

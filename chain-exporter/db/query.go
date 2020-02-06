@@ -6,6 +6,10 @@ import (
 	"github.com/go-pg/pg"
 )
 
+/*
+	For any type of database errors, return -1
+*/
+
 // QueryLatestBlockHeight queries latest block height in database
 func (db *Database) QueryLatestBlockHeight() (int64, error) {
 	var block schema.Block
@@ -19,7 +23,6 @@ func (db *Database) QueryLatestBlockHeight() (int64, error) {
 		return 0, err
 	}
 
-	// return -1 for any type of errors
 	if err != nil {
 		return -1, err
 	}
