@@ -27,5 +27,6 @@ type ResultTxs struct {
 	Signatures []Signature `json:"signatures"`
 	Memo       string      `json:"memo"`
 	Code       uint32      `json:"code"`
+	TotalTxs   int64       `json:"total_txs"`
 	Timestamp  time.Time   `json:"timestamp"`
 }

@@ -10,12 +10,11 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/client"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/codec"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/config"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/controllers"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/db"
-
-	"github.com/binance-chain/go-sdk/client/rpc"
 
 	amino "github.com/tendermint/go-amino"
 
@@ -26,11 +25,10 @@ import (
 
 // App wraps up the required variables that are needed in this app
 type App struct {
-	cdc       *amino.Codec
-	cfg       *config.Config
-	db        *db.Database
-	router    *mux.Router
-	rpcClient rpc.Client
+	cdc    *amino.Codec
+	client client.Client
+	db     *db.Database
+	router *mux.Router
 }
 
 // NewApp initializes the app with predefined configuration
@@ -41,11 +39,10 @@ func NewApp() *App {
 	cfg := config.ParseConfig()
 
 	app := &App{
-		cdc:       codec.Codec,
-		cfg:       cfg,
-		db:        db.Connect(cfg.DB),
-		router:    setRouter(),
-		rpcClient: rpc.NewRPCClient(cfg.Node.RPCNode, cfg.Node.NetworkType), // Binance Chain RPC Client
+		cdc:    codec.Codec,
+		client: client.NewClient(cfg.Node.RPCNode, cfg.Node.LCDEndpoint, cfg.Node.NetworkType),
+		db:     db.Connect(cfg.DB),
+		router: setRouter(),
 	}
 
 	// Ping database to verify connection is succeeded
@@ -76,8 +73,8 @@ func setRouter() *mux.Router {
 
 // setControllers sets controllers
 func (a *App) setControllers() {
-	controllers.BlockController(a.cdc, a.cfg, a.db, a.router, a.rpcClient)
-	controllers.TxController(a.cdc, a.cfg, a.db, a.router, a.rpcClient)
+	controllers.BlockController(a.cdc, a.client, a.db, a.router)
+	controllers.TxController(a.cdc, a.client, a.db, a.router)
 }
 
 // Run the app

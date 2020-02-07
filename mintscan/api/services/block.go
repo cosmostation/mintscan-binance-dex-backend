@@ -9,7 +9,6 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/schema"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/utils"
 )
 
@@ -41,19 +40,7 @@ func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	var blocks []schema.Block
-
-	var err error
-
-	switch {
-	case before > 0:
-		blocks, err = db.QueryBlocks(limit, before, after, offset)
-	case after > 0:
-		blocks, err = db.QueryBlocks(limit, before, after, offset)
-	case offset >= 0:
-		blocks, err = db.QueryBlocks(limit, before, after, offset)
-	}
-
+	blocks, err := db.QueryBlocks(limit, before, after, offset)
 	if err != nil {
 		fmt.Printf("failed to query blocks: %t\n", err)
 	}

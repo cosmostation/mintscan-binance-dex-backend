@@ -46,6 +46,67 @@ func (db *Database) QueryBlocks(limit int, before int, after int, offset int) ([
 	return blocks, nil
 }
 
+// QueryLatestBlockHeight queries latest block height saved in database
+func (db *Database) QueryLatestBlockHeight() (int64, error) {
+	var block schema.Block
+
+	err := db.Model(&block).
+		Column("height").
+		Limit(1).
+		Order("id DESC").
+		Select()
+
+	if err == pg.ErrNoRows {
+		return 0, fmt.Errorf("no rows in block table: %t", err)
+	}
+
+	if err != nil {
+		return 0, fmt.Errorf("unexpected database error: %t", err)
+	}
+
+	return block.Height, nil
+}
+
+// QueryTotalTxsNum queries total number of transactions
+func (db *Database) QueryTotalTxsNum(height int64) (int64, error) {
+	var block schema.Block
+
+	err := db.Model(&block).
+		Where("height = ?", height).
+		Limit(1).
+		Order("id DESC").
+		Select()
+
+	if err == pg.ErrNoRows {
+		return 0, fmt.Errorf("no rows in block table: %t", err)
+	}
+
+	if err != nil {
+		return 0, fmt.Errorf("unexpected database error: %t", err)
+	}
+
+	return block.TotalTxs, nil
+}
+
+// QueryTx queries particular transaction with height
+func (db *Database) QueryTx(height int64) ([]schema.Transaction, error) {
+	txs := make([]schema.Transaction, 0)
+
+	err := db.Model(&txs).
+		Where("height = ?", height).
+		Select()
+
+	if err == pg.ErrNoRows {
+		return txs, fmt.Errorf("no rows in block table: %t", err)
+	}
+
+	if err != nil {
+		return txs, fmt.Errorf("unexpected database error: %t", err)
+	}
+
+	return txs, nil
+}
+
 // QueryTxs queries transactions with pagination params, such as limit, before, after, and offset
 func (db *Database) QueryTxs(limit int, before int, after int, offset int) ([]schema.Transaction, error) {
 	txs := make([]schema.Transaction, 0)
@@ -84,12 +145,14 @@ func (db *Database) QueryTxs(limit int, before int, after int, offset int) ([]sc
 	return txs, nil
 }
 
-// QueryTx queries particular transaction with height
-func (db *Database) QueryTx(height int64) ([]schema.Transaction, error) {
+// QueryTxsByType queries transactions with tx type and start and end time
+func (db *Database) QueryTxsByType(txType string, startTime int64, endTime int64, limit int, before int) ([]schema.Transaction, error) {
 	txs := make([]schema.Transaction, 0)
 
 	err := db.Model(&txs).
-		Where("height = ?", height).
+		Where("(messages->0->>'type' = ?) AND TIMESTAMP BETWEEN TO_TIMESTAMP(?) AND TO_TIMESTAMP(?) AND height < ?", txType, startTime, endTime, before).
+		Limit(limit).
+		Order("id DESC").
 		Select()
 
 	if err == pg.ErrNoRows {
