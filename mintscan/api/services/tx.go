@@ -17,10 +17,66 @@ import (
 
 // GetTxs returns transactions based upon the request params
 func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
-	limit := int(100)
-	before := int(-1)
+	before := int(0)
 	after := int(-1)
-	offset := int(0)
+	limit := int(100)
+
+	if len(r.URL.Query()["before"]) > 0 {
+		before, _ = strconv.Atoi(r.URL.Query()["before"][0])
+	}
+
+	if len(r.URL.Query()["after"]) > 0 {
+		after, _ = strconv.Atoi(r.URL.Query()["after"][0])
+	}
+
+	if len(r.URL.Query()["limit"]) > 0 {
+		limit, _ = strconv.Atoi(r.URL.Query()["limit"][0])
+	}
+
+	if limit > 100 {
+		errors.ErrOverMaxLimit(w, http.StatusUnauthorized)
+		return nil
+	}
+
+	txs, err := db.QueryTxs(before, after, limit)
+	if err != nil {
+		fmt.Printf("failed to query txs due to: %t\n", err)
+	}
+
+	if len(txs) <= 0 {
+		return nil
+	}
+
+	result, err := setTxs(txs)
+	if err != nil {
+		fmt.Printf("failed to set txs: %t\n", err)
+	}
+
+	totalTxsNum, err := db.CountTotalTxsNum()
+	if err != nil {
+		fmt.Printf("failed to query total number of txs: %t\n", err)
+	}
+
+	// Handling before and after since their ordering data is different
+	if after >= 0 {
+		result.Paging.Total = totalTxsNum
+		result.Paging.Before = result.Data[0].ID
+		result.Paging.After = result.Data[len(result.Data)-1].ID
+	} else {
+		result.Paging.Total = totalTxsNum
+		result.Paging.Before = result.Data[len(result.Data)-1].ID
+		result.Paging.After = result.Data[0].ID
+	}
+
+	utils.Respond(w, result)
+	return nil
+}
+
+// GetTxsByType returns transactions based upon the request params
+func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+	before := int(0)
+	after := int(-1)
+	limit := int(100)
 
 	if len(r.URL.Query()["limit"]) > 0 {
 		limit, _ = strconv.Atoi(r.URL.Query()["limit"][0])
@@ -32,52 +88,6 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 
 	if len(r.URL.Query()["after"]) > 0 {
 		after, _ = strconv.Atoi(r.URL.Query()["after"][0])
-	}
-
-	if len(r.URL.Query()["offset"]) > 0 {
-		offset, _ = strconv.Atoi(r.URL.Query()["offset"][0])
-	}
-
-	if limit > 100 {
-		errors.ErrOverMaxLimit(w, http.StatusUnauthorized)
-		return nil
-	}
-
-	latestBlockHeight, err := db.QueryLatestBlockHeight()
-	if err != nil {
-		fmt.Printf("failed to query latest block height saved in database: %t\n", err)
-	}
-
-	totalTxsNum, err := db.QueryTotalTxsNum(latestBlockHeight)
-	if err != nil {
-		fmt.Printf("failed to query total number of txs: %t\n", err)
-	}
-
-	txs, err := db.QueryTxs(limit, before, after, offset)
-	if err != nil {
-		fmt.Printf("failed to query txs due to: %t\n", err)
-	}
-
-	result, err := setTxs(txs, totalTxsNum)
-	if err != nil {
-		fmt.Printf("failed to set txs: %t\n", err)
-	}
-
-	utils.Respond(w, result)
-	return nil
-}
-
-// GetTxsByType returns transactions based upon the request params
-func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
-	limit := int(100) // default limit is 50
-	before := int(0)
-
-	if len(r.URL.Query()["limit"]) > 0 {
-		limit, _ = strconv.Atoi(r.URL.Query()["limit"][0])
-	}
-
-	if len(r.URL.Query()["before"]) > 0 {
-		before, _ = strconv.Atoi(r.URL.Query()["before"][0])
 	}
 
 	if limit > 100 {
@@ -109,44 +119,55 @@ func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, 
 		return nil
 	}
 
-	latestBlockHeight, err := db.QueryLatestBlockHeight()
-	if err != nil {
-		fmt.Printf("failed to query latest block height saved in database: %t\n", err)
-	}
-
-	totalTxsNum, err := db.QueryTotalTxsNum(latestBlockHeight)
-	if err != nil {
-		fmt.Printf("failed to query total number of txs: %t\n", err)
-	}
-
-	txs, err := db.QueryTxsByType(txrp.TxType, txrp.StartTime, txrp.EndTime, limit, before)
+	txs, err := db.QueryTxsByType(txrp.TxType, txrp.StartTime, txrp.EndTime, before, after, limit)
 	if err != nil {
 		fmt.Printf("failed to query txs due to: %t\n", err)
 	}
 
-	result, err := setTxs(txs, totalTxsNum)
+	if len(txs) <= 0 {
+		return nil
+	}
+
+	result, err := setTxs(txs)
 	if err != nil {
 		fmt.Printf("failed to set txs: %t\n", err)
+	}
+
+	totalTxsNum, err := db.CountTotalTxsNum()
+	if err != nil {
+		fmt.Printf("failed to query total number of txs: %t\n", err)
+	}
+
+	// Handling before and after since their ordering data is different
+	if after >= 0 {
+		result.Paging.Total = totalTxsNum
+		result.Paging.Before = result.Data[0].ID
+		result.Paging.After = result.Data[len(result.Data)-1].ID
+	} else {
+		result.Paging.Total = totalTxsNum
+		result.Paging.Before = result.Data[len(result.Data)-1].ID
+		result.Paging.After = result.Data[0].ID
 	}
 
 	utils.Respond(w, result)
 	return nil
 }
 
-func setTxs(txs []schema.Transaction, totalTxsNum int64) ([]*models.ResultTxs, error) {
-	result := make([]*models.ResultTxs, 0)
+// setTxs handles txs and return result response
+func setTxs(txs []schema.Transaction) (*models.ResultTxs, error) {
+	data := make([]models.TxData, 0)
 
-	for i, tx := range txs {
+	for _, tx := range txs {
 		msgs := make([]models.Message, 0)
 		err := json.Unmarshal([]byte(tx.Messages), &msgs)
 		if err != nil {
-			return result, fmt.Errorf("failed to unmarshal msgs: %t", err)
+			return &models.ResultTxs{}, fmt.Errorf("failed to unmarshal msgs: %t", err)
 		}
 
 		sigs := make([]models.Signature, 0)
 		err = json.Unmarshal([]byte(tx.Signatures), &sigs)
 		if err != nil {
-			return result, fmt.Errorf("failed to unmarshal sigs: %t", err)
+			return &models.ResultTxs{}, fmt.Errorf("failed to unmarshal sigs: %t", err)
 		}
 
 		txResult := true
@@ -154,8 +175,8 @@ func setTxs(txs []schema.Transaction, totalTxsNum int64) ([]*models.ResultTxs, e
 			txResult = false
 		}
 
-		tempTx := &models.ResultTxs{
-			ID:         i + 1,
+		tempData := &models.TxData{
+			ID:         tx.ID,
 			Height:     tx.Height,
 			Result:     txResult,
 			TxHash:     tx.TxHash,
@@ -163,11 +184,14 @@ func setTxs(txs []schema.Transaction, totalTxsNum int64) ([]*models.ResultTxs, e
 			Signatures: sigs,
 			Memo:       tx.Memo,
 			Code:       tx.Code,
-			TotalTxs:   totalTxsNum,
 			Timestamp:  tx.Timestamp,
 		}
 
-		result = append(result, tempTx)
+		data = append(data, *tempData)
+	}
+
+	result := &models.ResultTxs{
+		Data: data,
 	}
 
 	return result, nil

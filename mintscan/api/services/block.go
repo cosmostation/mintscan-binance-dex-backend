@@ -9,19 +9,15 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/schema"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/utils"
 )
 
 // GetBlocks returns blocks based upon the request params
 func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
-	limit := int(100)
-	before := int(-1)
+	before := int(0)
 	after := int(-1)
-	offset := int(0)
-
-	if len(r.URL.Query()["limit"]) > 0 {
-		limit, _ = strconv.Atoi(r.URL.Query()["limit"][0])
-	}
+	limit := int(100)
 
 	if len(r.URL.Query()["before"]) > 0 {
 		before, _ = strconv.Atoi(r.URL.Query()["before"][0])
@@ -31,8 +27,8 @@ func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 		after, _ = strconv.Atoi(r.URL.Query()["after"][0])
 	}
 
-	if len(r.URL.Query()["offset"]) > 0 {
-		offset, _ = strconv.Atoi(r.URL.Query()["offset"][0])
+	if len(r.URL.Query()["limit"]) > 0 {
+		limit, _ = strconv.Atoi(r.URL.Query()["limit"][0])
 	}
 
 	if limit > 100 {
@@ -40,12 +36,43 @@ func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	blocks, err := db.QueryBlocks(limit, before, after, offset)
+	blocks, err := db.QueryBlocks(before, after, limit)
 	if err != nil {
 		fmt.Printf("failed to query blocks: %t\n", err)
 	}
 
-	result := make([]*models.ResultBlock, 0)
+	if len(blocks) <= 0 {
+		return nil
+	}
+
+	result, err := setBlocks(db, blocks)
+	if err != nil {
+		fmt.Printf("failed to set blocks: %t\n", err)
+	}
+
+	latestBlockHeight, err := db.QueryLatestBlockHeight()
+	if err != nil {
+		fmt.Printf("failed to query latest block height: %t\n", err)
+	}
+
+	// Handling before and after since their ordering data is different
+	if after >= 0 {
+		result.Paging.Total = int(latestBlockHeight)
+		result.Paging.Before = int32(result.Data[0].Height)
+		result.Paging.After = int32(result.Data[len(result.Data)-1].Height)
+	} else {
+		result.Paging.Total = int(latestBlockHeight)
+		result.Paging.Before = int32(result.Data[len(result.Data)-1].Height)
+		result.Paging.After = int32(result.Data[0].Height)
+	}
+
+	utils.Respond(w, result)
+	return nil
+}
+
+// setBlocks handles blocks and return result response
+func setBlocks(db *db.Database, blocks []schema.Block) (*models.ResultBlocks, error) {
+	data := make([]models.BlockData, 0)
 
 	for i, block := range blocks {
 		resultTxs := make([]models.Txs, 0)
@@ -79,7 +106,7 @@ func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 			}
 		}
 
-		tempBlock := &models.ResultBlock{
+		tempData := &models.BlockData{
 			ID:            i + 1,
 			Height:        block.Height,
 			Proposer:      block.Proposer,
@@ -93,9 +120,12 @@ func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 			Timestamp:     block.Timestamp,
 		}
 
-		result = append(result, tempBlock)
+		data = append(data, *tempData)
 	}
 
-	utils.Respond(w, result)
-	return nil
+	result := &models.ResultBlocks{
+		Data: data,
+	}
+
+	return result, nil
 }
