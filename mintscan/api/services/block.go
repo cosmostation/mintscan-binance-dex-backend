@@ -74,7 +74,7 @@ func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 func setBlocks(db *db.Database, blocks []schema.Block) (*models.ResultBlocks, error) {
 	data := make([]models.BlockData, 0)
 
-	for i, block := range blocks {
+	for _, block := range blocks {
 		resultTxs := make([]models.Txs, 0)
 
 		// Check if any transaction exists in this block
@@ -107,7 +107,6 @@ func setBlocks(db *db.Database, blocks []schema.Block) (*models.ResultBlocks, er
 		}
 
 		tempData := &models.BlockData{
-			ID:            i + 1,
 			Height:        block.Height,
 			Proposer:      block.Proposer,
 			Moniker:       block.Moniker,

@@ -18,7 +18,6 @@ type (
 
 	// BlockData wraps block data
 	BlockData struct {
-		ID            int       `json:"id"`
 		Height        int64     `json:"height"`
 		Proposer      string    `json:"proposer"`
 		Moniker       string    `json:"moniker"`
