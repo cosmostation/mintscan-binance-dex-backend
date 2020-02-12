@@ -2,19 +2,33 @@
 name: Feature request
 about: Suggest an idea for this project
 title: ''
-labels: ''
-assignees: ''
+labels: enhancement
+assignees: kogisin
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+<!-- < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < < ☺ 
+v                            ✰  Thanks for opening an issue! ✰    
+v    Before smashing the submit button please review the template.
+v    Word of caution: poorly thought-out proposals may be rejected 
+v                     without deliberation 
+☺ > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > >  -->
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+## Summary
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+<!-- Short, concise description of the proposed feature -->
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+## Problem Definition
+
+<!-- Why do we need this feature? 
+What problems may be addressed by introducing this feature?
+-->
+
+## Describe the solution you'd like
+
+<!-- Detailed description of requirements of implementation -->
+
+
+## Additional context
+
+<!-- Add any other context or screenshots about the feature request here. -->
