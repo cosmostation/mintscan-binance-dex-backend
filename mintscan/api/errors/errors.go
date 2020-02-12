@@ -19,11 +19,13 @@ type WrapError struct {
 const (
 	InternalServer ErrorCode = 101
 
-	DuplicateAccount  ErrorCode = 201
-	InvalidFormat     ErrorCode = 202
-	NotExist          ErrorCode = 203
-	FailedConversion  ErrorCode = 204
-	NotExistValidator ErrorCode = 205
+	DuplicateAccount   ErrorCode = 201
+	InvalidFormat      ErrorCode = 202
+	NotExist           ErrorCode = 203
+	NotAllowed         ErrorCode = 204
+	FailedConversion   ErrorCode = 205
+	NotExistValidator  ErrorCode = 206
+	InvalidMessageType ErrorCode = 207
 
 	OverMaxLimit                      ErrorCode = 301
 	FailedUnmarshalJSON               ErrorCode = 302
@@ -39,10 +41,14 @@ func ErrorCodeToErrorMsg(code ErrorCode) ErrorMsg {
 		return "Duplicate account"
 	case InvalidFormat:
 		return "Invalid format"
+	case InvalidMessageType:
+		return "Invalid Message Type"
 	case NotExist:
 		return "NotExist"
 	case NotExistValidator:
 		return "NotExistValidator"
+	case NotAllowed:
+		return "NotAllowed"
 	case FailedConversion:
 		return "FailedConversion"
 	case OverMaxLimit:
@@ -84,6 +90,14 @@ func ErrInvalidFormat(w http.ResponseWriter, statusCode int) {
 	PrintException(w, statusCode, wrapError)
 }
 
+func ErrInvalidMessageType(w http.ResponseWriter, statusCode int) {
+	wrapError := WrapError{
+		ErrorCode: InvalidMessageType,
+		ErrorMsg:  ErrorCodeToErrorMsg(InvalidMessageType),
+	}
+	PrintException(w, statusCode, wrapError)
+}
+
 func ErrNotExist(w http.ResponseWriter, statusCode int) {
 	wrapError := WrapError{
 		ErrorCode: NotExist,
@@ -96,6 +110,14 @@ func ErrNotExistValidator(w http.ResponseWriter, statusCode int) {
 	wrapError := WrapError{
 		ErrorCode: NotExistValidator,
 		ErrorMsg:  ErrorCodeToErrorMsg(NotExistValidator),
+	}
+	PrintException(w, statusCode, wrapError)
+}
+
+func ErrNotAllowed(w http.ResponseWriter, statusCode int) {
+	wrapError := WrapError{
+		ErrorCode: NotAllowed,
+		ErrorMsg:  ErrorCodeToErrorMsg(NotAllowed),
 	}
 	PrintException(w, statusCode, wrapError)
 }

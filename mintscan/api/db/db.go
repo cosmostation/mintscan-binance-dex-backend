@@ -4,6 +4,7 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/config"
 
 	"github.com/go-pg/pg"
+	"github.com/go-pg/pg/orm"
 )
 
 // Database implements a wrapper of golang ORM with focus on PostgreSQL
@@ -14,6 +15,11 @@ type Database struct {
 // Connect opens a database connections with the given database connection info from config.
 // It returns a database connection handle or an error if the connection fails.
 func Connect(cfg config.DBConfig) *Database {
+	// Disable pluralization
+	orm.SetTableNameInflector(func(s string) string {
+		return s
+	})
+
 	db := pg.Connect(&pg.Options{
 		Addr:     cfg.Host + ":" + cfg.Port,
 		User:     cfg.User,
