@@ -84,4 +84,4 @@ We encourage and support an active, healthy community of contributors — any co
 
 ## License
 
-Released under the [MIT License](https://github.com/cosmostation/mintscan-binance-dex-backend/LICENSE).
+Released under the [Apache 2.0 License](https://github.com/cosmostation/mintscan-binance-dex-backend/LICENSE).
