@@ -40,7 +40,7 @@ func NewApp() *App {
 
 	app := &App{
 		cdc:    codec.Codec,
-		client: client.NewClient(cfg.Node.RPCNode, cfg.Node.LCDEndpoint, cfg.Node.NetworkType),
+		client: client.NewClient(cfg.Node.RPCNode, cfg.Node.AcceleratedNode, cfg.Node.APIServerEndpoint, cfg.Node.NetworkType),
 		db:     db.Connect(cfg.DB),
 		router: setRouter(),
 	}

@@ -13,14 +13,15 @@ import (
 // Client wraps around both Tendermint RPC client and
 // Cosmos SDK LCD REST client that enables to query necessary data
 type Client struct {
-	rpcClient rpc.Client
-	lcdClient string
-	cdc       *amino.Codec
+	rpcClient         rpc.Client
+	acceleratedNode   string
+	apiServerEndpoint string
+	cdc               *amino.Codec
 }
 
 // NewClient returns Client
-func NewClient(rpcNode, lcdEndpoint string, networkType cmtypes.ChainNetwork) Client {
-	return Client{rpc.NewRPCClient(rpcNode, networkType), lcdEndpoint, codec.Codec}
+func NewClient(rpcNode, acceleratedNode, apiServerEndpoint string, networkType cmtypes.ChainNetwork) Client {
+	return Client{rpc.NewRPCClient(rpcNode, networkType), acceleratedNode, apiServerEndpoint, codec.Codec}
 }
 
 // LatestBlockHeight returns the latest block height on the active chain

@@ -26,7 +26,7 @@ type Exporter struct {
 func NewExporter() Exporter {
 	cfg := config.ParseConfig()
 
-	client := client.NewClient(cfg.Node.RPCNode, cfg.Node.LCDEndpoint, cfg.Node.NetworkType)
+	client := client.NewClient(cfg.Node.RPCNode, cfg.Node.AcceleratedNode, cfg.Node.APIServerEndpoint, cfg.Node.NetworkType)
 
 	db := db.Connect(cfg.DB)
 

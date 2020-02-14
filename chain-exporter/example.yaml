@@ -3,7 +3,8 @@ active: "testnet"
 mainnet:
   node: 
     rpc_node: "" 
-    lcd_endpoint: ""
+    accelerated_node: ""
+    api_server_endpoint: ""
   database:
     host: ""
     port: 5432
@@ -16,7 +17,8 @@ mainnet:
 testnet:
   node: 
     rpc_node: "" 
-    lcd_endpoint: ""
+    accelerated_node: ""
+    api_server_endpoint: ""
   database:
     host: ""
     port: 5432

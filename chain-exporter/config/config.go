@@ -19,9 +19,10 @@ type Config struct {
 
 // NodeConfig defines endpoints for both RPC node and LCD REST API server
 type NodeConfig struct {
-	RPCNode     string               `yaml:"rpc_node"`
-	LCDEndpoint string               `yaml:"lcd_endpoint"`
-	NetworkType cmtypes.ChainNetwork `yaml:"network_type"`
+	RPCNode           string               `yaml:"rpc_node"`
+	AcceleratedNode   string               `yaml:"accelerated_node"`
+	APIServerEndpoint string               `yaml:"api_server_endpoint"`
+	NetworkType       cmtypes.ChainNetwork `yaml:"network_type"`
 }
 
 // DBConfig defines all database connection configuration parameters.
@@ -58,9 +59,10 @@ func ParseConfig() Config {
 	switch viper.GetString("active") {
 	case "mainnet":
 		cfg.Node = NodeConfig{
-			RPCNode:     viper.GetString("mainnet.node.rpc_node"),
-			LCDEndpoint: viper.GetString("mainnet.node.lcd_endpoint"),
-			NetworkType: cmtypes.ProdNetwork,
+			RPCNode:           viper.GetString("mainnet.node.rpc_node"),
+			AcceleratedNode:   viper.GetString("mainnet.node.accelerated_node"),
+			APIServerEndpoint: viper.GetString("mainnet.node.api_server_endpoint"),
+			NetworkType:       cmtypes.ProdNetwork,
 		}
 		cfg.DB = DBConfig{
 			Host:     viper.GetString("mainnet.database.host"),
@@ -75,9 +77,10 @@ func ParseConfig() Config {
 
 	case "testnet":
 		cfg.Node = NodeConfig{
-			RPCNode:     viper.GetString("testnet.node.rpc_node"),
-			LCDEndpoint: viper.GetString("testnet.node.lcd_endpoint"),
-			NetworkType: cmtypes.TestNetwork,
+			RPCNode:           viper.GetString("testnet.node.rpc_node"),
+			AcceleratedNode:   viper.GetString("testnet.node.accelerated_node"),
+			APIServerEndpoint: viper.GetString("testnet.node.api_server_endpoint"),
+			NetworkType:       cmtypes.TestNetwork,
 		}
 		cfg.DB = DBConfig{
 			Host:     viper.GetString("testnet.database.host"),
