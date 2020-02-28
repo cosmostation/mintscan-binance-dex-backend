@@ -93,3 +93,19 @@ func (c Client) Validators() ([]*types.Validator, error) {
 
 	return vals, nil
 }
+
+// Tokens returns information about existing tokens in active chain
+func (c Client) Tokens(limit int, offset int) ([]*types.Token, error) {
+	resp, err := c.apiClient.R().Get("/api/v1/tokens?limit=" + string(limit) + "&offset=" + string(offset))
+	if err != nil {
+		return nil, err
+	}
+
+	var tokens []*types.Token
+	err = json.Unmarshal(resp.Body(), &tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	return tokens, nil
+}
