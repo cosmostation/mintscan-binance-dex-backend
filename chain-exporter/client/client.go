@@ -1,27 +1,39 @@
 package client
 
 import (
+	"encoding/json"
+	"time"
+
 	"github.com/binance-chain/go-sdk/client/rpc"
 	cmtypes "github.com/binance-chain/go-sdk/common/types"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/codec"
+	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/types"
 
 	amino "github.com/tendermint/go-amino"
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
+
+	resty "github.com/go-resty/resty/v2"
 )
 
 // Client wraps around both Tendermint RPC client and
 // Cosmos SDK LCD REST client that enables to query necessary data
 type Client struct {
-	rpcClient         rpc.Client
-	acceleratedNode   string
-	apiServerEndpoint string
-	cdc               *amino.Codec
+	acceleratedNode string
+	apiClient       *resty.Client
+	cdc             *amino.Codec
+	rpcClient       rpc.Client
 }
 
 // NewClient returns Client
 func NewClient(rpcNode, acceleratedNode, apiServerEndpoint string, networkType cmtypes.ChainNetwork) Client {
-	return Client{rpc.NewRPCClient(rpcNode, networkType), acceleratedNode, apiServerEndpoint, codec.Codec}
+	rpcClient := rpc.NewRPCClient(rpcNode, networkType)
+
+	restyClient := resty.New().
+		SetHostURL(apiServerEndpoint).
+		SetTimeout(time.Duration(5 * time.Second))
+
+	return Client{acceleratedNode, restyClient, codec.Codec, rpcClient}
 }
 
 // Block queries for a block by height. An error is returned if the query fails.
@@ -58,8 +70,26 @@ func (c Client) Txs(block *tmctypes.ResultBlock) ([]*rpc.ResultTx, error) {
 	return txs, nil
 }
 
-// Validators returns all the known Tendermint validators for a given block
+// ValidatorSet returns all the known Tendermint validators for a given block
 // height. An error is returned if the query fails.
-func (c Client) Validators(height int64) (*tmctypes.ResultValidators, error) {
+func (c Client) ValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
 	return c.rpcClient.Validators(&height)
+}
+
+// Validators returns validators detail information in Tendemrint validators in active chain
+// An error is returns if the query fails.
+func (c Client) Validators() ([]*types.Validator, error) {
+	resp, err := c.apiClient.R().Get("/api/v1/stake/validators")
+	if err != nil {
+		return nil, err
+	}
+
+	var vals []*types.Validator
+
+	err = json.Unmarshal(resp.Body(), &vals)
+	if err != nil {
+		return nil, err
+	}
+
+	return vals, nil
 }
