@@ -30,11 +30,21 @@ func (db *Database) QueryLatestBlockHeight() (int64, error) {
 	return block.Height, nil
 }
 
+// QueryMoniker queries validator moniker
+func (db *Database) QueryMoniker(valAddr string) string {
+	var validator schema.Validator
+	_ = db.Model(&validator).
+		Where("consensus_address = ?", valAddr).
+		Select()
+
+	return validator.Moniker
+}
+
 // ExistValidator checks to see if a validator exists
 func (db *Database) ExistValidator(valAddr string) (bool, error) {
 	var validator schema.Validator
 	ok, err := db.Model(&validator).
-		Where("validator_address = ?", valAddr).
+		Where("consensus_address = ?", valAddr).
 		Exists()
 
 	if err != nil {

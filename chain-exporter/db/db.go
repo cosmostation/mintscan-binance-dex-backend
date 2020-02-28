@@ -77,7 +77,7 @@ func (db *Database) CreateTables() error {
 		if err != nil {
 			return err
 		}
-		_, err = db.Model(schema.Validator{}).Exec(`CREATE INDEX validator_validator_address_idx ON validator USING btree(validator_address);`)
+		_, err = db.Model(schema.Validator{}).Exec(`CREATE INDEX validator_consensus_address_idx ON validator USING btree(consensus_address);`)
 		if err != nil {
 			return err
 		}

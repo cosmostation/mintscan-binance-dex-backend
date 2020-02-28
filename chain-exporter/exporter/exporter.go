@@ -101,12 +101,12 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to query block using rpc client: %t", err)
 	}
 
-	prevBlock, err := ex.client.Block(block.Block.LastCommit.Height())
+	valSet, err := ex.client.ValidatorSet(block.Block.LastCommit.Height())
 	if err != nil {
-		return fmt.Errorf("failed to query block using rpc client: %t", err)
+		return fmt.Errorf("failed to query validators using rpc client: %t", err)
 	}
 
-	vals, err := ex.client.Validators(block.Block.LastCommit.Height())
+	vals, err := ex.client.Validators()
 	if err != nil {
 		return fmt.Errorf("failed to query validators using rpc client: %t", err)
 	}
@@ -121,12 +121,12 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to get transactions: %t", err)
 	}
 
-	resultValidators, err := ex.getValidators(prevBlock, vals)
+	resultValidators, err := ex.getValidators(vals)
 	if err != nil {
 		return fmt.Errorf("failed to get validators: %t", err)
 	}
 
-	resultPreCommits, err := ex.getPreCommits(block.Block.LastCommit, vals)
+	resultPreCommits, err := ex.getPreCommits(block.Block.LastCommit, valSet)
 	if err != nil {
 		return fmt.Errorf("failed to get precommits: %t", err)
 	}

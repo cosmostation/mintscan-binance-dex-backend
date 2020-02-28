@@ -2,7 +2,6 @@ package exporter
 
 import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/types"
 
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
@@ -14,7 +13,7 @@ func (ex *Exporter) getBlock(block *tmctypes.ResultBlock) ([]*schema.Block, erro
 	tempBlock := &schema.Block{
 		Height:        block.Block.Height,
 		Proposer:      block.Block.ProposerAddress.String(),
-		Moniker:       types.GetValidatorMoniker(block.Block.ProposerAddress.String()),
+		Moniker:       ex.db.QueryMoniker(block.Block.ProposerAddress.String()),
 		BlockHash:     block.BlockMeta.BlockID.Hash.String(),
 		ParentHash:    block.BlockMeta.Header.LastBlockID.Hash.String(),
 		NumPrecommits: int64(len(block.Block.LastCommit.Precommits)),
