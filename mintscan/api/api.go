@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"go.uber.org/zap"
 
@@ -19,8 +18,6 @@ import (
 	amino "github.com/tendermint/go-amino"
 
 	"github.com/gorilla/mux"
-
-	resty "gopkg.in/resty.v1"
 )
 
 // App wraps up the required variables that are needed in this app
@@ -51,9 +48,6 @@ func NewApp() *App {
 		log.Fatal(errors.Wrap(err, "failed to ping database "))
 	}
 
-	// Set timeout for request
-	resty.SetTimeout(5 * time.Second)
-
 	// Set controllers
 	app.setControllers()
 
@@ -73,12 +67,13 @@ func setRouter() *mux.Router {
 
 // setControllers sets controllers
 func (a *App) setControllers() {
+	controllers.AssetController(a.cdc, a.client, a.db, a.router)
 	controllers.BlockController(a.cdc, a.client, a.db, a.router)
 	controllers.TxController(a.cdc, a.client, a.db, a.router)
 }
 
 // Run the app
 func (a *App) Run(port string) {
-	fmt.Print("Server is starting on http://localport", port, "\n")
+	fmt.Print("Server is starting on http://localhost", port, "\n")
 	log.Fatal(http.ListenAndServe(port, a.router))
 }

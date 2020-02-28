@@ -89,7 +89,8 @@ func ParseConfig() *Config {
 			RPCNode:           viper.GetString("testnet.node.rpc_node"),
 			AcceleratedNode:   viper.GetString("testnet.node.accelerated_node"),
 			APIServerEndpoint: viper.GetString("testnet.node.api_server_endpoint"),
-			NetworkType:       cmtypes.TestNetwork,
+			NetworkType:       cmtypes.ProdNetwork, // temporary
+			// NetworkType:       cmtypes.TestNetwork,
 		}
 		cfg.DB = DBConfig{
 			Host:     viper.GetString("testnet.database.host"),

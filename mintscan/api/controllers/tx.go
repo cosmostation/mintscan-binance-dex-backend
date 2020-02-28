@@ -17,6 +17,9 @@ func TxController(cdc *amino.Codec, client client.Client, db *db.Database, r *mu
 	r.HandleFunc("/txs", func(w http.ResponseWriter, r *http.Request) {
 		services.GetTxs(db, w, r)
 	}).Methods("GET")
+	r.HandleFunc("/txs/{hash}", func(w http.ResponseWriter, r *http.Request) {
+		services.GetTxByHash(db, w, r)
+	}).Methods("GET")
 	r.HandleFunc("/txs", func(w http.ResponseWriter, r *http.Request) {
 		services.GetTxsByType(client, db, w, r)
 	}).Methods("POST")

@@ -13,6 +13,8 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/schema"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/utils"
+
+	"github.com/gorilla/mux"
 )
 
 // GetTxs returns transactions based upon the request params
@@ -69,6 +71,16 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	}
 
 	utils.Respond(w, result)
+	return nil
+}
+
+// GetTxByHash returns certain transaction information by its tx hash
+func GetTxByHash(db *db.Database, w http.ResponseWriter, r *http.Request) error {
+	vars := mux.Vars(r)
+	txHash := vars["hash"]
+
+	fmt.Println(txHash)
+
 	return nil
 }
 
