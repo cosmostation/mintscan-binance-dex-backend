@@ -40,7 +40,7 @@ type (
 
 	// TxData wraps tx data
 	TxData struct {
-		ID         int32       `json:"id"`
+		ID         int32       `json:"id,omitempty"`
 		Height     int64       `json:"height"`
 		Result     bool        `json:"result"`
 		TxHash     string      `json:"tx_hash"`

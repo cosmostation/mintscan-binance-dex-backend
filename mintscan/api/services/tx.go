@@ -46,6 +46,7 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if len(txs) <= 0 {
+		utils.Respond(w, models.ResultTxs{})
 		return nil
 	}
 
@@ -77,10 +78,21 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 // GetTxByHash returns certain transaction information by its tx hash
 func GetTxByHash(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	vars := mux.Vars(r)
-	txHash := vars["hash"]
+	hash := vars["hash"]
 
-	fmt.Println(txHash)
+	tx, err := db.QueryTxByHash(hash)
+	if err != nil {
+		fmt.Printf("failed to query tx due to: %t\n", err)
+		utils.Respond(w, models.TxData{})
+		return nil
+	}
 
+	result, err := setTx(tx)
+	if err != nil {
+		fmt.Printf("failed to set tx: %t\n", err)
+	}
+
+	utils.Respond(w, result)
 	return nil
 }
 
@@ -163,6 +175,39 @@ func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, 
 
 	utils.Respond(w, result)
 	return nil
+}
+
+// setTx handles tx and return result response
+func setTx(tx schema.Transaction) (*models.TxData, error) {
+	msgs := make([]models.Message, 0)
+	err := json.Unmarshal([]byte(tx.Messages), &msgs)
+	if err != nil {
+		return &models.TxData{}, fmt.Errorf("failed to unmarshal msgs: %t", err)
+	}
+
+	sigs := make([]models.Signature, 0)
+	err = json.Unmarshal([]byte(tx.Signatures), &sigs)
+	if err != nil {
+		return &models.TxData{}, fmt.Errorf("failed to unmarshal sigs: %t", err)
+	}
+
+	txResult := true
+	if tx.Code != 0 {
+		txResult = false
+	}
+
+	result := &models.TxData{
+		Height:     tx.Height,
+		Result:     txResult,
+		TxHash:     tx.TxHash,
+		Messages:   msgs,
+		Signatures: sigs,
+		Memo:       tx.Memo,
+		Code:       tx.Code,
+		Timestamp:  tx.Timestamp,
+	}
+
+	return result, nil
 }
 
 // setTxs handles txs and return result response

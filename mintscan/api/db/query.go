@@ -150,6 +150,24 @@ func (db *Database) QueryTxs(before int, after int, limit int) ([]schema.Transac
 	return txs, nil
 }
 
+// QueryTxByHash queries transaction by transaction hash
+func (db *Database) QueryTxByHash(hash string) (schema.Transaction, error) {
+	var tx schema.Transaction
+	err := db.Model(&tx).
+		Where("tx_hash = ?", hash).
+		Select()
+
+	if err == pg.ErrNoRows {
+		return tx, fmt.Errorf("no rows in block table: %t", err)
+	}
+
+	if err != nil {
+		return tx, fmt.Errorf("unexpected database error: %t", err)
+	}
+
+	return tx, nil
+}
+
 // QueryTxsByType queries transactions with tx type and start and end time
 func (db *Database) QueryTxsByType(txType string, startTime int64, endTime int64, before int, after int, limit int) ([]schema.Transaction, error) {
 	txs := make([]schema.Transaction, 0)
