@@ -46,6 +46,7 @@ func ParseConfig() Config {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./")
 	viper.AddConfigPath("../") // for test cases
+	viper.AddConfigPath("/home/ubuntu/mintscan-binance-dex-backend/chain-exporter/")
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(errors.Wrap(err, "failed to read config"))

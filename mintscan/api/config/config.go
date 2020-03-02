@@ -45,12 +45,14 @@ type MarketConfig struct {
 	CoinGeckoEndpoint string `yaml:"coingecko_endpoint"`
 }
 
-// ParseConfig attempts to read and parse chain-exporter config from the given configPath.
+// ParseConfig attempts to read and parse mintscan config from the given configPath.
 // An error reading or parsing the config results in a panic.
 func ParseConfig() *Config {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./")
+	viper.AddConfigPath("../") // for test cases
+	viper.AddConfigPath("/home/ubuntu/mintscan-binance-dex-backend/mintscan/")
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(errors.Wrap(err, "failed to read config"))
