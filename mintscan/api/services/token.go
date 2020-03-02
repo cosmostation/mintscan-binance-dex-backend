@@ -8,9 +8,8 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/db"
 )
 
-// GetStatus returns current status on the active chain
-func GetStatus(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
-	fmt.Println("GetStatus")
-
+// GetTokens returns assets based upon the request params
+func GetTokens(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+	fmt.Println("GetTokens")
 	return nil
 }
