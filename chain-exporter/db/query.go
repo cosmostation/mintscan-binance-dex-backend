@@ -53,3 +53,16 @@ func (db *Database) ExistValidator(valAddr string) (bool, error) {
 
 	return ok, nil
 }
+
+// ExistToken checks to see if a token exists
+func (db *Database) ExistToken(originalSymbol string) (bool, error) {
+	var token schema.Token
+	ok, err := db.Model(&token).
+		Where("original_symbol = ?", originalSymbol).
+		Exists()
+	if err != nil {
+		return ok, err
+	}
+
+	return ok, nil
+}

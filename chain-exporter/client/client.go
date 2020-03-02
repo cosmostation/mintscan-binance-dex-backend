@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 
 	"github.com/binance-chain/go-sdk/client/rpc"
@@ -96,7 +97,7 @@ func (c Client) Validators() ([]*types.Validator, error) {
 
 // Tokens returns information about existing tokens in active chain
 func (c Client) Tokens(limit int, offset int) ([]*types.Token, error) {
-	resp, err := c.apiClient.R().Get("/api/v1/tokens?limit=" + string(limit) + "&offset=" + string(offset))
+	resp, err := c.apiClient.R().Get("/api/v1/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
 	if err != nil {
 		return nil, err
 	}

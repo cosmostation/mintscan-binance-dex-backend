@@ -136,9 +136,7 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to get tokens: %t", err)
 	}
 
-	fmt.Println("resultTokens===", resultTokens)
-
-	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators, resultPreCommits)
+	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators, resultPreCommits, resultTokens)
 	if err != nil {
 		return fmt.Errorf("failed to insert exporterd data: %t", err)
 	}

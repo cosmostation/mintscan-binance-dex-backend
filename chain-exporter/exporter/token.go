@@ -1,34 +1,21 @@
 package exporter
 
 import (
+	"fmt"
+
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/types"
 )
 
-// 배열을 만들고
-// 요청 후 10개 면 10개 가져온 후 배열에 담고 offset 10개 올린 후 다시 요청
-
-// getTokens
+// getTokens gets all tokens availble on the active chain
 func (ex *Exporter) getTokens() ([]*schema.Token, error) {
 	limit := 100
 	offset := 0
+	lock := false
 
-	tokens := make([]*types.Token, 0)
-
-	tks, err := ex.client.Tokens(limit, offset)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, tk := range tks {
-		tokens = append(tokens, tk)
-	}
+	tokens := make([]*schema.Token, 0)
 
 	for {
-		// Increase offset by limit to request
-		offset += limit
-
-		if len(tks) < offset {
+		if lock == true {
 			break
 		}
 
@@ -38,8 +25,29 @@ func (ex *Exporter) getTokens() ([]*schema.Token, error) {
 		}
 
 		for _, tk := range tks {
-			tokens = append(tokens, tk)
+			ok, err := ex.db.ExistToken(tk.OriginalSymbol)
+			if !ok {
+				tempTk := &schema.Token{
+					Name:           tk.Name,
+					Symbol:         tk.Symbol,
+					OriginalSymbol: tk.OriginalSymbol,
+					TotalSupply:    tk.TotalSupply,
+					Owner:          tk.Owner,
+					Mintable:       tk.Mintable,
+				}
+
+				tokens = append(tokens, tempTk)
+			}
+			if err != nil {
+				return nil, fmt.Errorf("unexpected error when checking token existence: %t", err)
+			}
 		}
+
+		if len(tks) != limit {
+			lock = true
+		}
+
+		offset = offset + limit
 	}
 
 	return tokens, nil
