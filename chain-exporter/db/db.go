@@ -38,8 +38,7 @@ func (db *Database) Ping() error {
 
 // CreateTables creates database tables using object relational mapping (ORM)
 func (db *Database) CreateTables() error {
-	for _, model := range []interface{}{(*schema.Block)(nil), (*schema.PreCommit)(nil), (*schema.Transaction)(nil),
-		(*schema.Validator)(nil), (*schema.Token)(nil)} {
+	for _, model := range []interface{}{(*schema.Block)(nil), (*schema.PreCommit)(nil), (*schema.Transaction)(nil), (*schema.Validator)(nil)} {
 		// Disable pluralization
 		orm.SetTableNameInflector(func(s string) string {
 			return s

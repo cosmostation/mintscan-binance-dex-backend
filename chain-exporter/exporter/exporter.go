@@ -131,12 +131,12 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to get precommits: %t", err)
 	}
 
-	resultTokens, err := ex.getTokens()
-	if err != nil {
-		return fmt.Errorf("failed to get tokens: %t", err)
-	}
+	// resultTokens, err := ex.getTokens()
+	// if err != nil {
+	// 	return fmt.Errorf("failed to get tokens: %t", err)
+	// }
 
-	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators, resultPreCommits, resultTokens)
+	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators, resultPreCommits)
 	if err != nil {
 		return fmt.Errorf("failed to insert exporterd data: %t", err)
 	}
