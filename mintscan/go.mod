@@ -11,7 +11,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.6.2
 	github.com/tendermint/go-amino v0.15.1
+	github.com/tendermint/tendermint v0.32.3
 	go.uber.org/zap v1.10.0
-	gopkg.in/resty.v1 v1.12.0
 	mellium.im/sasl v0.2.1 // indirect
 )

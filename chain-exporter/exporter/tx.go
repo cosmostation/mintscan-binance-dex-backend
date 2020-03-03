@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/types"
@@ -31,6 +32,10 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) ([]*schema.Transaction, 
 			if err != nil {
 				return nil, err
 			}
+
+			fmt.Println(tx.Hash.String())
+			fmt.Println(string(msgsBz))
+			fmt.Println("")
 
 			sigs := make([]types.Signature, len(stdTx.Signatures), len(stdTx.Signatures))
 

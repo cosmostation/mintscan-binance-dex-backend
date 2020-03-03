@@ -35,9 +35,17 @@ func NewApp() *App {
 
 	cfg := config.ParseConfig()
 
+	client := client.NewClient(
+		cfg.Node.RPCNode,
+		cfg.Node.AcceleratedNode,
+		cfg.Node.APIServerEndpoint,
+		cfg.Market.CoinGeckoEndpoint,
+		cfg.Node.NetworkType,
+	)
+
 	app := &App{
 		cdc:    codec.Codec,
-		client: client.NewClient(cfg.Node.RPCNode, cfg.Node.AcceleratedNode, cfg.Node.APIServerEndpoint, cfg.Node.NetworkType),
+		client: client,
 		db:     db.Connect(cfg.DB),
 		router: setRouter(),
 	}

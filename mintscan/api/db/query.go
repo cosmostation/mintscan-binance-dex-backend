@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/schema"
 
 	"github.com/go-pg/pg"
@@ -204,4 +205,17 @@ func (db *Database) QueryTxsByType(txType string, startTime int64, endTime int64
 	}
 
 	return txs, nil
+}
+
+// ExistToken checks to see if a token exists
+func (db *Database) ExistToken(originalSymbol string) (bool, error) {
+	var token models.Token
+	ok, err := db.Model(&token).
+		Where("original_symbol = ?", originalSymbol).
+		Exists()
+	if err != nil {
+		return ok, err
+	}
+
+	return ok, nil
 }

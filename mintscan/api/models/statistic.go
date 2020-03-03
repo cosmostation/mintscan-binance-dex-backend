@@ -4,7 +4,9 @@ import "time"
 
 // Market represents market data
 type Market struct {
-	Price             float64   `json:"price"`
+	Name              string    `json:"name"`
+	Symbol            string    `json:"symbol"`
+	CurrentPrice      float64   `json:"current_price"`
 	Currency          string    `json:"currency"`
 	MarketCapRank     uint8     `json:"market_cap_rank"`
 	PercentChange1H   float64   `json:"percent_change_1h"`
