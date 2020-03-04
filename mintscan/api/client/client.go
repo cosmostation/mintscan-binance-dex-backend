@@ -105,19 +105,36 @@ func (c Client) Validators() ([]*models.Validator, error) {
 	return vals, nil
 }
 
-// BinanceCoinMarketData fetches BNB market data from CoinGecko API
-func (c Client) BinanceCoinMarketData() (models.Market, error) {
-	resp, err := c.coinGeckoClient.R().Get("/api/v3/coins/binancecoin")
+// CoinMarketData fetches current market data from CoinGecko API
+func (c Client) CoinMarketData(id string) (models.CoinGeckoMarket, error) {
+	resp, err := c.coinGeckoClient.R().Get("/coins/" + id + "?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false")
 	if err != nil {
-		return models.Market{}, err
+		return models.CoinGeckoMarket{}, err
 	}
 
-	var coingeckoMarket models.CoinGeckoMarket
+	var data models.CoinGeckoMarket
 
-	err = json.Unmarshal(resp.Body(), &coingeckoMarket)
+	err = json.Unmarshal(resp.Body(), &data)
 	if err != nil {
-		return models.Market{}, err
+		return models.CoinGeckoMarket{}, err
 	}
 
-	return models.Market{}, nil
+	return data, nil
+}
+
+// CoinMarketChartData fetches current market chart data from CoinGecko API
+func (c Client) CoinMarketChartData(id string, from string, to string) (models.CoinGeckoMarketChart, error) {
+	resp, err := c.coinGeckoClient.R().Get("/coins/" + id + "/market_chart/range?id=" + id + "&vs_currency=usd&from=" + from + "&to=" + to)
+	if err != nil {
+		return models.CoinGeckoMarketChart{}, err
+	}
+
+	var data models.CoinGeckoMarketChart
+
+	err = json.Unmarshal(resp.Body(), &data)
+	if err != nil {
+		return models.CoinGeckoMarketChart{}, err
+	}
+
+	return data, nil
 }
