@@ -46,6 +46,26 @@ func (db *Database) QueryBlocks(before int, after int, limit int) ([]schema.Bloc
 	return blocks, nil
 }
 
+// QueryLatestBlock queries latest block information saved in database
+func (db *Database) QueryLatestBlock() (schema.Block, error) {
+	var block schema.Block
+
+	err := db.Model(&block).
+		Limit(1).
+		Order("id DESC").
+		Select()
+
+	if err == pg.ErrNoRows {
+		return schema.Block{}, fmt.Errorf("no rows in block table: %t", err)
+	}
+
+	if err != nil {
+		return schema.Block{}, fmt.Errorf("unexpected database error: %t", err)
+	}
+
+	return block, nil
+}
+
 // QueryLatestBlockHeight queries latest block height saved in database
 func (db *Database) QueryLatestBlockHeight() (int64, error) {
 	var block schema.Block
@@ -67,7 +87,7 @@ func (db *Database) QueryLatestBlockHeight() (int64, error) {
 	return block.Height, nil
 }
 
-// QueryTotalTxsNum queries total number of transactions in that height
+// QueryTotalTxsNum queries total number of transactions up until that height
 func (db *Database) QueryTotalTxsNum(height int64) (int64, error) {
 	var block schema.Block
 
@@ -89,10 +109,24 @@ func (db *Database) QueryTotalTxsNum(height int64) (int64, error) {
 }
 
 // CountTotalTxsNum counts total number of transactions saved in transaction table
-func (db *Database) CountTotalTxsNum() (int, error) {
+// Note that count(*) raises performance issue as more txs saved in database
+func (db *Database) CountTotalTxsNum() (int32, error) {
 	var tx schema.Transaction
 
-	return db.Model(&tx).Count()
+	err := db.Model(&tx).
+		Limit(1).
+		Order("id DESC").
+		Select()
+
+	if err == pg.ErrNoRows {
+		return 0, fmt.Errorf("no rows in block table: %t", err)
+	}
+
+	if err != nil {
+		return 0, fmt.Errorf("unexpected database error: %t", err)
+	}
+
+	return tx.ID, nil
 }
 
 // QueryTx queries particular transaction with height

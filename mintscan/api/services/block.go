@@ -57,11 +57,11 @@ func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 
 	// Handling before and after since their ordering data is different
 	if after >= 0 {
-		result.Paging.Total = int(latestBlockHeight)
+		result.Paging.Total = int32(latestBlockHeight)
 		result.Paging.Before = int32(result.Data[0].Height)
 		result.Paging.After = int32(result.Data[len(result.Data)-1].Height)
 	} else {
-		result.Paging.Total = int(latestBlockHeight)
+		result.Paging.Total = int32(latestBlockHeight)
 		result.Paging.Before = int32(result.Data[len(result.Data)-1].Height)
 		result.Paging.After = int32(result.Data[0].Height)
 	}
