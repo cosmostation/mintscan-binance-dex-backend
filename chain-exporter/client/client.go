@@ -80,7 +80,7 @@ func (c Client) ValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
 // Validators returns validators detail information in Tendemrint validators in active chain
 // An error is returns if the query fails.
 func (c Client) Validators() ([]*types.Validator, error) {
-	resp, err := c.apiClient.R().Get("/api/v1/stake/validators")
+	resp, err := c.apiClient.R().Get("/stake/validators")
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (c Client) Validators() ([]*types.Validator, error) {
 
 // Tokens returns information about existing tokens in active chain
 func (c Client) Tokens(limit int, offset int) ([]*types.Token, error) {
-	resp, err := c.apiClient.R().Get("/api/v1/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
+	resp, err := c.apiClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
 	if err != nil {
 		return nil, err
 	}

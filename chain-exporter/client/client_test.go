@@ -16,7 +16,7 @@ func TestRequestTokens(t *testing.T) {
 
 	client := resty.New().SetHostURL(cfg.Node.APIServerEndpoint)
 
-	resp, err := client.R().Get("/api/v1/tokens?limit=2")
+	resp, err := client.R().Get("/tokens?limit=2")
 	if err != nil {
 		t.Errorf("failed to request api call: %v\n", err)
 	}

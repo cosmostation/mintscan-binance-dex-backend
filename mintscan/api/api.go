@@ -40,6 +40,7 @@ func NewApp() *App {
 		cfg.Node.AcceleratedNode,
 		cfg.Node.APIServerEndpoint,
 		cfg.Market.CoinGeckoEndpoint,
+		cfg.Node.ExplorerServerEndpoint,
 		cfg.Node.NetworkType,
 	)
 
@@ -75,6 +76,7 @@ func setRouter() *mux.Router {
 
 // setControllers sets controllers
 func (a *App) setControllers() {
+	controllers.AssetController(a.cdc, a.client, a.db, a.router)
 	controllers.BlockController(a.cdc, a.client, a.db, a.router)
 	controllers.StatusController(a.cdc, a.client, a.db, a.router)
 	controllers.MarketController(a.cdc, a.client, a.db, a.router)

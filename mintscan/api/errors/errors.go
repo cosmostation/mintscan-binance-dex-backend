@@ -30,6 +30,9 @@ const (
 	OverMaxLimit                      ErrorCode = 301
 	FailedUnmarshalJSON               ErrorCode = 302
 	FailedMarshalBinaryLengthPrefixed ErrorCode = 303
+
+	RequiredParam ErrorCode = 601
+	InvalidParam  ErrorCode = 602
 )
 
 // ErrorCodeToErrorMsg returns error message from error code
@@ -57,6 +60,18 @@ func ErrorCodeToErrorMsg(code ErrorCode) ErrorMsg {
 		return "FailedUnmarshalJSON"
 	case FailedMarshalBinaryLengthPrefixed:
 		return "FailedMarshalBinaryLengthPrefixed"
+	default:
+		return "Unknown"
+	}
+}
+
+// ErrorCodeToErrorMsgs returns error message from error code
+func ErrorCodeToErrorMsgs(code ErrorCode, msg string) ErrorMsg {
+	switch code {
+	case RequiredParam:
+		return ErrorMsg("Required Parameter: " + msg)
+	case InvalidParam:
+		return ErrorMsg("Invalid Parameter: " + msg)
 	default:
 		return "Unknown"
 	}
@@ -150,6 +165,22 @@ func ErrFailedMarshalBinaryLengthPrefixed(w http.ResponseWriter, statusCode int)
 	wrapError := WrapError{
 		ErrorCode: FailedMarshalBinaryLengthPrefixed,
 		ErrorMsg:  ErrorCodeToErrorMsg(FailedMarshalBinaryLengthPrefixed),
+	}
+	PrintException(w, statusCode, wrapError)
+}
+
+func ErrRequiredParam(w http.ResponseWriter, statusCode int, msg string) {
+	wrapError := WrapError{
+		ErrorCode: RequiredParam,
+		ErrorMsg:  ErrorCodeToErrorMsgs(RequiredParam, msg),
+	}
+	PrintException(w, statusCode, wrapError)
+}
+
+func ErrInvalidParam(w http.ResponseWriter, statusCode int, msg string) {
+	wrapError := WrapError{
+		ErrorCode: InvalidParam,
+		ErrorMsg:  ErrorCodeToErrorMsgs(InvalidParam, msg),
 	}
 	PrintException(w, statusCode, wrapError)
 }
