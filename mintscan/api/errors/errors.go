@@ -25,7 +25,6 @@ const (
 	NotAllowed         ErrorCode = 204
 	FailedConversion   ErrorCode = 205
 	InvalidMessageType ErrorCode = 207
-	RequireIDParam     ErrorCode = 208
 
 	OverMaxLimit                      ErrorCode = 301
 	FailedUnmarshalJSON               ErrorCode = 302
@@ -46,8 +45,6 @@ func ErrorCodeToErrorMsg(code ErrorCode) ErrorMsg {
 		return "Invalid format"
 	case InvalidMessageType:
 		return "Invalid Message Type"
-	case RequireIDParam:
-		return "Require ID Param"
 	case NotExist:
 		return "NotExist"
 	case NotAllowed:
@@ -109,14 +106,6 @@ func ErrInvalidMessageType(w http.ResponseWriter, statusCode int) {
 	wrapError := WrapError{
 		ErrorCode: InvalidMessageType,
 		ErrorMsg:  ErrorCodeToErrorMsg(InvalidMessageType),
-	}
-	PrintException(w, statusCode, wrapError)
-}
-
-func ErrRequireIDParam(w http.ResponseWriter, statusCode int) {
-	wrapError := WrapError{
-		ErrorCode: RequireIDParam,
-		ErrorMsg:  ErrorCodeToErrorMsg(RequireIDParam),
 	}
 	PrintException(w, statusCode, wrapError)
 }

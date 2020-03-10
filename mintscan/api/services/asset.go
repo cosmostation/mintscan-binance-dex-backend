@@ -11,6 +11,24 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/utils"
 )
 
+// GetAsset returns asset based upon the request params
+func GetAsset(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+	if len(r.URL.Query()["asset"]) <= 0 {
+		errors.ErrRequiredParam(w, http.StatusBadRequest, "'asset' is not present")
+		return nil
+	}
+
+	asset := r.URL.Query()["asset"][0]
+
+	result, err := client.Asset(asset)
+	if err != nil {
+		fmt.Printf("failed to get asset detail information: %t\n", err)
+	}
+
+	utils.Respond(w, result)
+	return nil
+}
+
 // GetAssets returns assets based upon the request params
 func GetAssets(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	if len(r.URL.Query()["page"]) <= 0 {

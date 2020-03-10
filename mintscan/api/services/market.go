@@ -15,13 +15,14 @@ import (
 
 // GetCoinMarketData returns market data from CoinGecko API
 func GetCoinMarketData(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		errors.ErrRequireIDParam(w, http.StatusBadRequest)
+	if len(r.URL.Query()["id"]) <= 0 {
+		errors.ErrRequiredParam(w, http.StatusBadRequest, "'id' is not present")
 		return nil
 	}
 
-	data, err := client.CoinMarketData(int(0))
+	id := r.URL.Query()["id"][0]
+
+	data, err := client.CoinMarketData(id)
 	if err != nil {
 		fmt.Printf("failed to fetch coin market data: %t\n", err)
 	}
@@ -48,11 +49,12 @@ func GetCoinMarketData(client client.Client, db *db.Database, w http.ResponseWri
 
 // GetCoinMarketChartData returns market chart data from CoinGecko API
 func GetCoinMarketChartData(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		errors.ErrRequireIDParam(w, http.StatusBadRequest)
+	if len(r.URL.Query()["id"]) <= 0 {
+		errors.ErrRequiredParam(w, http.StatusBadRequest, "'id' is not present")
 		return nil
 	}
+
+	id := r.URL.Query()["id"][0]
 
 	// Current time and its minus 24 hours
 	to := time.Now().UTC()
@@ -62,11 +64,7 @@ func GetCoinMarketChartData(client client.Client, db *db.Database, w http.Respon
 	toStr := fmt.Sprintf("%d", to.Unix())
 	fromStr := fmt.Sprintf("%d", from.Unix())
 
-	fmt.Println(toStr)
-	fmt.Println(fromStr)
-
-	marketChartData, err := client.CoinMarketChartData(int(0), int(0), int(0))
-	// marketChartData, err := client.CoinMarketChartData(id, fromStr, toStr)
+	marketChartData, err := client.CoinMarketChartData(id, fromStr, toStr)
 	if err != nil {
 		fmt.Printf("failed to fetch coin market chart data: %t\n", err)
 	}

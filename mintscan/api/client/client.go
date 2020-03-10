@@ -119,8 +119,8 @@ func (c Client) Validators() ([]*models.Validator, error) {
 }
 
 // CoinMarketData fetches current market data from CoinGecko API
-func (c Client) CoinMarketData(id int) (models.CoinGeckoMarket, error) {
-	queryStr := strconv.Itoa(id) + "?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false"
+func (c Client) CoinMarketData(id string) (models.CoinGeckoMarket, error) {
+	queryStr := id + "?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false"
 	resp, err := c.coinGeckoClient.R().Get("/coins/" + queryStr)
 	if err != nil {
 		return models.CoinGeckoMarket{}, err
@@ -136,8 +136,8 @@ func (c Client) CoinMarketData(id int) (models.CoinGeckoMarket, error) {
 }
 
 // CoinMarketChartData fetches current market chart data from CoinGecko API
-func (c Client) CoinMarketChartData(id int, from int, to int) (models.CoinGeckoMarketChart, error) {
-	queryStr := strconv.Itoa(id) + "/market_chart/range?id=" + strconv.Itoa(id) + "&vs_currency=usd&from=" + strconv.Itoa(from) + "&to=" + strconv.Itoa(to)
+func (c Client) CoinMarketChartData(id string, from string, to string) (models.CoinGeckoMarketChart, error) {
+	queryStr := id + "/market_chart/range?id=" + id + "&vs_currency=usd&from=" + from + "&to=" + to
 	resp, err := c.coinGeckoClient.R().Get("/coins/" + queryStr)
 	if err != nil {
 		return models.CoinGeckoMarketChart{}, err
@@ -152,7 +152,23 @@ func (c Client) CoinMarketChartData(id int, from int, to int) (models.CoinGeckoM
 	return data, nil
 }
 
-// Assets fetches official explorer asset API and return result
+// Asset fetches official explorer asset API and return result
+func (c Client) Asset(assetName string) (models.Asset, error) {
+	resp, err := c.explorerClient.R().Get("/asset?asset=" + assetName)
+	if err != nil {
+		return models.Asset{}, err
+	}
+
+	var asset models.Asset
+	err = json.Unmarshal(resp.Body(), &asset)
+	if err != nil {
+		return models.Asset{}, err
+	}
+
+	return asset, nil
+}
+
+// Assets fetches official explorer assets API and return result
 func (c Client) Assets(page int, rows int) (models.Assets, error) {
 	queryStr := "/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)

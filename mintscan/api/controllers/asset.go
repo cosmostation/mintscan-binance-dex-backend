@@ -14,6 +14,9 @@ import (
 
 // AssetController passes requests to its respective service
 func AssetController(cdc *amino.Codec, client client.Client, db *db.Database, r *mux.Router) {
+	r.HandleFunc("/asset", func(w http.ResponseWriter, r *http.Request) {
+		services.GetAsset(client, db, w, r)
+	}).Methods("GET")
 	r.HandleFunc("/assets", func(w http.ResponseWriter, r *http.Request) {
 		services.GetAssets(client, db, w, r)
 	}).Methods("GET")
