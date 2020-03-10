@@ -2,7 +2,7 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -38,7 +38,7 @@ func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 
 	blocks, err := db.QueryBlocks(before, after, limit)
 	if err != nil {
-		fmt.Printf("failed to query blocks: %t\n", err)
+		log.Printf("failed to query blocks: %t\n", err)
 	}
 
 	if len(blocks) <= 0 {
@@ -47,12 +47,12 @@ func GetBlocks(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 
 	result, err := setBlocks(db, blocks)
 	if err != nil {
-		fmt.Printf("failed to set blocks: %t\n", err)
+		log.Printf("failed to set blocks: %t\n", err)
 	}
 
 	latestBlockHeight, err := db.QueryLatestBlockHeight()
 	if err != nil {
-		fmt.Printf("failed to query latest block height: %t\n", err)
+		log.Printf("failed to query latest block height: %t\n", err)
 	}
 
 	// Handling before and after since their ordering data is different
@@ -84,7 +84,7 @@ func setBlocks(db *db.Database, blocks []schema.Block) (*models.ResultBlocks, er
 				msgs := make([]models.Message, 0)
 				err := json.Unmarshal([]byte(tx.Messages), &msgs)
 				if err != nil {
-					fmt.Printf("failed to unmarshal msgs: %t\n", err)
+					log.Printf("failed to unmarshal msgs: %t\n", err)
 				}
 
 				txResult := true

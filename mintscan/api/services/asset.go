@@ -1,7 +1,7 @@
 package services
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -22,7 +22,7 @@ func GetAsset(client client.Client, db *db.Database, w http.ResponseWriter, r *h
 
 	result, err := client.Asset(asset)
 	if err != nil {
-		fmt.Printf("failed to get asset detail information: %t\n", err)
+		log.Printf("failed to get asset detail information: %t\n", err)
 	}
 
 	utils.Respond(w, result)
@@ -51,7 +51,7 @@ func GetAssets(client client.Client, db *db.Database, w http.ResponseWriter, r *
 
 	result, err := client.Assets(page, rows)
 	if err != nil {
-		fmt.Printf("failed to get asset list: %t\n", err)
+		log.Printf("failed to get asset list: %t\n", err)
 	}
 
 	utils.Respond(w, result)
@@ -86,7 +86,7 @@ func GetAssetHolders(client client.Client, db *db.Database, w http.ResponseWrite
 
 	result, err := client.AssetHolders(asset, page, rows)
 	if err != nil {
-		fmt.Printf("failed to get asset holders list: %t\n", err)
+		log.Printf("failed to get asset holders list: %t\n", err)
 	}
 
 	utils.Respond(w, result)

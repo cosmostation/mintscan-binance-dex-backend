@@ -8,6 +8,7 @@ require (
 	github.com/go-resty/resty/v2 v2.2.0
 	github.com/gorilla/mux v1.7.3
 	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/labstack/gommon v0.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.6.2
 	github.com/tendermint/go-amino v0.15.1

@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -42,7 +43,7 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 
 	txs, err := db.QueryTxs(before, after, limit)
 	if err != nil {
-		fmt.Printf("failed to query txs due to: %t\n", err)
+		log.Printf("failed to query txs due to: %t\n", err)
 	}
 
 	if len(txs) <= 0 {
@@ -52,12 +53,12 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 
 	result, err := setTxs(txs)
 	if err != nil {
-		fmt.Printf("failed to set txs: %t\n", err)
+		log.Printf("failed to set txs: %t\n", err)
 	}
 
 	totalTxsNum, err := db.CountTotalTxsNum()
 	if err != nil {
-		fmt.Printf("failed to query total number of txs: %t\n", err)
+		log.Printf("failed to query total number of txs: %t\n", err)
 	}
 
 	// Handling before and after since their ordering data is different
@@ -82,14 +83,14 @@ func GetTxByHash(db *db.Database, w http.ResponseWriter, r *http.Request) error 
 
 	tx, err := db.QueryTxByHash(hash)
 	if err != nil {
-		fmt.Printf("failed to query tx due to: %t\n", err)
+		log.Printf("failed to query tx due to: %t\n", err)
 		utils.Respond(w, models.TxData{})
 		return nil
 	}
 
 	result, err := setTx(tx)
 	if err != nil {
-		fmt.Printf("failed to set tx: %t\n", err)
+		log.Printf("failed to set tx: %t\n", err)
 	}
 
 	utils.Respond(w, result)
@@ -122,7 +123,7 @@ func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, 
 	var txrp models.TxRequestPayload
 	err := json.NewDecoder(r.Body).Decode(&txrp)
 	if err != nil {
-		fmt.Printf("failed to decode txrp: %t\n", err)
+		log.Printf("failed to decode txrp: %t\n", err)
 	}
 
 	// Set the first block time if StartTime is not parsed
@@ -145,7 +146,7 @@ func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, 
 
 	txs, err := db.QueryTxsByType(txrp.TxType, txrp.StartTime, txrp.EndTime, before, after, limit)
 	if err != nil {
-		fmt.Printf("failed to query txs due to: %t\n", err)
+		log.Printf("failed to query txs due to: %t\n", err)
 	}
 
 	if len(txs) <= 0 {
@@ -154,12 +155,12 @@ func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, 
 
 	result, err := setTxs(txs)
 	if err != nil {
-		fmt.Printf("failed to set txs: %t\n", err)
+		log.Printf("failed to set txs: %t\n", err)
 	}
 
 	totalTxsNum, err := db.CountTotalTxsNum()
 	if err != nil {
-		fmt.Printf("failed to query total number of txs: %t\n", err)
+		log.Printf("failed to query total number of txs: %t\n", err)
 	}
 
 	// Handling before and after since their ordering data is different

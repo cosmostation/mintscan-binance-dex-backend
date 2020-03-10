@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -24,7 +25,7 @@ func GetCoinMarketData(client client.Client, db *db.Database, w http.ResponseWri
 
 	data, err := client.CoinMarketData(id)
 	if err != nil {
-		fmt.Printf("failed to fetch coin market data: %t\n", err)
+		log.Printf("failed to fetch coin market data: %t\n", err)
 	}
 
 	marketData := &models.Market{
@@ -60,13 +61,9 @@ func GetCoinMarketChartData(client client.Client, db *db.Database, w http.Respon
 	to := time.Now().UTC()
 	from := to.AddDate(0, 0, -1)
 
-	// Convert from unix timestamp to string
-	toStr := fmt.Sprintf("%d", to.Unix())
-	fromStr := fmt.Sprintf("%d", from.Unix())
-
-	marketChartData, err := client.CoinMarketChartData(id, fromStr, toStr)
+	marketChartData, err := client.CoinMarketChartData(id, fmt.Sprintf("%d", to.Unix()), fmt.Sprintf("%d", from.Unix()))
 	if err != nil {
-		fmt.Printf("failed to fetch coin market chart data: %t\n", err)
+		log.Printf("failed to fetch coin market chart data: %t\n", err)
 	}
 
 	utils.Respond(w, marketChartData)

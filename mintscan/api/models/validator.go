@@ -24,6 +24,7 @@ type Validator struct {
 	Commission         Commission      `json:"commission"`
 }
 
+// Description wraps validator's description information
 type Description struct {
 	Moniker  string `json:"moniker"`
 	Identity string `json:"identity"`
@@ -31,6 +32,7 @@ type Description struct {
 	Details  string `json:"details"`
 }
 
+// Commission wraps commission information of a validator
 type Commission struct {
 	Rate          string    `json:"rate"`
 	MaxRate       string    `json:"max_rate"`

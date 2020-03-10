@@ -1,11 +1,8 @@
 package api
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-
-	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
 
@@ -30,9 +27,6 @@ type App struct {
 
 // NewApp initializes the app with predefined configuration
 func NewApp() *App {
-	logger, _ := zap.NewProduction()
-	zap.ReplaceGlobals(logger)
-
 	cfg := config.ParseConfig()
 
 	client := client.NewClient(
@@ -84,8 +78,8 @@ func (a *App) setControllers() {
 	controllers.TxController(a.cdc, a.client, a.db, a.router)
 }
 
-// Run the app
+// Run runs the API server
 func (a *App) Run(port string) {
-	fmt.Print("Server is starting on http://localhost", port, "\n")
+	log.Print("Server is starting on http://localhost", port, "\n")
 	log.Fatal(http.ListenAndServe(port, a.router))
 }

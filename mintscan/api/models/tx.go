@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Txs is transaction data for result block
+// Txs represents transaction data for result block
 type Txs struct {
 	Height    int64     `json:"height"`
 	Result    bool      `json:"result"`
@@ -16,13 +16,13 @@ type Txs struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
-// Message respresents tx meesage
+// Message wraps tx message
 type Message struct {
 	Type  string          `json:"type"`
 	Value json.RawMessage `json:"value"`
 }
 
-// Message respresents tx signature
+// Signature wraps tx signature
 type Signature struct {
 	Pubkey        string `json:"pubkey"`
 	Address       string `json:"address"`
@@ -38,6 +38,27 @@ type TxRequestPayload struct {
 	StartTime int64  `json:"start_time"`
 	EndTime   int64  `json:"end_time"`
 }
+
+type (
+	// ResultTxs is transaction result response
+	ResultTxs struct {
+		Paging Paging   `json:"paging"`
+		Data   []TxData `json:"data"`
+	}
+
+	// TxData wraps tx data
+	TxData struct {
+		ID         int32       `json:"id,omitempty"`
+		Height     int64       `json:"height"`
+		Result     bool        `json:"result"`
+		TxHash     string      `json:"tx_hash"`
+		Messages   []Message   `json:"messages"`
+		Signatures []Signature `json:"signatures"`
+		Memo       string      `json:"memo"`
+		Code       uint32      `json:"code"`
+		Timestamp  time.Time   `json:"timestamp"`
+	}
+)
 
 // ValidatorMsgType verifies transaction message type
 func ValidatorMsgType(msgType string) bool {
@@ -77,24 +98,3 @@ func ValidatorMsgType(msgType string) bool {
 
 	return false
 }
-
-type (
-	// ResultTxs is transaction result response
-	ResultTxs struct {
-		Paging Paging   `json:"paging"`
-		Data   []TxData `json:"data"`
-	}
-
-	// TxData wraps tx data
-	TxData struct {
-		ID         int32       `json:"id,omitempty"`
-		Height     int64       `json:"height"`
-		Result     bool        `json:"result"`
-		TxHash     string      `json:"tx_hash"`
-		Messages   []Message   `json:"messages"`
-		Signatures []Signature `json:"signatures"`
-		Memo       string      `json:"memo"`
-		Code       uint32      `json:"code"`
-		Timestamp  time.Time   `json:"timestamp"`
-	}
-)

@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -126,6 +127,10 @@ func (c Client) CoinMarketData(id string) (models.CoinGeckoMarket, error) {
 		return models.CoinGeckoMarket{}, err
 	}
 
+	if resp.IsError() {
+		return models.CoinGeckoMarket{}, fmt.Errorf("CoinMarketData: %t", err)
+	}
+
 	var data models.CoinGeckoMarket
 	err = json.Unmarshal(resp.Body(), &data)
 	if err != nil {
@@ -141,6 +146,10 @@ func (c Client) CoinMarketChartData(id string, from string, to string) (models.C
 	resp, err := c.coinGeckoClient.R().Get("/coins/" + queryStr)
 	if err != nil {
 		return models.CoinGeckoMarketChart{}, err
+	}
+
+	if resp.IsError() {
+		return models.CoinGeckoMarketChart{}, fmt.Errorf("CoinMarketChartData: %t", err)
 	}
 
 	var data models.CoinGeckoMarketChart

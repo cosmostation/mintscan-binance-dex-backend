@@ -108,27 +108,6 @@ func (db *Database) QueryTotalTxsNum(height int64) (int64, error) {
 	return block.TotalTxs, nil
 }
 
-// CountTotalTxsNum counts total number of transactions saved in transaction table
-// Note that count(*) raises performance issue as more txs saved in database
-func (db *Database) CountTotalTxsNum() (int32, error) {
-	var tx schema.Transaction
-
-	err := db.Model(&tx).
-		Limit(1).
-		Order("id DESC").
-		Select()
-
-	if err == pg.ErrNoRows {
-		return 0, fmt.Errorf("no rows in block table: %t", err)
-	}
-
-	if err != nil {
-		return 0, fmt.Errorf("unexpected database error: %t", err)
-	}
-
-	return tx.ID, nil
-}
-
 // QueryTx queries particular transaction with height
 func (db *Database) QueryTx(height int64) ([]schema.Transaction, error) {
 	txs := make([]schema.Transaction, 0)
@@ -252,4 +231,25 @@ func (db *Database) ExistToken(originalSymbol string) (bool, error) {
 	}
 
 	return ok, nil
+}
+
+// CountTotalTxsNum counts total number of transactions saved in transaction table
+// Note that count(*) raises performance issue as more txs saved in database
+func (db *Database) CountTotalTxsNum() (int32, error) {
+	var tx schema.Transaction
+
+	err := db.Model(&tx).
+		Limit(1).
+		Order("id DESC").
+		Select()
+
+	if err == pg.ErrNoRows {
+		return 0, fmt.Errorf("no rows in block table: %t", err)
+	}
+
+	if err != nil {
+		return 0, fmt.Errorf("unexpected database error: %t", err)
+	}
+
+	return tx.ID, nil
 }

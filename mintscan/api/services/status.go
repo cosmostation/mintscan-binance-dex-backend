@@ -1,7 +1,7 @@
 package services
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/client"
@@ -17,12 +17,12 @@ func GetStatus(client client.Client, db *db.Database, w http.ResponseWriter, r *
 
 	block, err := client.Block(status.SyncInfo.LatestBlockHeight)
 	if err != nil {
-		return fmt.Errorf("failed to query block using rpc client: %t", err)
+		log.Printf("failed to query block using rpc client: %t\n", err)
 	}
 
 	prevBlock, err := client.Block(status.SyncInfo.LatestBlockHeight - 1)
 	if err != nil {
-		return fmt.Errorf("failed to query block using rpc client: %t", err)
+		log.Printf("failed to query previous block using rpc client: %t\n", err)
 	}
 
 	blockTime := block.Block.Time.UTC().

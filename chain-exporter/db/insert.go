@@ -6,10 +6,11 @@ import (
 )
 
 // InsertExportedData inserts exported block, transaction data
+// RunInTransaction runs a function in a transaction.
+// if function returns an error transaction is rollbacked, otherwise transaction is committed.
 func (db *Database) InsertExportedData(block []*schema.Block, txs []*schema.Transaction,
 	vals []*schema.Validator, precommits []*schema.PreCommit) error {
-	// RunInTransaction runs a function in a transaction.
-	// if function returns an error transaction is rollbacked, otherwise transaction is committed.
+
 	err := db.RunInTransaction(func(tx *pg.Tx) error {
 		if len(block) > 0 {
 			err := tx.Insert(&block)

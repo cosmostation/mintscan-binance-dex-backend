@@ -62,7 +62,7 @@ func ErrorCodeToErrorMsg(code ErrorCode) ErrorMsg {
 	}
 }
 
-// ErrorCodeToErrorMsgs returns error message from error code
+// ErrorCodeToErrorMsgs returns error message concatenating with custom message from error code
 func ErrorCodeToErrorMsgs(code ErrorCode, msg string) ErrorMsg {
 	switch code {
 	case RequiredParam:
