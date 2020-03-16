@@ -23,18 +23,31 @@ type Client struct {
 	acceleratedNode string
 	apiClient       *resty.Client
 	cdc             *amino.Codec
+	explorerClient  *resty.Client
 	rpcClient       rpc.Client
 }
 
 // NewClient returns Client
-func NewClient(rpcNode, acceleratedNode, apiServerEndpoint string, networkType cmtypes.ChainNetwork) Client {
-	rpcClient := rpc.NewRPCClient(rpcNode, networkType)
+func NewClient(rpcNode, acceleratedNode, apiServerEndpoint string, explorerServerEndpoint string,
+	networkType cmtypes.ChainNetwork) Client {
 
 	restyClient := resty.New().
 		SetHostURL(apiServerEndpoint).
 		SetTimeout(time.Duration(5 * time.Second))
 
-	return Client{acceleratedNode, restyClient, codec.Codec, rpcClient}
+	explorerClient := resty.New().
+		SetHostURL(explorerServerEndpoint).
+		SetTimeout(time.Duration(5 * time.Second))
+
+	rpcClient := rpc.NewRPCClient(rpcNode, networkType)
+
+	return Client{
+		acceleratedNode,
+		restyClient,
+		codec.Codec,
+		explorerClient,
+		rpcClient,
+	}
 }
 
 // Block queries for a block by height. An error is returned if the query fails.
@@ -78,7 +91,7 @@ func (c Client) ValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
 }
 
 // Validators returns validators detail information in Tendemrint validators in active chain
-// An error is returns if the query fails.
+// An error returns if the query fails.
 func (c Client) Validators() ([]*types.Validator, error) {
 	resp, err := c.apiClient.R().Get("/stake/validators")
 	if err != nil {
@@ -109,4 +122,21 @@ func (c Client) Tokens(limit int, offset int) ([]*types.Token, error) {
 	}
 
 	return tokens, nil
+}
+
+// AssetInfoList returns asset info list in active chain
+// An error returns if the query fails.
+func (c Client) AssetInfoList(page int, rows int) (types.AssetInfo, error) {
+	resp, err := c.explorerClient.R().Get("/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
+	if err != nil {
+		return types.AssetInfo{}, err
+	}
+
+	var assets types.AssetInfo
+	err = json.Unmarshal(resp.Body(), &assets)
+	if err != nil {
+		return types.AssetInfo{}, err
+	}
+
+	return assets, nil
 }

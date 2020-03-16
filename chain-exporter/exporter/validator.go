@@ -39,7 +39,7 @@ func (ex *Exporter) getValidators(vals []*types.Validator) ([]*schema.Validator,
 		}
 
 		if err != nil {
-			return nil, fmt.Errorf("unexpected error when checking validator existence: %t", err)
+			return nil, fmt.Errorf("unexpected error when checking validator existence: %s", err)
 		}
 	}
 

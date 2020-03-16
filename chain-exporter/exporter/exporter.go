@@ -26,7 +26,13 @@ type Exporter struct {
 func NewExporter() Exporter {
 	cfg := config.ParseConfig()
 
-	client := client.NewClient(cfg.Node.RPCNode, cfg.Node.AcceleratedNode, cfg.Node.APIServerEndpoint, cfg.Node.NetworkType)
+	client := client.NewClient(
+		cfg.Node.RPCNode,
+		cfg.Node.AcceleratedNode,
+		cfg.Node.APIServerEndpoint,
+		cfg.Node.ExplorerServerEndpoint,
+		cfg.Node.NetworkType,
+	)
 
 	db := db.Connect(cfg.DB)
 
@@ -98,42 +104,42 @@ func (ex *Exporter) sync() error {
 func (ex *Exporter) process(height int64) error {
 	block, err := ex.client.Block(height)
 	if err != nil {
-		return fmt.Errorf("failed to query block using rpc client: %t", err)
+		return fmt.Errorf("failed to query block using rpc client: %s", err)
 	}
 
 	valSet, err := ex.client.ValidatorSet(block.Block.LastCommit.Height())
 	if err != nil {
-		return fmt.Errorf("failed to query validators using rpc client: %t", err)
+		return fmt.Errorf("failed to query validators using rpc client: %s", err)
 	}
 
 	vals, err := ex.client.Validators()
 	if err != nil {
-		return fmt.Errorf("failed to query validators using rpc client: %t", err)
+		return fmt.Errorf("failed to query validators using rpc client: %s", err)
 	}
 
 	resultBlock, err := ex.getBlock(block) // TODO: Reward Fees Calculation
 	if err != nil {
-		return fmt.Errorf("failed to get block: %t", err)
+		return fmt.Errorf("failed to get block: %s", err)
 	}
 
 	resultTxs, err := ex.getTxs(block)
 	if err != nil {
-		return fmt.Errorf("failed to get transactions: %t", err)
+		return fmt.Errorf("failed to get transactions: %s", err)
 	}
 
 	resultValidators, err := ex.getValidators(vals)
 	if err != nil {
-		return fmt.Errorf("failed to get validators: %t", err)
+		return fmt.Errorf("failed to get validators: %s", err)
 	}
 
 	resultPreCommits, err := ex.getPreCommits(block.Block.LastCommit, valSet)
 	if err != nil {
-		return fmt.Errorf("failed to get precommits: %t", err)
+		return fmt.Errorf("failed to get precommits: %s", err)
 	}
 
 	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators, resultPreCommits)
 	if err != nil {
-		return fmt.Errorf("failed to insert exporterd data: %t", err)
+		return fmt.Errorf("failed to insert exporterd data: %s", err)
 	}
 
 	return nil
