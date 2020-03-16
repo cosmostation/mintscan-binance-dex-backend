@@ -121,14 +121,15 @@ func (c Client) Validators() ([]*models.Validator, error) {
 
 // CoinMarketData fetches current market data from CoinGecko API
 func (c Client) CoinMarketData(id string) (models.CoinGeckoMarket, error) {
-	queryStr := id + "?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false"
-	resp, err := c.coinGeckoClient.R().Get("/coins/" + queryStr)
+	queryStr := "/coins/" + id + "?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false"
+
+	resp, err := c.coinGeckoClient.R().Get(queryStr)
 	if err != nil {
 		return models.CoinGeckoMarket{}, err
 	}
 
 	if resp.IsError() {
-		return models.CoinGeckoMarket{}, fmt.Errorf("CoinMarketData: %t", err)
+		return models.CoinGeckoMarket{}, fmt.Errorf("failed to respond: %s", err)
 	}
 
 	var data models.CoinGeckoMarket
@@ -142,14 +143,15 @@ func (c Client) CoinMarketData(id string) (models.CoinGeckoMarket, error) {
 
 // CoinMarketChartData fetches current market chart data from CoinGecko API
 func (c Client) CoinMarketChartData(id string, from string, to string) (models.CoinGeckoMarketChart, error) {
-	queryStr := id + "/market_chart/range?id=" + id + "&vs_currency=usd&from=" + from + "&to=" + to
-	resp, err := c.coinGeckoClient.R().Get("/coins/" + queryStr)
+	queryStr := "/coins/" + id + "/market_chart/range?id=" + id + "&vs_currency=usd&from=" + from + "&to=" + to
+
+	resp, err := c.coinGeckoClient.R().Get(queryStr)
 	if err != nil {
 		return models.CoinGeckoMarketChart{}, err
 	}
 
 	if resp.IsError() {
-		return models.CoinGeckoMarketChart{}, fmt.Errorf("CoinMarketChartData: %t", err)
+		return models.CoinGeckoMarketChart{}, fmt.Errorf("failed to respond: %s", err)
 	}
 
 	var data models.CoinGeckoMarketChart

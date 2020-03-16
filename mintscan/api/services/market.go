@@ -61,9 +61,9 @@ func GetCoinMarketChartData(client client.Client, db *db.Database, w http.Respon
 	to := time.Now().UTC()
 	from := to.AddDate(0, 0, -1)
 
-	marketChartData, err := client.CoinMarketChartData(id, fmt.Sprintf("%d", to.Unix()), fmt.Sprintf("%d", from.Unix()))
+	marketChartData, err := client.CoinMarketChartData(id, fmt.Sprintf("%d", from.Unix()), fmt.Sprintf("%d", to.Unix()))
 	if err != nil {
-		log.Printf("failed to fetch coin market chart data: %t\n", err)
+		log.Printf("failed to fetch coin market chart data: %s\n", err)
 	}
 
 	utils.Respond(w, marketChartData)
