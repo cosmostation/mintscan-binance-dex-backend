@@ -1,9 +1,8 @@
 package cron
 
 import (
+	"fmt"
 	"log"
-	"os"
-	"os/signal"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
 
@@ -12,8 +11,7 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/client"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/config"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/db"
-
-	"github.com/robfig/cron"
+	// "github.com/robfig/cron"
 )
 
 // Cron wraps the required params to export blockchain
@@ -51,7 +49,9 @@ func NewCron() Cron {
 // Start starts to create cron jobs, which will fetch asset information list and
 // store the data in database every hour and every day
 func (c *Cron) Start() error {
-	cron := cron.New()
+	// cron := cron.New()
+
+	fmt.Println("CronJob Started")
 
 	assetInfoList1H, err := c.getAssetInfoList1H()
 	if err != nil {
@@ -63,28 +63,31 @@ func (c *Cron) Start() error {
 		log.Printf("failed to get asset into list 24H: %s", err)
 	}
 
-	// Every hour
-	cron.AddFunc("0 0 * * * *", func() {
-		c.db.SaveAssetInfoList1H(assetInfoList1H)
-		log.Println("successfully saved asset information list 1H")
-	})
+	fmt.Println("assetInfoList1H: ", assetInfoList1H)
+	fmt.Println("assetInfoList24H: ", assetInfoList24H)
 
-	// Every 24 hours at 1:00 AM UTC timezone
-	cron.AddFunc("0 0 1 * * *", func() {
-		c.db.SaveAssetInfoList24H(assetInfoList24H)
-		log.Println("successfully saved asset information list 24H")
-	})
+	// // Every hour
+	// cron.AddFunc("0 0 * * * *", func() {
+	// 	c.db.SaveAssetInfoList1H(assetInfoList1H)
+	// 	log.Println("successfully saved asset information list 1H")
+	// })
 
-	go c.Start()
+	// // Every 24 hours at 1:00 AM UTC timezone
+	// cron.AddFunc("0 0 1 * * *", func() {
+	// 	c.db.SaveAssetInfoList24H(assetInfoList24H)
+	// 	log.Println("successfully saved asset information list 24H")
+	// })
 
-	// Allow graceful closing of the governance loop
-	signalCh := make(chan os.Signal, 1)
-	signal.Notify(signalCh, os.Interrupt)
-	<-signalCh
+	// go c.Start()
+
+	// // Allow graceful closing of the governance loop
+	// signalCh := make(chan os.Signal, 1)
+	// signal.Notify(signalCh, os.Interrupt)
+	// <-signalCh
 
 	// Test
-	// c.db.SaveAssetInfoList1H(assetInfoList1H)
-	// c.db.SaveAssetInfoList24H(assetInfoList24H)
+	c.db.SaveAssetInfoList1H(assetInfoList1H)
+	c.db.SaveAssetInfoList24H(assetInfoList24H)
 
 	return nil
 }

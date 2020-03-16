@@ -109,7 +109,7 @@ func (ex *Exporter) process(height int64) error {
 
 	valSet, err := ex.client.ValidatorSet(block.Block.LastCommit.Height())
 	if err != nil {
-		return fmt.Errorf("failed to query validators using rpc client: %s", err)
+		return fmt.Errorf("failed to query validator set using rpc client: %s", err)
 	}
 
 	vals, err := ex.client.Validators()

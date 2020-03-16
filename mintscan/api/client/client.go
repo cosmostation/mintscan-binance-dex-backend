@@ -178,17 +178,17 @@ func (c Client) Asset(assetName string) (models.Asset, error) {
 }
 
 // Assets fetches official explorer assets API and return result
-func (c Client) Assets(page int, rows int) (models.Assets, error) {
+func (c Client) Assets(page int, rows int) (models.AssetInfo, error) {
 	queryStr := "/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)
 	if err != nil {
-		return models.Assets{}, err
+		return models.AssetInfo{}, err
 	}
 
-	var assets models.Assets
+	var assets models.AssetInfo
 	err = json.Unmarshal(resp.Body(), &assets)
 	if err != nil {
-		return models.Assets{}, err
+		return models.AssetInfo{}, err
 	}
 
 	return assets, nil
@@ -209,4 +209,21 @@ func (c Client) AssetHolders(asset string, page int, rows int) (models.AssetHold
 	}
 
 	return assetHolders, nil
+}
+
+// AssetTxs fetches official explorer asset txs API and return result
+func (c Client) AssetTxs(txAsset string, page int, rows int) (models.AssetTxs, error) {
+	queryStr := "/txs?txAsset=" + txAsset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
+	resp, err := c.explorerClient.R().Get(queryStr)
+	if err != nil {
+		return models.AssetTxs{}, err
+	}
+
+	var assetTxs models.AssetTxs
+	err = json.Unmarshal(resp.Body(), &assetTxs)
+	if err != nil {
+		return models.AssetTxs{}, err
+	}
+
+	return assetTxs, nil
 }
