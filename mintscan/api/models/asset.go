@@ -105,30 +105,30 @@ type AssetTxs struct {
 
 // ResultAssetTxs represents response data for AssetTxs
 type ResultAssetTxs struct {
-	TxNums  int       `json:"tx_nums"`
-	TxArray []TxArray `json:"tx_array"`
+	TxNums  int       `json:"txNums"`
+	TxArray []TxArray `json:"txArray"`
 }
 
 // TxArray wraps ResultAssetTxs TxArray
 type TxArray struct {
-	TxHash        string      `json:"tx_hash"`
+	BlockHeight   int64       `json:"blockHeight"`
 	Code          int64       `json:"code"`
-	BlockHeight   int64       `json:"block_height"`
-	Timestamp     int64       `json:"timestamp"`
-	TxType        string      `json:"tx_type"`
-	TxFee         float64     `json:"tx_fee"`
-	FromAddr      string      `json:"from_addr"`
-	TxAsset       string      `json:"tx_asset"`
-	TxQuoteAsset  string      `json:"tx_quote_asset"`
+	TxHash        string      `json:"txHash"`
+	TxType        string      `json:"txType"`
+	TxAsset       string      `json:"txAsset"`
+	TxQuoteAsset  string      `json:"txQuoteAsset"`
 	Value         float64     `json:"value"`
-	TxAge         int64       `json:"tx_age"`
-	OrderID       string      `json:"order_id"`
+	TxFee         float64     `json:"txFee"`
+	FromAddr      string      `json:"fromAddr"`
+	TxAge         int64       `json:"txAge,omitempty"`
+	OrderID       string      `json:"orderId,omitempty"`
 	Message       AssetTxData `json:"message"`
 	Log           string      `json:"log"`
-	ConfirmBlocks int64       `json:"confirm_blocks"`
+	ConfirmBlocks int64       `json:"confirmBlocks"`
 	Memo          string      `json:"memo"`
 	Source        int64       `json:"source"`
-	HasChildren   int64       `json:"has_children"`
+	HasChildren   int64       `json:"hasChildren,omitempty"`
+	Timestamp     int64       `json:"timeStamp"`
 }
 
 // AssetTxData wraps ResultAssetTxs Data

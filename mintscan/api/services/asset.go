@@ -183,24 +183,21 @@ func GetAssetTxs(client client.Client, db *db.Database, w http.ResponseWriter, r
 		}
 
 		tempTxArray := &models.TxArray{
-			TxHash:        tx.TxHash,
 			BlockHeight:   tx.BlockHeight,
 			Code:          tx.Code,
+			TxHash:        tx.TxHash,
 			TxType:        tx.TxType,
-			TxFee:         tx.TxFee,
-			Timestamp:     tx.TimeStamp,
-			FromAddr:      tx.FromAddr,
-			Value:         tx.Value,
 			TxAsset:       tx.TxAsset,
 			TxQuoteAsset:  tx.TxQuoteAsset,
-			TxAge:         tx.TxAge,
-			OrderID:       tx.OrderID,
+			Value:         tx.Value,
+			TxFee:         tx.TxFee,
+			FromAddr:      tx.FromAddr,
 			Message:       data,
 			Log:           tx.Log,
 			ConfirmBlocks: tx.ConfirmBlocks,
 			Memo:          tx.Memo,
 			Source:        tx.Source,
-			HasChildren:   tx.HasChildren,
+			Timestamp:     tx.TimeStamp,
 		}
 
 		txArray = append(txArray, *tempTxArray)
