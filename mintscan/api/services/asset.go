@@ -25,7 +25,7 @@ func GetAsset(client client.Client, db *db.Database, w http.ResponseWriter, r *h
 
 	result, err := client.Asset(asset)
 	if err != nil {
-		log.Printf("failed to get asset detail information: %t\n", err)
+		log.Printf("failed to get asset detail information: %s\n", err)
 	}
 
 	utils.Respond(w, result)
@@ -54,7 +54,7 @@ func GetAssets(client client.Client, db *db.Database, w http.ResponseWriter, r *
 
 	result, err := client.Assets(page, rows)
 	if err != nil {
-		log.Printf("failed to get asset list: %t\n", err)
+		log.Printf("failed to get asset list: %s\n", err)
 	}
 
 	utils.Respond(w, result)
@@ -89,7 +89,7 @@ func GetAssetHolders(client client.Client, db *db.Database, w http.ResponseWrite
 
 	result, err := client.AssetHolders(asset, page, rows)
 	if err != nil {
-		log.Printf("failed to get asset holders list: %t\n", err)
+		log.Printf("failed to get asset holders list: %s\n", err)
 	}
 
 	utils.Respond(w, result)
@@ -118,7 +118,7 @@ func GetAssetsImages(client client.Client, db *db.Database, w http.ResponseWrite
 
 	assets, err := client.Assets(page, rows)
 	if err != nil {
-		log.Printf("failed to get asset list: %t\n", err)
+		log.Printf("failed to get asset list: %s\n", err)
 	}
 
 	imageList := make([]models.ImageList, 0)
@@ -170,7 +170,7 @@ func GetAssetTxs(client client.Client, db *db.Database, w http.ResponseWriter, r
 
 	assetTxs, err := client.AssetTxs(txAsset, page, rows)
 	if err != nil {
-		log.Printf("failed to get asset list: %t\n", err)
+		log.Printf("failed to get asset list: %s\n", err)
 	}
 
 	txArray := make([]models.TxArray, 0)

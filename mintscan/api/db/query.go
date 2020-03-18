@@ -36,11 +36,11 @@ func (db *Database) QueryBlocks(before int, after int, limit int) ([]schema.Bloc
 	}
 
 	if err == pg.ErrNoRows {
-		return blocks, fmt.Errorf("no rows in block table: %t", err)
+		return blocks, fmt.Errorf("no rows in block table: %s", err)
 	}
 
 	if err != nil {
-		return blocks, fmt.Errorf("unexpected database error: %t", err)
+		return blocks, fmt.Errorf("unexpected database error: %s", err)
 	}
 
 	return blocks, nil
@@ -56,11 +56,11 @@ func (db *Database) QueryLatestBlock() (schema.Block, error) {
 		Select()
 
 	if err == pg.ErrNoRows {
-		return schema.Block{}, fmt.Errorf("no rows in block table: %t", err)
+		return schema.Block{}, fmt.Errorf("no rows in block table: %s", err)
 	}
 
 	if err != nil {
-		return schema.Block{}, fmt.Errorf("unexpected database error: %t", err)
+		return schema.Block{}, fmt.Errorf("unexpected database error: %s", err)
 	}
 
 	return block, nil
@@ -77,11 +77,11 @@ func (db *Database) QueryLatestBlockHeight() (int64, error) {
 		Select()
 
 	if err == pg.ErrNoRows {
-		return 0, fmt.Errorf("no rows in block table: %t", err)
+		return 0, fmt.Errorf("no rows in block table: %s", err)
 	}
 
 	if err != nil {
-		return 0, fmt.Errorf("unexpected database error: %t", err)
+		return 0, fmt.Errorf("unexpected database error: %s", err)
 	}
 
 	return block.Height, nil
@@ -98,11 +98,11 @@ func (db *Database) QueryTotalTxsNum(height int64) (int64, error) {
 		Select()
 
 	if err == pg.ErrNoRows {
-		return 0, fmt.Errorf("no rows in block table: %t", err)
+		return 0, fmt.Errorf("no rows in block table: %s", err)
 	}
 
 	if err != nil {
-		return 0, fmt.Errorf("unexpected database error: %t", err)
+		return 0, fmt.Errorf("unexpected database error: %s", err)
 	}
 
 	return block.TotalTxs, nil
@@ -117,11 +117,11 @@ func (db *Database) QueryTx(height int64) ([]schema.Transaction, error) {
 		Select()
 
 	if err == pg.ErrNoRows {
-		return txs, fmt.Errorf("no rows in block table: %t", err)
+		return txs, fmt.Errorf("no rows in block table: %s", err)
 	}
 
 	if err != nil {
-		return txs, fmt.Errorf("unexpected database error: %t", err)
+		return txs, fmt.Errorf("unexpected database error: %s", err)
 	}
 
 	return txs, nil
@@ -154,11 +154,11 @@ func (db *Database) QueryTxs(before int, after int, limit int) ([]schema.Transac
 	}
 
 	if err == pg.ErrNoRows {
-		return txs, fmt.Errorf("no rows in block table: %t", err)
+		return txs, fmt.Errorf("no rows in block table: %s", err)
 	}
 
 	if err != nil {
-		return txs, fmt.Errorf("unexpected database error: %t", err)
+		return txs, fmt.Errorf("unexpected database error: %s", err)
 	}
 
 	return txs, nil
@@ -172,11 +172,11 @@ func (db *Database) QueryTxByHash(hash string) (schema.Transaction, error) {
 		Select()
 
 	if err == pg.ErrNoRows {
-		return tx, fmt.Errorf("no rows in block table: %t", err)
+		return tx, fmt.Errorf("no rows in block table: %s", err)
 	}
 
 	if err != nil {
-		return tx, fmt.Errorf("unexpected database error: %t", err)
+		return tx, fmt.Errorf("unexpected database error: %s", err)
 	}
 
 	return tx, nil
@@ -210,11 +210,11 @@ func (db *Database) QueryTxsByType(txType string, startTime int64, endTime int64
 	}
 
 	if err == pg.ErrNoRows {
-		return txs, fmt.Errorf("no rows in block table: %t", err)
+		return txs, fmt.Errorf("no rows in block table: %s", err)
 	}
 
 	if err != nil {
-		return txs, fmt.Errorf("unexpected database error: %t", err)
+		return txs, fmt.Errorf("unexpected database error: %s", err)
 	}
 
 	return txs, nil
@@ -244,11 +244,11 @@ func (db *Database) CountTotalTxsNum() (int32, error) {
 		Select()
 
 	if err == pg.ErrNoRows {
-		return 0, fmt.Errorf("no rows in block table: %t", err)
+		return 0, fmt.Errorf("no rows in block table: %s", err)
 	}
 
 	if err != nil {
-		return 0, fmt.Errorf("unexpected database error: %t", err)
+		return 0, fmt.Errorf("unexpected database error: %s", err)
 	}
 
 	return tx.ID, nil

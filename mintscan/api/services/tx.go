@@ -43,7 +43,7 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 
 	txs, err := db.QueryTxs(before, after, limit)
 	if err != nil {
-		log.Printf("failed to query txs due to: %t\n", err)
+		log.Printf("failed to query txs: %s\n", err)
 	}
 
 	if len(txs) <= 0 {
@@ -53,12 +53,12 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 
 	result, err := setTxs(txs)
 	if err != nil {
-		log.Printf("failed to set txs: %t\n", err)
+		log.Printf("failed to set txs: %s\n", err)
 	}
 
 	totalTxsNum, err := db.CountTotalTxsNum()
 	if err != nil {
-		log.Printf("failed to query total number of txs: %t\n", err)
+		log.Printf("failed to query total number of txs: %s\n", err)
 	}
 
 	// Handling before and after since their ordering data is different
@@ -83,14 +83,14 @@ func GetTxByHash(db *db.Database, w http.ResponseWriter, r *http.Request) error 
 
 	tx, err := db.QueryTxByHash(hash)
 	if err != nil {
-		log.Printf("failed to query tx due to: %t\n", err)
+		log.Printf("failed to query tx: %s\n", err)
 		utils.Respond(w, models.TxData{})
 		return nil
 	}
 
 	result, err := setTx(tx)
 	if err != nil {
-		log.Printf("failed to set tx: %t\n", err)
+		log.Printf("failed to set tx: %s\n", err)
 	}
 
 	utils.Respond(w, result)
@@ -123,7 +123,7 @@ func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, 
 	var txrp models.TxRequestPayload
 	err := json.NewDecoder(r.Body).Decode(&txrp)
 	if err != nil {
-		log.Printf("failed to decode txrp: %t\n", err)
+		log.Printf("failed to decode txrp: %s\n", err)
 	}
 
 	// Set the first block time if StartTime is not parsed
@@ -146,7 +146,7 @@ func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, 
 
 	txs, err := db.QueryTxsByType(txrp.TxType, txrp.StartTime, txrp.EndTime, before, after, limit)
 	if err != nil {
-		log.Printf("failed to query txs due to: %t\n", err)
+		log.Printf("failed to query txs: %s\n", err)
 	}
 
 	if len(txs) <= 0 {
@@ -155,12 +155,12 @@ func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, 
 
 	result, err := setTxs(txs)
 	if err != nil {
-		log.Printf("failed to set txs: %t\n", err)
+		log.Printf("failed to set txs: %s\n", err)
 	}
 
 	totalTxsNum, err := db.CountTotalTxsNum()
 	if err != nil {
-		log.Printf("failed to query total number of txs: %t\n", err)
+		log.Printf("failed to query total number of txs: %s\n", err)
 	}
 
 	// Handling before and after since their ordering data is different
@@ -183,13 +183,13 @@ func setTx(tx schema.Transaction) (*models.TxData, error) {
 	msgs := make([]models.Message, 0)
 	err := json.Unmarshal([]byte(tx.Messages), &msgs)
 	if err != nil {
-		return &models.TxData{}, fmt.Errorf("failed to unmarshal msgs: %t", err)
+		return &models.TxData{}, fmt.Errorf("failed to unmarshal msgs: %s", err)
 	}
 
 	sigs := make([]models.Signature, 0)
 	err = json.Unmarshal([]byte(tx.Signatures), &sigs)
 	if err != nil {
-		return &models.TxData{}, fmt.Errorf("failed to unmarshal sigs: %t", err)
+		return &models.TxData{}, fmt.Errorf("failed to unmarshal sigs: %s", err)
 	}
 
 	txResult := true
@@ -219,13 +219,13 @@ func setTxs(txs []schema.Transaction) (*models.ResultTxs, error) {
 		msgs := make([]models.Message, 0)
 		err := json.Unmarshal([]byte(tx.Messages), &msgs)
 		if err != nil {
-			return &models.ResultTxs{}, fmt.Errorf("failed to unmarshal msgs: %t", err)
+			return &models.ResultTxs{}, fmt.Errorf("failed to unmarshal msgs: %s", err)
 		}
 
 		sigs := make([]models.Signature, 0)
 		err = json.Unmarshal([]byte(tx.Signatures), &sigs)
 		if err != nil {
-			return &models.ResultTxs{}, fmt.Errorf("failed to unmarshal sigs: %t", err)
+			return &models.ResultTxs{}, fmt.Errorf("failed to unmarshal sigs: %s", err)
 		}
 
 		txResult := true

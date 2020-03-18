@@ -25,7 +25,7 @@ func GetCoinMarketData(client client.Client, db *db.Database, w http.ResponseWri
 
 	data, err := client.CoinMarketData(id)
 	if err != nil {
-		log.Printf("failed to fetch coin market data: %t\n", err)
+		log.Printf("failed to fetch coin market data: %s\n", err)
 	}
 
 	marketData := &models.Market{
