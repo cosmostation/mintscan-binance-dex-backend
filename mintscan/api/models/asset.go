@@ -87,13 +87,14 @@ type AssetTxs struct {
 		TxType        string  `json:"txType"`
 		TimeStamp     int64   `json:"timeStamp"`
 		FromAddr      string  `json:"fromAddr"`
+		ToAddr        string  `json:"toAddr"`
 		Value         float64 `json:"value"`
 		TxAsset       string  `json:"txAsset"`
 		TxQuoteAsset  string  `json:"txQuoteAsset"`
 		TxFee         float64 `json:"txFee"`
 		TxAge         int64   `json:"txAge"`
 		OrderID       string  `json:"orderId"`
-		Data          string  `json:"data"`
+		Data          string  `json:"data,omitempty"`
 		Code          int64   `json:"code"`
 		Log           string  `json:"log"`
 		ConfirmBlocks int64   `json:"confirmBlocks"`
@@ -111,24 +112,25 @@ type ResultAssetTxs struct {
 
 // TxArray wraps ResultAssetTxs TxArray
 type TxArray struct {
-	BlockHeight   int64       `json:"blockHeight"`
-	Code          int64       `json:"code"`
-	TxHash        string      `json:"txHash"`
-	TxType        string      `json:"txType"`
-	TxAsset       string      `json:"txAsset"`
-	TxQuoteAsset  string      `json:"txQuoteAsset"`
-	Value         float64     `json:"value"`
-	TxFee         float64     `json:"txFee"`
-	FromAddr      string      `json:"fromAddr"`
-	TxAge         int64       `json:"txAge,omitempty"`
-	OrderID       string      `json:"orderId,omitempty"`
-	Message       AssetTxData `json:"message"`
-	Log           string      `json:"log"`
-	ConfirmBlocks int64       `json:"confirmBlocks"`
-	Memo          string      `json:"memo"`
-	Source        int64       `json:"source"`
-	HasChildren   int64       `json:"hasChildren,omitempty"`
-	Timestamp     int64       `json:"timeStamp"`
+	BlockHeight   int64        `json:"blockHeight"`
+	Code          int64        `json:"code"`
+	TxHash        string       `json:"txHash"`
+	TxType        string       `json:"txType"`
+	TxAsset       string       `json:"txAsset"`
+	TxQuoteAsset  string       `json:"txQuoteAsset,omitempty"`
+	Value         float64      `json:"value"`
+	TxFee         float64      `json:"txFee"`
+	FromAddr      string       `json:"fromAddr"`
+	ToAddr        string       `json:"toAddr,omitempty"`
+	TxAge         int64        `json:"txAge"`
+	OrderID       string       `json:"orderId,omitempty"`
+	Message       *AssetTxData `json:"message,omitempty"`
+	Log           string       `json:"log"`
+	ConfirmBlocks int64        `json:"confirmBlocks"`
+	Memo          string       `json:"memo"`
+	Source        int64        `json:"source"`
+	HasChildren   int64        `json:"hasChildren,omitempty"`
+	Timestamp     int64        `json:"timeStamp"`
 }
 
 // AssetTxData wraps ResultAssetTxs Data

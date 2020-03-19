@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -176,28 +175,39 @@ func GetAssetTxs(client client.Client, db *db.Database, w http.ResponseWriter, r
 	txArray := make([]models.TxArray, 0)
 
 	for _, tx := range assetTxs.TxArray {
-		var data models.AssetTxData
-		err = json.Unmarshal([]byte(tx.Data), &data)
-		if err != nil {
-			fmt.Printf("failed to unmarshal AssetTxData: %s", err)
+		var toAddr string
+		if tx.ToAddr != "" {
+			toAddr = tx.ToAddr
 		}
 
 		tempTxArray := &models.TxArray{
 			BlockHeight:   tx.BlockHeight,
-			Code:          tx.Code,
 			TxHash:        tx.TxHash,
+			Code:          tx.Code,
 			TxType:        tx.TxType,
 			TxAsset:       tx.TxAsset,
 			TxQuoteAsset:  tx.TxQuoteAsset,
 			Value:         tx.Value,
 			TxFee:         tx.TxFee,
+			TxAge:         tx.TxAge,
 			FromAddr:      tx.FromAddr,
-			Message:       data,
+			ToAddr:        toAddr,
 			Log:           tx.Log,
 			ConfirmBlocks: tx.ConfirmBlocks,
 			Memo:          tx.Memo,
 			Source:        tx.Source,
 			Timestamp:     tx.TimeStamp,
+		}
+
+		// txType TRANSFER shouldn't throw message data
+		var data models.AssetTxData
+		if tx.Data != "" {
+			err = json.Unmarshal([]byte(tx.Data), &data)
+			if err != nil {
+				log.Printf("failed to unmarshal AssetTxData: %s", err)
+			}
+
+			tempTxArray.Message = &data
 		}
 
 		txArray = append(txArray, *tempTxArray)
