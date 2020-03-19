@@ -20,4 +20,7 @@ func MarketController(cdc *amino.Codec, client client.Client, db *db.Database, r
 	r.HandleFunc("/market/chart", func(w http.ResponseWriter, r *http.Request) {
 		services.GetCoinMarketChartData(client, db, w, r)
 	}).Methods("GET")
+	r.HandleFunc("/market/coin/list", func(w http.ResponseWriter, r *http.Request) {
+		services.GetCoinList(client, db, w, r)
+	}).Methods("GET")
 }

@@ -5,7 +5,18 @@ import (
 	"time"
 )
 
-// CoinGeckoMarket is a struct for CoinGecko API
+// CoinList has id, symbol, and name for the top 4 highest marketcap value in active Binance Chain.
+// This list is defined here to use CoinGecko Market Chart API since it requires id for the BEP2 token.
+var CoinList = []struct {
+	ID, Symbol, Name string
+}{
+	{"true-usd", "tusd", "TrueUSD"},
+	{"stableusd", "USDS", "Stably Dollar"},
+	{"trueaud", "taud", "TrueAUD"},
+	{"truehkd", "thkd", "TrueHKD"},
+}
+
+// CoinGeckoMarket represents data for CoinGecko Market API
 type CoinGeckoMarket struct {
 	ID                  string          `json:"id"`
 	Symbol              string          `json:"symbol"`
@@ -128,9 +139,16 @@ type CoinMarketCurrencies struct {
 	Zar float64 `json:"zar"`
 }
 
-// CoinGeckoMarketChart is a struct for CoinGecko API
+// CoinGeckoMarketChar represents CoinGecko Market Chart API
 type CoinGeckoMarketChart struct {
 	Prices       [][]float64 `json:"prices"`
 	MarketCaps   [][]float64 `json:"market_caps"`
 	TotalVolumes [][]float64 `json:"total_volumes"`
+}
+
+// CoinGeckoCoinList represents CoinGecko Coin List
+type CoinGeckoCoinList struct {
+	ID     string `json:"id"`
+	Symbol string `json:"symbol"`
+	Name   string `json:"name"`
 }

@@ -69,3 +69,21 @@ func GetCoinMarketChartData(client client.Client, db *db.Database, w http.Respon
 	utils.Respond(w, marketChartData)
 	return nil
 }
+
+// GetCoinList returns market chart data from CoinGecko API
+func GetCoinList(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+	coinList := make([]models.CoinGeckoCoinList, 0)
+
+	for _, coin := range models.CoinList {
+		tempCoinList := &models.CoinGeckoCoinList{
+			ID:     coin.ID,
+			Symbol: coin.Symbol,
+			Name:   coin.Name,
+		}
+
+		coinList = append(coinList, *tempCoinList)
+	}
+
+	utils.Respond(w, coinList)
+	return nil
+}
