@@ -12,17 +12,18 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/client"
 	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/config"
 	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/db"
+	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/models"
 
 	"github.com/robfig/cron"
 )
 
-// Cron wraps the required params to export blockchain
+// Cron wraps all required parameters to create cron jobs
 type Cron struct {
 	client client.Client
 	db     *db.Database
 }
 
-// NewCron returns Cron
+// NewCron sets necessary config and clients to begin jobs
 func NewCron() Cron {
 	cfg := config.ParseConfig()
 
@@ -36,20 +37,18 @@ func NewCron() Cron {
 
 	db := db.Connect(cfg.DB)
 
-	// Ping database to verify connection is succeeded
 	err := db.Ping()
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "failed to ping database."))
 	}
 
-	// Create database tables
 	db.CreateTables()
 
 	return Cron{client, db}
 }
 
-// Start starts to create cron jobs, which will fetch asset information list and
-// store the data in database every hour and every day
+// Start starts to create cron jobs which fetches chosen asset list information and
+// store them in database every hour and every 24 hours.
 func (c *Cron) Start() error {
 	log.Println("Starting cron jobs...")
 
@@ -57,23 +56,13 @@ func (c *Cron) Start() error {
 
 	// Every hour
 	cron.AddFunc("0 0 * * * *", func() {
-		assetInfoList1H, err := c.getAssetInfoList1H()
-		if err != nil {
-			log.Printf("failed to get asset into list 1H: %s", err)
-		}
-
-		c.db.SaveAssetInfoList1H(assetInfoList1H)
+		c.AssetInfoList1H()
 		log.Println("successfully saved asset information list 1H")
 	})
 
 	// Every 24 hours at 1:00 AM UTC timezone
 	cron.AddFunc("0 0 1 * * *", func() {
-		assetInfoList24H, err := c.getAssetInfoList24H()
-		if err != nil {
-			log.Printf("failed to get asset into list 24H: %s", err)
-		}
-
-		c.db.SaveAssetInfoList24H(assetInfoList24H)
+		c.AssetInfoList24H()
 		log.Println("successfully saved asset information list 24H")
 	})
 
@@ -87,67 +76,71 @@ func (c *Cron) Start() error {
 	return nil
 }
 
-// getAssetInfoList1H fetches asset information list and return them
-func (c *Cron) getAssetInfoList1H() ([]*schema.StatAssetInfoList1H, error) {
+// AssetInfoList1H fetches asset information list and save them
+func (c *Cron) AssetInfoList1H() ([]*schema.StatAssetInfoList1H, error) {
 	assetInfoList := make([]*schema.StatAssetInfoList1H, 0)
 
-	page := int(1)
-	rows := int(200)
-
-	assets, err := c.client.AssetInfoList(page, rows)
-	if err != nil {
-		return assetInfoList, err
-	}
-
-	for _, asset := range assets.AssetInfoList {
-		tempAssetInfoList := &schema.StatAssetInfoList1H{
-			TotalNum:        assets.TotalNum,
-			Name:            asset.Name,
-			Asset:           asset.Asset,
-			Owner:           asset.Owner,
-			Price:           asset.Price,
-			Currency:        asset.QuoteUnit,
-			ChangeRange:     asset.ChangeRange,
-			Supply:          asset.Supply,
-			Marketcap:       asset.Supply * asset.Price,
-			AssetImg:        asset.AssetImg,
-			AssetCreateTime: asset.AssetCreateTime,
+	for _, assetName := range models.ChosenAssetNames {
+		asset, err := c.client.Asset(assetName)
+		if err != nil {
+			log.Printf("failed to request client Asset: %s", err)
 		}
 
-		assetInfoList = append(assetInfoList, tempAssetInfoList)
+		tempAssetInfo := &schema.StatAssetInfoList1H{
+			Asset:        asset.Asset,
+			MappedAsset:  asset.MappedAsset,
+			Name:         asset.Name,
+			AssetImage:   asset.AssetImg,
+			Price:        asset.Price,
+			QuoteUnit:    asset.QuoteUnit,
+			Supply:       asset.Supply,
+			Marketcap:    asset.Price * asset.Supply,
+			Owner:        asset.Owner,
+			Transactions: asset.Transactions,
+			Holders:      asset.Holders,
+		}
+
+		assetInfoList = append(assetInfoList, tempAssetInfo)
+	}
+
+	err := c.db.SaveAssetInfoList1H(assetInfoList)
+	if err != nil {
+		log.Printf("failed to save AssetInfoList: %s", err)
 	}
 
 	return assetInfoList, nil
 }
 
-// getAssetInfoList24H fetches asset information list and return them
-func (c *Cron) getAssetInfoList24H() ([]*schema.StatAssetInfoList24H, error) {
+// AssetInfoList24H fetches asset information list and save them
+func (c *Cron) AssetInfoList24H() ([]*schema.StatAssetInfoList24H, error) {
 	assetInfoList := make([]*schema.StatAssetInfoList24H, 0)
 
-	page := int(1)
-	rows := int(200)
-
-	assets, err := c.client.AssetInfoList(page, rows)
-	if err != nil {
-		return assetInfoList, err
-	}
-
-	for _, asset := range assets.AssetInfoList {
-		tempAssetInfoList := &schema.StatAssetInfoList24H{
-			TotalNum:        assets.TotalNum,
-			Name:            asset.Name,
-			Asset:           asset.Asset,
-			Owner:           asset.Owner,
-			Price:           asset.Price,
-			Currency:        asset.QuoteUnit,
-			ChangeRange:     asset.ChangeRange,
-			Supply:          asset.Supply,
-			Marketcap:       asset.Supply * asset.Price,
-			AssetImg:        asset.AssetImg,
-			AssetCreateTime: asset.AssetCreateTime,
+	for _, assetName := range models.ChosenAssetNames {
+		asset, err := c.client.Asset(assetName)
+		if err != nil {
+			log.Printf("failed to request client Asset: %s", err)
 		}
 
-		assetInfoList = append(assetInfoList, tempAssetInfoList)
+		tempAssetInfo := &schema.StatAssetInfoList24H{
+			Asset:        asset.Asset,
+			MappedAsset:  asset.MappedAsset,
+			Name:         asset.Name,
+			AssetImage:   asset.AssetImg,
+			Price:        asset.Price,
+			QuoteUnit:    asset.QuoteUnit,
+			Supply:       asset.Supply,
+			Marketcap:    asset.Price * asset.Supply,
+			Owner:        asset.Owner,
+			Transactions: asset.Transactions,
+			Holders:      asset.Holders,
+		}
+
+		assetInfoList = append(assetInfoList, tempAssetInfo)
+	}
+
+	err := c.db.SaveAssetInfoList24H(assetInfoList)
+	if err != nil {
+		log.Printf("failed to save AssetInfoList: %s", err)
 	}
 
 	return assetInfoList, nil

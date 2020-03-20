@@ -6,7 +6,7 @@ import (
 	"github.com/binance-chain/go-sdk/types"
 )
 
-// Codec is amino codec to marshal/unmarshal Binance Chain interfaces and etc.
+// Codec is amino codec to serialize Binance Chain interfaces and data
 var Codec *amino.Codec
 
 // initializes upon package loading

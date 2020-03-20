@@ -10,14 +10,14 @@ import (
 	cmtypes "github.com/binance-chain/go-sdk/common/types"
 )
 
-// Config defines all necessary juno configuration parameters.
+// Config defines all necessary parameters
 type Config struct {
 	Node   NodeConfig   `yaml:"node"`
 	DB     DBConfig     `yaml:"database"`
 	Market MarketConfig `yaml:"market"`
 }
 
-// NodeConfig defines endpoints for both RPC node and LCD REST API server
+// NodeConfig wraps all node endpoints that are used in this project
 type NodeConfig struct {
 	RPCNode                string               `yaml:"rpc_node"`
 	AcceleratedNode        string               `yaml:"accelerated_node"`
@@ -26,7 +26,7 @@ type NodeConfig struct {
 	NetworkType            cmtypes.ChainNetwork `yaml:"network_type"`
 }
 
-// DBConfig defines all database connection configuration parameters.
+// DBConfig wraps all required parameters for database connection
 type DBConfig struct {
 	Host     string `yaml:"host"`
 	Port     string `yaml:"port"`
@@ -35,19 +35,19 @@ type DBConfig struct {
 	Table    string `yaml:"table"`
 }
 
-// MarketConfig defines endpoints where you parse market data from
+// MarketConfig wraps all required params for market endpoints
 type MarketConfig struct {
 	CoinGeckoEndpoint string `yaml:"coingecko_endpoint"`
 }
 
-// ParseConfig attempts to read and parse chain-exporter config from the given configPath.
+// ParseConfig attempts to read and parse config.yaml from the given path
 // An error reading or parsing the config results in a panic.
 func ParseConfig() Config {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./")
-	viper.AddConfigPath("../") // for test cases
-	viper.AddConfigPath("/home/ubuntu/mintscan-binance-dex-backend/chain-exporter/")
+	viper.AddConfigPath("../")                                                       // for test cases
+	viper.AddConfigPath("/home/ubuntu/mintscan-binance-dex-backend/chain-exporter/") // for production
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(errors.Wrap(err, "failed to read config"))

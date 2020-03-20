@@ -9,15 +9,15 @@ import (
 	cmtypes "github.com/binance-chain/go-sdk/common/types"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/codec"
-	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/types"
+	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/models"
 
 	amino "github.com/tendermint/go-amino"
 
 	resty "github.com/go-resty/resty/v2"
 )
 
-// Client wraps around both Tendermint RPC client and
-// Cosmos SDK LCD REST client that enables to query necessary data
+// Client wraps around both Tendermint RPC and
+// Cosmos SDK REST clients that enable to query necessary data
 type Client struct {
 	acceleratedNode string
 	apiClient       *resty.Client
@@ -49,19 +49,34 @@ func NewClient(rpcNode, acceleratedNode, apiServerEndpoint string, explorerServe
 	}
 }
 
-// AssetInfoList returns asset info list in active chain
-// An error returns if the query fails.
-func (c Client) AssetInfoList(page int, rows int) (types.AssetInfo, error) {
+// Assets fetches asset list information from an explorer API
+func (c Client) Assets(page int, rows int) (models.Assets, error) {
 	resp, err := c.explorerClient.R().Get("/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
-		return types.AssetInfo{}, err
+		return models.Assets{}, err
 	}
 
-	var assets types.AssetInfo
+	var assets models.Assets
 	err = json.Unmarshal(resp.Body(), &assets)
 	if err != nil {
-		return types.AssetInfo{}, err
+		return models.Assets{}, err
 	}
 
 	return assets, nil
+}
+
+// Asset fetches particular asset information from an explorer API
+func (c Client) Asset(assetName string) (models.Asset, error) {
+	resp, err := c.explorerClient.R().Get("/asset?asset=" + assetName)
+	if err != nil {
+		return models.Asset{}, err
+	}
+
+	var asset models.Asset
+	err = json.Unmarshal(resp.Body(), &asset)
+	if err != nil {
+		return models.Asset{}, err
+	}
+
+	return asset, nil
 }
