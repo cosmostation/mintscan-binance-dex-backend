@@ -10,6 +10,7 @@ type StatAssetInfoList1H struct {
 	MappedAsset  string    `json:"mapped_asset" sql:",notnull"`
 	Price        float64   `json:"price"`
 	QuoteUnit    string    `json:"quote_unit"`
+	ChangeRange  float64   `json:"change_range"`
 	Supply       float64   `json:"supply" sql:",notnull"`
 	Marketcap    float64   `json:"marketcap" sql:",notnull"`
 	Owner        string    `json:"owner" sql:",notnull"`
@@ -27,6 +28,7 @@ type StatAssetInfoList24H struct {
 	Name         string    `json:"name" sql:",notnull"`
 	Price        float64   `json:"price"`
 	QuoteUnit    string    `json:"quote_unit"`
+	ChangeRange  float64   `json:"change_range"`
 	Supply       float64   `json:"supply" sql:",notnull"`
 	Marketcap    float64   `json:"marketcap" sql:",notnull"`
 	Owner        string    `json:"owner" sql:",notnull"`
