@@ -1,7 +1,7 @@
 package services
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/client"
@@ -24,7 +24,7 @@ func GetOrders(client client.Client, db *db.Database, w http.ResponseWriter, r *
 
 	order, err := client.Order(id)
 	if err != nil {
-		fmt.Printf("failed to request order information: %s\n", err)
+		log.Printf("failed to request order information: %s\n", err)
 	}
 
 	utils.Respond(w, order)

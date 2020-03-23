@@ -33,6 +33,8 @@ func GetAsset(client client.Client, db *db.Database, w http.ResponseWriter, r *h
 
 // GetAssets returns assets based upon the request params
 func GetAssets(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+	onlyPrice := "false" // default is false, when true it only show assets price information
+
 	if len(r.URL.Query()["page"]) <= 0 {
 		errors.ErrRequiredParam(w, http.StatusBadRequest, "'page' is not present")
 		return nil
@@ -43,6 +45,10 @@ func GetAssets(client client.Client, db *db.Database, w http.ResponseWriter, r *
 		return nil
 	}
 
+	if len(r.URL.Query()["only_price"]) > 0 {
+		onlyPrice = r.URL.Query()["only_price"][0]
+	}
+
 	page, _ := strconv.Atoi(r.URL.Query()["page"][0])
 	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
 
@@ -51,12 +57,36 @@ func GetAssets(client client.Client, db *db.Database, w http.ResponseWriter, r *
 		return nil
 	}
 
-	result, err := client.Assets(page, rows)
+	assets, err := client.Assets(page, rows)
 	if err != nil {
 		log.Printf("failed to get asset list: %s\n", err)
 	}
 
-	utils.Respond(w, result)
+	if onlyPrice == "true" {
+		assetInfoList := make([]models.ResultAssetInfoList, 0)
+
+		for _, asset := range assets.AssetInfoList {
+			tempAssetInfoList := &models.ResultAssetInfoList{
+				Asset:       asset.Asset,
+				MappedAsset: asset.MappedAsset,
+				Name:        asset.Name,
+				Price:       asset.Price,
+				QuoteUnit:   asset.QuoteUnit,
+			}
+
+			assetInfoList = append(assetInfoList, *tempAssetInfoList)
+		}
+
+		result := &models.ResultAssetInfo{
+			TotalNum:      assets.TotalNum,
+			AssetInfoList: assetInfoList,
+		}
+
+		utils.Respond(w, result)
+		return nil
+	}
+
+	utils.Respond(w, assets)
 	return nil
 }
 

@@ -256,10 +256,8 @@ func (db *Database) CountTotalTxsNum() (int32, error) {
 
 // QueryAssetChartHistory queries asset chart history
 // Stats Exporter needs to be executed and run at least 24 hours to get the result
-func (db *Database) QueryAssetChartHistory(asset string) ([]schema.StatAssetInfoList1H, error) {
+func (db *Database) QueryAssetChartHistory(asset string, limit int) ([]schema.StatAssetInfoList1H, error) {
 	chartHistory := make([]schema.StatAssetInfoList1H, 0)
-
-	limit := int(24)
 
 	err := db.Model(&chartHistory).
 		Where("asset = ?", asset).

@@ -1,6 +1,17 @@
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
+
+// ChosenAssetNames are chosen four asset names for the card view on Asset page
+var ChosenAssetNames = []string{
+	"TUSDB-888",
+	"USDSB-1AC",
+	"BTCB-1DE",
+	"IRIS-D88",
+}
 
 // Asset represents asset detail information
 type Asset struct {
@@ -33,25 +44,43 @@ type Asset struct {
 
 // AssetInfo represents asset information list
 type AssetInfo struct {
-	TotalNum      int `json:"totalNum"`
-	AssetInfoList []struct {
-		CreateTime      json.RawMessage `json:"createTime"`
-		UpdateTime      json.RawMessage `json:"updateTime"`
-		ID              int32           `json:"id"`
-		Asset           string          `json:"asset"`
-		MappedAsset     string          `json:"mappedAsset"`
-		Name            string          `json:"name"`
-		AssetImg        string          `json:"assetImg"`
-		Supply          float64         `json:"supply"`
-		Price           float64         `json:"price"`
-		QuoteUnit       string          `json:"quoteUnit"`
-		ChangeRange     float64         `json:"changeRange"`
-		Owner           string          `json:"owner"`
-		Mintable        int32           `json:"mintable"`
-		Visible         json.RawMessage `json:"visible"`
-		Description     json.RawMessage `json:"description"`
-		AssetCreateTime int64           `json:"assetCreateTime"`
-	} `json:"assetInfoList"`
+	TotalNum      int             `json:"totalNum"`
+	AssetInfoList []AssetInfoList `json:"assetInfoList"`
+}
+
+// AssetInfoList wraps asset information list
+type AssetInfoList struct {
+	CreateTime      json.RawMessage `json:"createTime"`
+	UpdateTime      json.RawMessage `json:"updateTime"`
+	ID              int32           `json:"id"`
+	Asset           string          `json:"asset"`
+	MappedAsset     string          `json:"mappedAsset"`
+	Name            string          `json:"name"`
+	AssetImg        string          `json:"assetImg"`
+	Supply          float64         `json:"supply"`
+	Price           float64         `json:"price"`
+	QuoteUnit       string          `json:"quoteUnit"`
+	ChangeRange     float64         `json:"changeRange"`
+	Owner           string          `json:"owner"`
+	Mintable        int32           `json:"mintable"`
+	Visible         json.RawMessage `json:"visible"`
+	Description     json.RawMessage `json:"description"`
+	AssetCreateTime int64           `json:"assetCreateTime"`
+}
+
+// ResultAssetInfo represents asset information list
+type ResultAssetInfo struct {
+	TotalNum      int                   `json:"totalNum"`
+	AssetInfoList []ResultAssetInfoList `json:"assetInfoList"`
+}
+
+// ResultAssetInfoList wraps result asset information list
+type ResultAssetInfoList struct {
+	Asset       string  `json:"asset"`
+	MappedAsset string  `json:"mappedAsset"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	QuoteUnit   string  `json:"quoteUnit"`
 }
 
 // AssetHolders represents asset holders list
@@ -144,4 +173,24 @@ type AssetTxData struct {
 		TimeInForce string `json:"timeInForce"`
 		OrderID     string `json:"orderId"`
 	} `json:"orderData"`
+}
+
+// AssetChartHistory represents asset chart hisotry
+type AssetChartHistory struct {
+	Name         string   `json:"name"`
+	Asset        string   `json:"asset"`
+	MappedAsset  string   `json:"mapped_asset"`
+	CurrentPrice float64  `json:"current_price"`
+	QuoteUnit    string   `json:"quote_unit"`
+	ChangeRange  float64  `json:"change_range"`
+	Supply       float64  `json:"supply"`
+	Marketcap    float64  `json:"marketcap"`
+	AssetImage   string   `json:"asset_img"`
+	Prices       []Prices `json:"prices"`
+}
+
+// Price wraps price
+type Prices struct {
+	Price     float64   `json:"price"`
+	Timestamp time.Time `json:"timestamp"`
 }

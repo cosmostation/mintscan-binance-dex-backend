@@ -1,7 +1,7 @@
 package services
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/client"
@@ -28,7 +28,7 @@ func GetAccount(client client.Client, db *db.Database, w http.ResponseWriter, r 
 
 	account, err := client.Account(address)
 	if err != nil {
-		fmt.Printf("failed to request account information: %s\n", err)
+		log.Printf("failed to request account information: %s\n", err)
 	}
 
 	utils.Respond(w, account)
