@@ -19,18 +19,22 @@ import (
 // Client wraps around both Tendermint RPC and
 // Cosmos SDK REST clients that enable to query necessary data
 type Client struct {
-	acceleratedNode string
-	apiClient       *resty.Client
-	cdc             *amino.Codec
-	explorerClient  *resty.Client
-	rpcClient       rpc.Client
+	acceleratedClient *resty.Client
+	apiClient         *resty.Client
+	cdc               *amino.Codec
+	explorerClient    *resty.Client
+	rpcClient         rpc.Client
 }
 
 // NewClient returns Client
-func NewClient(rpcNode, acceleratedNode, apiServerEndpoint string, explorerServerEndpoint string,
+func NewClient(rpcNode, acceleratedEndpoint, apiServerEndpoint string, explorerServerEndpoint string,
 	networkType cmtypes.ChainNetwork) Client {
 
-	restyClient := resty.New().
+	acceleratedClient := resty.New().
+		SetHostURL(acceleratedEndpoint).
+		SetTimeout(time.Duration(5 * time.Second))
+
+	apiClient := resty.New().
 		SetHostURL(apiServerEndpoint).
 		SetTimeout(time.Duration(5 * time.Second))
 
@@ -41,8 +45,8 @@ func NewClient(rpcNode, acceleratedNode, apiServerEndpoint string, explorerServe
 	rpcClient := rpc.NewRPCClient(rpcNode, networkType)
 
 	return Client{
-		acceleratedNode,
-		restyClient,
+		acceleratedClient,
+		apiClient,
 		codec.Codec,
 		explorerClient,
 		rpcClient,

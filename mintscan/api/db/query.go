@@ -253,3 +253,27 @@ func (db *Database) CountTotalTxsNum() (int32, error) {
 
 	return tx.ID, nil
 }
+
+// QueryAssetChartHistory queries asset chart history
+// Stats Exporter needs to be executed and run at least 24 hours to get the result
+func (db *Database) QueryAssetChartHistory(asset string) ([]schema.StatAssetInfoList1H, error) {
+	chartHistory := make([]schema.StatAssetInfoList1H, 0)
+
+	limit := int(24)
+
+	err := db.Model(&chartHistory).
+		Where("asset = ?", asset).
+		Limit(limit).
+		Order("id DESC").
+		Select()
+
+	if err == pg.ErrNoRows {
+		return chartHistory, fmt.Errorf("no rows in block table: %s", err)
+	}
+
+	if err != nil {
+		return chartHistory, fmt.Errorf("unexpected database error: %s", err)
+	}
+
+	return chartHistory, nil
+}

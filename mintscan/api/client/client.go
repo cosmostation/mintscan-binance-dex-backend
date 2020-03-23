@@ -24,17 +24,22 @@ import (
 // Client wraps around both Tendermint RPC client and
 // Cosmos SDK LCD REST client that enables to query necessary data
 type Client struct {
-	acceleratedNode string
-	apiClient       *resty.Client
-	cdc             *amino.Codec
-	coinGeckoClient *resty.Client
-	explorerClient  *resty.Client
-	rpcClient       rpc.Client
+	acceleratedClient *resty.Client
+	apiClient         *resty.Client
+	cdc               *amino.Codec
+	coinGeckoClient   *resty.Client
+	explorerClient    *resty.Client
+	rpcClient         rpc.Client
 }
 
 // NewClient returns Client
-func NewClient(rpcNode, acceleratedNode, apiServerEndpoint string, coinGeckoEndpoint string,
+func NewClient(rpcNode, acceleratedEndpoint, apiServerEndpoint string, coinGeckoEndpoint string,
 	explorerServerEndpoint string, networkType cmtypes.ChainNetwork) Client {
+
+	acceleratedClient := resty.New().
+		SetHostURL(acceleratedEndpoint).
+		SetTimeout(time.Duration(5 * time.Second))
+
 	apiClient := resty.New().
 		SetHostURL(apiServerEndpoint).
 		SetTimeout(time.Duration(5 * time.Second))
@@ -50,7 +55,7 @@ func NewClient(rpcNode, acceleratedNode, apiServerEndpoint string, coinGeckoEndp
 	rpcClient := rpc.NewRPCClient(rpcNode, networkType)
 
 	return Client{
-		acceleratedNode,
+		acceleratedClient,
 		apiClient,
 		codec.Codec,
 		coinGeckoClient,
@@ -228,4 +233,36 @@ func (c Client) AssetTxs(txAsset string, page int, rows int) (models.AssetTxs, e
 	}
 
 	return assetTxs, nil
+}
+
+// Account returns account information
+func (c Client) Account(address string) (models.Account, error) {
+	resp, err := c.apiClient.R().Get("/account/" + address)
+	if err != nil {
+		return models.Account{}, err
+	}
+
+	var account models.Account
+	err = json.Unmarshal(resp.Body(), &account)
+	if err != nil {
+		return models.Account{}, err
+	}
+
+	return account, nil
+}
+
+// Order returns order information
+func (c Client) Order(id string) (models.Order, error) {
+	resp, err := c.acceleratedClient.R().Get("/orders/" + id)
+	if err != nil {
+		return models.Order{}, err
+	}
+
+	var order models.Order
+	err = json.Unmarshal(resp.Body(), &order)
+	if err != nil {
+		return models.Order{}, err
+	}
+
+	return order, nil
 }

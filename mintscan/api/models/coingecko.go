@@ -81,7 +81,7 @@ type CoinGeckoMarket struct {
 	Tickers             json.RawMessage `json:"tickers"`
 }
 
-// CoinMarketCurrencies wraps currencies provided by CoinGecko API
+// CoinMarketCurrencies represents currencies provided by CoinGecko API
 type CoinMarketCurrencies struct {
 	Aed float64 `json:"aed"`
 	Ars float64 `json:"ars"`
@@ -139,7 +139,7 @@ type CoinMarketCurrencies struct {
 	Zar float64 `json:"zar"`
 }
 
-// CoinGeckoMarketChar represents CoinGecko Market Chart API
+// CoinGeckoMarketChart represents CoinGecko Market Chart API
 type CoinGeckoMarketChart struct {
 	Prices       [][]float64 `json:"prices"`
 	MarketCaps   [][]float64 `json:"market_caps"`

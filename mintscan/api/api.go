@@ -45,7 +45,6 @@ func NewApp() *App {
 		router: setRouter(),
 	}
 
-	// Ping database to verify connection is succeeded
 	err := app.db.Ping()
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "failed to ping database "))
@@ -70,10 +69,13 @@ func setRouter() *mux.Router {
 
 // setControllers sets controllers
 func (a *App) setControllers() {
+	controllers.AccountController(a.cdc, a.client, a.db, a.router)
 	controllers.AssetController(a.cdc, a.client, a.db, a.router)
 	controllers.BlockController(a.cdc, a.client, a.db, a.router)
 	controllers.StatusController(a.cdc, a.client, a.db, a.router)
+	controllers.StatsController(a.cdc, a.client, a.db, a.router)
 	controllers.MarketController(a.cdc, a.client, a.db, a.router)
+	controllers.OrderController(a.cdc, a.client, a.db, a.router)
 	controllers.TokenController(a.cdc, a.client, a.db, a.router)
 	controllers.TxController(a.cdc, a.client, a.db, a.router)
 }
