@@ -50,7 +50,7 @@ func NewClient(rpcNode, acceleratedEndpoint, apiServerEndpoint string, coinGecko
 
 	explorerClient := resty.New().
 		SetHostURL(explorerServerEndpoint).
-		SetTimeout(time.Duration(5 * time.Second))
+		SetTimeout(time.Duration(10 * time.Second))
 
 	rpcClient := rpc.NewRPCClient(rpcNode, networkType)
 
@@ -249,6 +249,23 @@ func (c Client) Account(address string) (models.Account, error) {
 	}
 
 	return account, nil
+}
+
+// AccountTxs fetches official explorer asset txs API and return result
+func (c Client) AccountTxs(address string, page int, rows int) (models.AccountTxs, error) {
+	queryStr := "/txs?address=" + address + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
+	resp, err := c.explorerClient.R().Get(queryStr)
+	if err != nil {
+		return models.AccountTxs{}, err
+	}
+
+	var acctTxs models.AccountTxs
+	err = json.Unmarshal(resp.Body(), &acctTxs)
+	if err != nil {
+		return models.AccountTxs{}, err
+	}
+
+	return acctTxs, nil
 }
 
 // Order returns order information

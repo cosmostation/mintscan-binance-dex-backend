@@ -29,7 +29,4 @@ func AssetController(cdc *amino.Codec, client client.Client, db *db.Database, r 
 	r.HandleFunc("/assets/txs", func(w http.ResponseWriter, r *http.Request) {
 		services.GetAssetTxs(client, db, w, r)
 	}).Methods("GET")
-	r.HandleFunc("/asset/chart", func(w http.ResponseWriter, r *http.Request) {
-		services.GetAssetChart(client, db, w, r)
-	}).Methods("GET")
 }

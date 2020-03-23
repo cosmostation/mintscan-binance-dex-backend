@@ -57,6 +57,11 @@ func GetAssets(client client.Client, db *db.Database, w http.ResponseWriter, r *
 		return nil
 	}
 
+	if rows > 1000 {
+		errors.ErrInvalidParam(w, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		return nil
+	}
+
 	assets, err := client.Assets(page, rows)
 	if err != nil {
 		log.Printf("failed to get asset list: %s\n", err)
@@ -116,6 +121,11 @@ func GetAssetHolders(client client.Client, db *db.Database, w http.ResponseWrite
 		return nil
 	}
 
+	if rows > 100 {
+		errors.ErrInvalidParam(w, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		return nil
+	}
+
 	result, err := client.AssetHolders(asset, page, rows)
 	if err != nil {
 		log.Printf("failed to get asset holders list: %s\n", err)
@@ -142,6 +152,11 @@ func GetAssetsImages(client client.Client, db *db.Database, w http.ResponseWrite
 
 	if rows < 1 {
 		errors.ErrInvalidParam(w, http.StatusBadRequest, "'rows' cannot be less than 1")
+		return nil
+	}
+
+	if rows > 100 {
+		errors.ErrInvalidParam(w, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return nil
 	}
 
@@ -197,12 +212,17 @@ func GetAssetTxs(client client.Client, db *db.Database, w http.ResponseWriter, r
 		return nil
 	}
 
+	if rows > 100 {
+		errors.ErrInvalidParam(w, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		return nil
+	}
+
 	assetTxs, err := client.AssetTxs(txAsset, page, rows)
 	if err != nil {
 		log.Printf("failed to get asset list: %s\n", err)
 	}
 
-	txArray := make([]models.TxArray, 0)
+	txArray := make([]models.AssetTxArray, 0)
 
 	for _, tx := range assetTxs.TxArray {
 		var toAddr string
@@ -210,7 +230,7 @@ func GetAssetTxs(client client.Client, db *db.Database, w http.ResponseWriter, r
 			toAddr = tx.ToAddr
 		}
 
-		tempTxArray := &models.TxArray{
+		tempTxArray := &models.AssetTxArray{
 			BlockHeight:   tx.BlockHeight,
 			TxHash:        tx.TxHash,
 			Code:          tx.Code,
@@ -249,15 +269,5 @@ func GetAssetTxs(client client.Client, db *db.Database, w http.ResponseWriter, r
 	}
 
 	utils.Respond(w, result)
-	return nil
-}
-
-// GetAssetChart returns asset chart
-func GetAssetChart(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
-	log.Println("GetAssetChart")
-
-	// ResultAssetChart
-	// Price, Currency, Marketcap, ChangeRange,
-	// Prices
 	return nil
 }

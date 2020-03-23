@@ -135,12 +135,12 @@ type AssetTxs struct {
 
 // ResultAssetTxs represents response data for AssetTxs
 type ResultAssetTxs struct {
-	TxNums  int       `json:"txNums"`
-	TxArray []TxArray `json:"txArray"`
+	TxNums  int            `json:"txNums"`
+	TxArray []AssetTxArray `json:"txArray"`
 }
 
-// TxArray wraps ResultAssetTxs TxArray
-type TxArray struct {
+// AssetTxArray wraps ResultAssetTxs TxArray
+type AssetTxArray struct {
 	BlockHeight   int64        `json:"blockHeight"`
 	Code          int64        `json:"code"`
 	TxHash        string       `json:"txHash"`

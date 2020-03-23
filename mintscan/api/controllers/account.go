@@ -16,4 +16,7 @@ func AccountController(cdc *amino.Codec, client client.Client, db *db.Database, 
 	r.HandleFunc("/account/{address}", func(w http.ResponseWriter, r *http.Request) {
 		services.GetAccount(client, db, w, r)
 	}).Methods("GET")
+	r.HandleFunc("/account/txs/{address}", func(w http.ResponseWriter, r *http.Request) {
+		services.GetAccountTxs(client, db, w, r)
+	}).Methods("GET")
 }
