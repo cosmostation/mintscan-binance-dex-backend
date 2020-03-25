@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/db"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/utils"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
 // GetTokens returns assets based upon the request params
-func GetTokens(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func GetTokens(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	limit := 100
 	offset := 0
 
@@ -28,7 +28,7 @@ func GetTokens(client client.Client, db *db.Database, w http.ResponseWriter, r *
 		return nil
 	}
 
-	tks, _ := client.Tokens(limit, offset)
+	tks, _ := c.Tokens(limit, offset)
 
 	utils.Respond(w, tks)
 	return nil

@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/db"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/utils"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 	"github.com/gorilla/mux"
 )
 
 // GetAccount returns account information
-func GetAccount(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func GetAccount(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
@@ -29,7 +29,7 @@ func GetAccount(client client.Client, db *db.Database, w http.ResponseWriter, r 
 		return nil
 	}
 
-	account, err := client.Account(address)
+	account, err := c.Account(address)
 	if err != nil {
 		log.Printf("failed to request account information: %s\n", err)
 	}
@@ -39,7 +39,7 @@ func GetAccount(client client.Client, db *db.Database, w http.ResponseWriter, r 
 }
 
 // GetAccountTxs returns transactions associated with an account
-func GetAccountTxs(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func GetAccountTxs(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
@@ -74,7 +74,7 @@ func GetAccountTxs(client client.Client, db *db.Database, w http.ResponseWriter,
 		return nil
 	}
 
-	acctTxs, err := client.AccountTxs(address, page, rows)
+	acctTxs, err := c.AccountTxs(address, page, rows)
 	if err != nil {
 		log.Printf("failed to get account txs: %s\n", err)
 	}

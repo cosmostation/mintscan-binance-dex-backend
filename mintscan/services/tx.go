@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/db"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/schema"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/utils"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/schema"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -98,7 +98,7 @@ func GetTxByHash(db *db.Database, w http.ResponseWriter, r *http.Request) error 
 }
 
 // GetTxsByType returns transactions based upon the request params
-func GetTxsByType(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func GetTxsByType(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)

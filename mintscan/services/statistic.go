@@ -4,20 +4,20 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/db"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/utils"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
 // GetAssetsChartHistory returns
-func GetAssetsChartHistory(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func GetAssetsChartHistory(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	result := make([]models.AssetChartHistory, 0)
 
 	limit := int(24)
 
 	for _, assetName := range models.ChosenAssetNames {
-		asset, err := client.Asset(assetName)
+		asset, err := c.Asset(assetName)
 		if err != nil {
 			log.Printf("failed to get asset detail information: %s\n", err)
 		}

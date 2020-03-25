@@ -8,11 +8,11 @@ import (
 
 	"github.com/binance-chain/go-sdk/client/rpc"
 
-	cmtypes "github.com/binance-chain/go-sdk/common/types"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/codec"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/codec"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/config"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 
@@ -21,8 +21,8 @@ import (
 	resty "github.com/go-resty/resty/v2"
 )
 
-// Client wraps around both Tendermint RPC client and
-// Cosmos SDK LCD REST client that enables to query necessary data
+// Client wraps for both Tendermint RPC and other API clients that
+// are needed for this project
 type Client struct {
 	acceleratedClient *resty.Client
 	apiClient         *resty.Client
@@ -33,28 +33,27 @@ type Client struct {
 }
 
 // NewClient returns Client
-func NewClient(rpcNode, acceleratedEndpoint, apiServerEndpoint string, coinGeckoEndpoint string,
-	explorerServerEndpoint string, networkType cmtypes.ChainNetwork) Client {
+func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
 
 	acceleratedClient := resty.New().
-		SetHostURL(acceleratedEndpoint).
+		SetHostURL(cfg.AcceleratedNode).
 		SetTimeout(time.Duration(5 * time.Second))
 
 	apiClient := resty.New().
-		SetHostURL(apiServerEndpoint).
+		SetHostURL(cfg.APIServerEndpoint).
 		SetTimeout(time.Duration(5 * time.Second))
 
 	coinGeckoClient := resty.New().
-		SetHostURL(coinGeckoEndpoint).
+		SetHostURL(marketCfg.CoinGeckoEndpoint).
 		SetTimeout(time.Duration(5 * time.Second))
 
 	explorerClient := resty.New().
-		SetHostURL(explorerServerEndpoint).
+		SetHostURL(cfg.ExplorerServerEndpoint).
 		SetTimeout(time.Duration(10 * time.Second))
 
-	rpcClient := rpc.NewRPCClient(rpcNode, networkType)
+	rpcClient := rpc.NewRPCClient(cfg.RPCNode, cfg.NetworkType)
 
-	return Client{
+	return &Client{
 		acceleratedClient,
 		apiClient,
 		codec.Codec,

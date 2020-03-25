@@ -3,8 +3,8 @@ package db
 import (
 	"fmt"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/schema"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/schema"
 
 	"github.com/go-pg/pg"
 )

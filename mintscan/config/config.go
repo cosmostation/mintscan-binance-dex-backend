@@ -10,7 +10,7 @@ import (
 	cmtypes "github.com/binance-chain/go-sdk/common/types"
 )
 
-// Config defines all necessary parameters
+// Config wraps all config
 type Config struct {
 	Node   NodeConfig   `yaml:"node"`
 	DB     DBConfig     `yaml:"database"`
@@ -112,7 +112,7 @@ func ParseConfig() *Config {
 		}
 
 	default:
-		log.Fatal("active can be either mainnet or testnet.")
+		log.Fatalf("active parameter in config.yaml cannot be set as '%s'", viper.GetString("active"))
 	}
 
 	return &cfg

@@ -6,16 +6,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/utils"
-
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/db"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
 // GetCoinMarketData returns market data from CoinGecko API
-func GetCoinMarketData(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func GetCoinMarketData(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	if len(r.URL.Query()["id"]) <= 0 {
 		errors.ErrRequiredParam(w, http.StatusBadRequest, "'id' is not present")
 		return nil
@@ -23,7 +22,7 @@ func GetCoinMarketData(client client.Client, db *db.Database, w http.ResponseWri
 
 	id := r.URL.Query()["id"][0]
 
-	data, err := client.CoinMarketData(id)
+	data, err := c.CoinMarketData(id)
 	if err != nil {
 		log.Printf("failed to fetch coin market data: %s\n", err)
 	}
@@ -49,7 +48,7 @@ func GetCoinMarketData(client client.Client, db *db.Database, w http.ResponseWri
 }
 
 // GetCoinMarketChartData returns market chart data from CoinGecko API
-func GetCoinMarketChartData(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func GetCoinMarketChartData(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	if len(r.URL.Query()["id"]) <= 0 {
 		errors.ErrRequiredParam(w, http.StatusBadRequest, "'id' is not present")
 		return nil
@@ -61,7 +60,7 @@ func GetCoinMarketChartData(client client.Client, db *db.Database, w http.Respon
 	to := time.Now().UTC()
 	from := to.AddDate(0, 0, -1)
 
-	marketChartData, err := client.CoinMarketChartData(id, fmt.Sprintf("%d", from.Unix()), fmt.Sprintf("%d", to.Unix()))
+	marketChartData, err := c.CoinMarketChartData(id, fmt.Sprintf("%d", from.Unix()), fmt.Sprintf("%d", to.Unix()))
 	if err != nil {
 		log.Printf("failed to fetch coin market chart data: %s\n", err)
 	}
@@ -71,7 +70,7 @@ func GetCoinMarketChartData(client client.Client, db *db.Database, w http.Respon
 }
 
 // GetCoinList returns market chart data from CoinGecko API
-func GetCoinList(client client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func GetCoinList(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	coinList := make([]models.CoinGeckoCoinList, 0)
 
 	for _, coin := range models.CoinList {

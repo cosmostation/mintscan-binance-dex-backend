@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/api/config"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/config"
 
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
@@ -15,8 +15,7 @@ type Database struct {
 // Connect opens a database connections with the given database connection info from config.
 // It returns a database connection handle or an error if the connection fails.
 func Connect(cfg config.DBConfig) *Database {
-	// Disable pluralization
-	orm.SetTableNameInflector(func(s string) string {
+	orm.SetTableNameInflector(func(s string) string { // disable pluralization
 		return s
 	})
 
@@ -30,7 +29,8 @@ func Connect(cfg config.DBConfig) *Database {
 	return &Database{db}
 }
 
-// Ping returns a database connection handle or an error if the connection fails.
+// Ping returns a database connection handle
+// An error is returned if the connection fails.
 func (db *Database) Ping() error {
 	_, err := db.Exec("SELECT 1")
 	if err != nil {
