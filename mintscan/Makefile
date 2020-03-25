@@ -4,10 +4,6 @@ COMMIT                := $(shell git log -1 --format='%H')
 TOOLS_DESTDIR         ?= $(GOPATH)/bin/mintscan
 BUILD_FLAGS 		  := -ldflags "-X main.buildHash=${COMMIT} -X util.BuildVersion=${VERSION}"
 
-###############################################################################
-# Build / Install
-###############################################################################
-
 build: go.sum
 	@echo "building mintscan binary..."
 	@go build -mod=readonly $(BUILD_FLAGS) -o $(TOOLS_DESTDIR) .
@@ -16,10 +12,6 @@ build: go.sum
 install: go.sum
 	@echo "installing mintscan binary..."
 	@go install -mod=readonly $(BUILD_FLAGS) .
-
-###############################################################################
-# Tests / CI
-###############################################################################
 
 clean:
 	@echo "cleaning mintscan binary..."

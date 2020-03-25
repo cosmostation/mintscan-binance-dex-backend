@@ -5,7 +5,7 @@ mainnet:
     rpc_node: "" # tcp://dataseed1.binance.org:80
     accelerated_node: "" # https://dex-asiapacific.binance.org/api/v1
     api_server_endpoint: ""
-    explorer_api_endpoint: "" # this is not public API server provided by Binance team
+    explorer_api_endpoint: "" # https://explorer.binance.org/api/v1
   database:
     host: ""
     port: 5432
