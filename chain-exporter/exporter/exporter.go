@@ -26,7 +26,13 @@ type Exporter struct {
 func NewExporter() Exporter {
 	cfg := config.ParseConfig()
 
-	client := client.NewClient(cfg.Node.RPCNode, cfg.Node.LCDEndpoint, cfg.Node.NetworkType)
+	client := client.NewClient(
+		cfg.Node.RPCNode,
+		cfg.Node.AcceleratedNode,
+		cfg.Node.APIServerEndpoint,
+		cfg.Node.ExplorerServerEndpoint,
+		cfg.Node.NetworkType,
+	)
 
 	db := db.Connect(cfg.DB)
 
@@ -45,6 +51,9 @@ func NewExporter() Exporter {
 // Start creates database tables and indexes using Postgres ORM library go-pg and
 // starts syncing blockchain.
 func (ex *Exporter) Start() error {
+	c1 := make(chan string)
+	c2 := make(chan string)
+
 	go func() {
 		for {
 			fmt.Println("start - sync blockchain")
@@ -57,8 +66,37 @@ func (ex *Exporter) Start() error {
 		}
 	}()
 
+	go func() {
+		for {
+			time.Sleep(1 * time.Hour)
+			c1 <- "saving asset information list every hour..."
+		}
+	}()
+
+	go func() {
+		for {
+			time.Sleep(24 * time.Hour)
+			c2 <- "parsing from keybase server using keybase identity"
+		}
+	}()
+
 	for {
-		select {}
+		select {
+		case msg1 := <-c1:
+			assetInfoList1H, err := ex.getAssetInfoList1H()
+			if err != nil {
+				log.Printf("failed to get asset into list 1H: %s", err)
+			}
+			ex.db.SaveAssetInfoList1H(assetInfoList1H)
+			log.Println("finish - ", msg1)
+		case msg2 := <-c2:
+			assetInfoList24H, err := ex.getAssetInfoList24H()
+			if err != nil {
+				log.Printf("failed to get asset into list 24H: %s", err)
+			}
+			ex.db.SaveAssetInfoList24H(assetInfoList24H)
+			log.Println("finish - ", msg2)
+		}
 	}
 }
 
@@ -98,42 +136,42 @@ func (ex *Exporter) sync() error {
 func (ex *Exporter) process(height int64) error {
 	block, err := ex.client.Block(height)
 	if err != nil {
-		return fmt.Errorf("failed to query block using rpc client: %t", err)
+		return fmt.Errorf("failed to query block using rpc client: %s", err)
 	}
 
-	prevBlock, err := ex.client.Block(block.Block.LastCommit.Height())
+	valSet, err := ex.client.ValidatorSet(block.Block.LastCommit.Height())
 	if err != nil {
-		return fmt.Errorf("failed to query block using rpc client: %t", err)
+		return fmt.Errorf("failed to query validator set using rpc client: %s", err)
 	}
 
-	vals, err := ex.client.Validators(block.Block.LastCommit.Height())
+	vals, err := ex.client.Validators()
 	if err != nil {
-		return fmt.Errorf("failed to query validators using rpc client: %t", err)
+		return fmt.Errorf("failed to query validators using rpc client: %s", err)
 	}
 
-	resultBlock, err := ex.getBlock(block) // TODO: Fees and RewardsTo Addr
+	resultBlock, err := ex.getBlock(block) // TODO: Reward Fees Calculation
 	if err != nil {
-		return fmt.Errorf("failed to get block: %t", err)
+		return fmt.Errorf("failed to get block: %s", err)
 	}
 
 	resultTxs, err := ex.getTxs(block)
 	if err != nil {
-		return fmt.Errorf("failed to get transactions: %t", err)
+		return fmt.Errorf("failed to get transactions: %s", err)
 	}
 
-	resultValidators, err := ex.getValidators(prevBlock, vals)
+	resultValidators, err := ex.getValidators(vals)
 	if err != nil {
-		return fmt.Errorf("failed to get validators: %t", err)
+		return fmt.Errorf("failed to get validators: %s", err)
 	}
 
-	resultPreCommits, err := ex.getPreCommits(block.Block.LastCommit, vals)
+	resultPreCommits, err := ex.getPreCommits(block.Block.LastCommit, valSet)
 	if err != nil {
-		return fmt.Errorf("failed to get precommits: %t", err)
+		return fmt.Errorf("failed to get precommits: %s", err)
 	}
 
 	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators, resultPreCommits)
 	if err != nil {
-		return fmt.Errorf("failed to insert exporterd data: %t", err)
+		return fmt.Errorf("failed to insert exporterd data: %s", err)
 	}
 
 	return nil

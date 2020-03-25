@@ -5,44 +5,41 @@ import (
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/types"
-
-	cmtypes "github.com/binance-chain/go-sdk/common/types"
-
-	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 // getValidators parses validators information and wrap into Precommit schema struct
-func (ex *Exporter) getValidators(block *tmctypes.ResultBlock, vals *tmctypes.ResultValidators) ([]*schema.Validator, error) {
+func (ex *Exporter) getValidators(vals []*types.Validator) ([]*schema.Validator, error) {
 	validators := make([]*schema.Validator, 0)
 
-	if len(vals.Validators) > 0 {
-		for _, val := range vals.Validators {
-			valAddr := val.Address.String()
-
-			// Insert validator only if not exist
-			ok, err := ex.db.ExistValidator(valAddr)
-			if !ok {
-				consPubKey, err := cmtypes.Bech32ifyConsPub(val.PubKey)
-				if err != nil {
-					return nil, err
-				}
-
-				moniker := types.GetValidatorMoniker(valAddr)
-
-				tempVals := &schema.Validator{
-					ValidatorAddress: valAddr,
-					Moniker:          moniker,
-					ConsensusPubKey:  consPubKey,
-					VotingPower:      val.VotingPower,
-					Timestamp:        block.Block.Time,
-				}
-
-				validators = append(validators, tempVals)
+	// Looping through validators and insert them if not already exists in database
+	for _, val := range vals {
+		ok, err := ex.db.ExistValidator(val.ConsensusAddress)
+		if !ok {
+			tempVal := &schema.Validator{
+				Moniker:                 val.Description.Moniker,
+				AccountAddress:          val.AccountAddress,
+				OperatorAddress:         val.OperatorAddress,
+				ConsensusAddress:        val.ConsensusAddress,
+				Jailed:                  val.Jailed,
+				Status:                  val.Status,
+				Tokens:                  val.Tokens,
+				VotingPower:             val.Power,
+				DelegatorShares:         val.DelegatorShares,
+				BondHeight:              val.BondHeight,
+				BondIntraTxCounter:      val.BondIntraTxCounter,
+				UnbondingHeight:         val.UnbondingHeight,
+				UnbondingTime:           val.UnbondingTime,
+				CommissionRate:          val.Commission.Rate,
+				CommissionMaxRate:       val.Commission.MaxRate,
+				CommissionMaxChangeRate: val.Commission.MaxChangeRate,
+				CommissionUpdateTime:    val.Commission.UpdateTime,
 			}
 
-			if err != nil {
-				return nil, fmt.Errorf("unexpected error when querying validator existence: %t", err)
-			}
+			validators = append(validators, tempVal)
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("unexpected error when checking validator existence: %s", err)
 		}
 	}
 

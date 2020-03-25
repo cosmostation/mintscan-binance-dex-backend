@@ -1,0 +1,27 @@
+active: "testnet"
+
+mainnet:
+  node: 
+    rpc_node: "" # tcp://dataseed1.binance.org:80
+    accelerated_node: "" # https://dex-asiapacific.binance.org/api/v1
+    api_server_endpoint: ""
+    explorer_server_endpoint: "" # https://explorer.binance.org/api/v1
+  database:
+    host: ""
+    port: 5432
+    user: ""
+    password: ""
+    table: ""
+
+testnet:
+  node: 
+    rpc_node: "" 
+    accelerated_node: ""
+    api_server_endpoint: ""
+    explorer_server_endpoint: ""
+  database:
+    host: ""
+    port: 5432
+    user: ""
+    password: ""
+    table: ""

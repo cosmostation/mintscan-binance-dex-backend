@@ -10,21 +10,23 @@ import (
 	cmtypes "github.com/binance-chain/go-sdk/common/types"
 )
 
-// Config defines all necessary juno configuration parameters.
+// Config defines all necessary parameters
 type Config struct {
 	Node   NodeConfig   `yaml:"node"`
 	DB     DBConfig     `yaml:"database"`
 	Market MarketConfig `yaml:"market"`
 }
 
-// NodeConfig defines endpoints for both RPC node and LCD REST API server
+// NodeConfig wraps all node endpoints that are used in this project
 type NodeConfig struct {
-	RPCNode     string               `yaml:"rpc_node"`
-	LCDEndpoint string               `yaml:"lcd_endpoint"`
-	NetworkType cmtypes.ChainNetwork `yaml:"network_type"`
+	RPCNode                string               `yaml:"rpc_node"`
+	AcceleratedNode        string               `yaml:"accelerated_node"`
+	APIServerEndpoint      string               `yaml:"api_server_endpoint"`
+	ExplorerServerEndpoint string               `yaml:"explorer_server_endpoint"`
+	NetworkType            cmtypes.ChainNetwork `yaml:"network_type"`
 }
 
-// DBConfig defines all database connection configuration parameters.
+// DBConfig wraps all required parameters for database connection
 type DBConfig struct {
 	Host     string `yaml:"host"`
 	Port     string `yaml:"port"`
@@ -33,17 +35,19 @@ type DBConfig struct {
 	Table    string `yaml:"table"`
 }
 
-// MarketConfig defines endpoints where you parse market data from
+// MarketConfig wraps all required params for market endpoints
 type MarketConfig struct {
 	CoinGeckoEndpoint string `yaml:"coingecko_endpoint"`
 }
 
-// ParseConfig attempts to read and parse chain-exporter config from the given configPath.
+// ParseConfig attempts to read and parse config.yaml from the given path
 // An error reading or parsing the config results in a panic.
 func ParseConfig() Config {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./")
+	viper.AddConfigPath("../")                                                       // for test cases
+	viper.AddConfigPath("/home/ubuntu/mintscan-binance-dex-backend/chain-exporter/") // for production
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(errors.Wrap(err, "failed to read config"))
@@ -58,9 +62,11 @@ func ParseConfig() Config {
 	switch viper.GetString("active") {
 	case "mainnet":
 		cfg.Node = NodeConfig{
-			RPCNode:     viper.GetString("mainnet.node.rpc_node"),
-			LCDEndpoint: viper.GetString("mainnet.node.lcd_endpoint"),
-			NetworkType: cmtypes.ProdNetwork,
+			RPCNode:                viper.GetString("mainnet.node.rpc_node"),
+			AcceleratedNode:        viper.GetString("mainnet.node.accelerated_node"),
+			APIServerEndpoint:      viper.GetString("mainnet.node.api_server_endpoint"),
+			ExplorerServerEndpoint: viper.GetString("mainnet.node.explorer_server_endpoint"),
+			NetworkType:            cmtypes.ProdNetwork,
 		}
 		cfg.DB = DBConfig{
 			Host:     viper.GetString("mainnet.database.host"),
@@ -75,9 +81,11 @@ func ParseConfig() Config {
 
 	case "testnet":
 		cfg.Node = NodeConfig{
-			RPCNode:     viper.GetString("testnet.node.rpc_node"),
-			LCDEndpoint: viper.GetString("testnet.node.lcd_endpoint"),
-			NetworkType: cmtypes.TestNetwork,
+			RPCNode:                viper.GetString("testnet.node.rpc_node"),
+			AcceleratedNode:        viper.GetString("testnet.node.accelerated_node"),
+			APIServerEndpoint:      viper.GetString("testnet.node.api_server_endpoint"),
+			ExplorerServerEndpoint: viper.GetString("testnet.node.explorer_server_endpoint"),
+			NetworkType:            cmtypes.ProdNetwork, // ProdNetwork, TestNetwork
 		}
 		cfg.DB = DBConfig{
 			Host:     viper.GetString("testnet.database.host"),

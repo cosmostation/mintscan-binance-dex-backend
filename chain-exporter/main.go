@@ -5,6 +5,11 @@ import (
 )
 
 func main() {
+	// Start exporting chain data
 	exporter := exporter.NewExporter()
 	exporter.Start()
+
+	// Start cron jobs to store data for every certain time
+	// cron := cron.NewCron()
+	// cron.Start()
 }

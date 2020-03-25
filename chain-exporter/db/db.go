@@ -38,7 +38,8 @@ func (db *Database) Ping() error {
 
 // CreateTables creates database tables using object relational mapping (ORM)
 func (db *Database) CreateTables() error {
-	for _, model := range []interface{}{(*schema.Block)(nil), (*schema.PreCommit)(nil), (*schema.Transaction)(nil), (*schema.Validator)(nil)} {
+	for _, model := range []interface{}{(*schema.Block)(nil), (*schema.PreCommit)(nil), (*schema.Transaction)(nil),
+		(*schema.Validator)(nil), (*schema.StatAssetInfoList1H)(nil), (*schema.StatAssetInfoList24H)(nil)} {
 		// Disable pluralization
 		orm.SetTableNameInflector(func(s string) string {
 			return s
@@ -57,30 +58,42 @@ func (db *Database) CreateTables() error {
 	// RunInTransaction creates indexes to reduce the cost of lookup queries in case of server traffic jams.
 	// If function returns an error transaction is rollbacked, otherwise transaction is committed.
 	err := db.RunInTransaction(func(tx *pg.Tx) error {
-		_, err := db.Model(schema.Block{}).Exec(`CREATE INDEX block_height_idx ON block USING btree(height);`)
+		_, err := db.Model(schema.Block{}).
+			Exec(`CREATE INDEX block_height_idx ON block USING btree(height);`)
 		if err != nil {
 			return err
 		}
-		_, err = db.Model(schema.PreCommit{}).Exec(`CREATE INDEX pre_commit_height_idx ON pre_commit USING btree(height);`)
+		_, err = db.Model(schema.PreCommit{}).
+			Exec(`CREATE INDEX pre_commit_height_idx ON pre_commit USING btree(height);`)
 		if err != nil {
 			return err
 		}
-		_, err = db.Model(schema.PreCommit{}).Exec(`CREATE INDEX pre_commit_validator_address_idx ON pre_commit USING btree(validator_address);`)
+		_, err = db.Model(schema.PreCommit{}).
+			Exec(`CREATE INDEX pre_commit_validator_address_idx ON pre_commit USING btree(validator_address);`)
 		if err != nil {
 			return err
 		}
-		_, err = db.Model(schema.Transaction{}).Exec(`CREATE INDEX transaction_height_idx ON transaction USING btree(height);`)
+		_, err = db.Model(schema.Transaction{}).
+			Exec(`CREATE INDEX transaction_height_idx ON transaction USING btree(height);`)
 		if err != nil {
 			return err
 		}
-		_, err = db.Model(schema.Transaction{}).Exec(`CREATE INDEX transaction_tx_hash_idx ON transaction USING btree(tx_hash);`)
+		_, err = db.Model(schema.Transaction{}).
+			Exec(`CREATE INDEX transaction_tx_hash_idx ON transaction USING btree(tx_hash);`)
 		if err != nil {
 			return err
 		}
-		_, err = db.Model(schema.Validator{}).Exec(`CREATE INDEX validator_validator_address_idx ON validator USING btree(validator_address);`)
+		_, err = db.Model(schema.Transaction{}).
+			Exec(`CREATE INDEX transaction_messages_symbol_idx ON validator USING btree((messages->0->'value'->>'symbol'));`)
 		if err != nil {
 			return err
 		}
+		_, err = db.Model(schema.Validator{}).
+			Exec(`CREATE INDEX validator_consensus_address_idx ON validator USING btree(consensus_address);`)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 

@@ -26,7 +26,6 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) ([]*schema.Transaction, 
 			var stdTx txtypes.StdTx
 			ex.cdc.UnmarshalBinaryLengthPrefixed([]byte(tx.Tx), &stdTx)
 
-			// messages
 			msgsBz, err := ex.cdc.MarshalJSON(stdTx.GetMsgs())
 			if err != nil {
 				return nil, err
@@ -49,7 +48,6 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) ([]*schema.Transaction, 
 				}
 			}
 
-			// signatures
 			sigsBz, err := ex.cdc.MarshalJSON(sigs)
 			if err != nil {
 				return nil, err
