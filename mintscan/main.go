@@ -40,18 +40,21 @@ func run() error {
 	}
 
 	r := mux.NewRouter()
-	r = r.PathPrefix("/v1").Subrouter()
+	s := r.PathPrefix("/v1").Subrouter()
 
-	// set controlelrs
-	controllers.AccountController(client, db, r)
-	controllers.AssetController(client, db, r)
-	controllers.BlockController(client, db, r)
-	controllers.StatusController(client, db, r)
-	controllers.StatsController(client, db, r)
-	controllers.MarketController(client, db, r)
-	controllers.OrderController(client, db, r)
-	controllers.TokenController(client, db, r)
-	controllers.TxController(client, db, r)
+	controllers.AccountController(client, db, s)
+	controllers.AssetController(client, db, s)
+	controllers.BlockController(client, db, s)
+	controllers.StatusController(client, db, s)
+	controllers.StatsController(client, db, s)
+	controllers.MarketController(client, db, s)
+	controllers.OrderController(client, db, s)
+	controllers.TokenController(client, db, s)
+	controllers.TxController(client, db, s)
+
+	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) { // catch-all
+		w.Write([]byte("No route is found matching the URL"))
+	})
 
 	// start the API server
 	log.Printf("Server is running on http://localhost:%s\n", cfg.Web.Port)
