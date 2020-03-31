@@ -1,10 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/config"
@@ -17,15 +19,8 @@ import (
 )
 
 func main() {
-	log.SetOutput(os.Stdout)
-	log.SetFlags(log.LUTC | log.Ldate | log.Ltime | log.Lshortfile)
+	l := log.New(os.Stdout, "Mintscan API ", log.LstdFlags)
 
-	if err := run(); err != nil {
-		log.Fatal(errors.Wrap(err, "failed to start server."))
-	}
-}
-
-func run() error {
 	cfg := config.ParseConfig()
 
 	client := client.NewClient(
@@ -56,11 +51,38 @@ func run() error {
 		w.Write([]byte("No route is found matching the URL"))
 	})
 
-	// start the API server
-	log.Printf("Server is running on http://localhost:%s\n", cfg.Web.Port)
-	if err := http.ListenAndServe(":"+cfg.Web.Port, r); err != nil {
-		return fmt.Errorf("http server: %s", err)
+	// create a new server
+	sm := &http.Server{
+		Addr:         ":" + cfg.Web.Port,
+		Handler:      r,                 // set the default handler
+		ErrorLog:     l,                 // set the logger for the server
+		ReadTimeout:  10 * time.Second,  // max time to read request from the client
+		WriteTimeout: 20 * time.Second,  // max time to write response to the client
+		IdleTimeout:  120 * time.Second, // max time for connections using TCP Keep-Alive
 	}
 
-	return nil
+	// start the server
+	go func() {
+		l.Printf("Server is running on http://localhost:%s\n", cfg.Web.Port)
+
+		err := sm.ListenAndServe()
+		if err != nil {
+			os.Exit(1)
+		}
+	}()
+
+	// trap sigterm or interupt and gracefully shutdown the server
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, os.Kill)
+
+	// Block until a signal is received.
+	sig := <-c
+
+	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	sm.Shutdown(ctx)
+
+	l.Println("Gracefully shutting down the server: ", sig)
 }
