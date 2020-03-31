@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/binance-chain/go-sdk/client/rpc"
-	cmtypes "github.com/binance-chain/go-sdk/common/types"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/codec"
+	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/config"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/types"
 
 	amino "github.com/tendermint/go-amino"
@@ -27,23 +27,22 @@ type Client struct {
 	rpcClient         rpc.Client
 }
 
-// NewClient returns Client
-func NewClient(rpcNode, acceleratedEndpoint, apiServerEndpoint string, explorerServerEndpoint string,
-	networkType cmtypes.ChainNetwork) Client {
+// NewClient creates a new client with the given config
+func NewClient(cfg config.NodeConfig) Client {
 
 	acceleratedClient := resty.New().
-		SetHostURL(acceleratedEndpoint).
+		SetHostURL(cfg.AcceleratedNode).
 		SetTimeout(time.Duration(5 * time.Second))
 
 	apiClient := resty.New().
-		SetHostURL(apiServerEndpoint).
+		SetHostURL(cfg.APIServerEndpoint).
 		SetTimeout(time.Duration(5 * time.Second))
 
 	explorerClient := resty.New().
-		SetHostURL(explorerServerEndpoint).
-		SetTimeout(time.Duration(5 * time.Second))
+		SetHostURL(cfg.ExplorerServerEndpoint).
+		SetTimeout(time.Duration(30 * time.Second))
 
-	rpcClient := rpc.NewRPCClient(rpcNode, networkType)
+	rpcClient := rpc.NewRPCClient(cfg.RPCNode, cfg.NetworkType)
 
 	return Client{
 		acceleratedClient,

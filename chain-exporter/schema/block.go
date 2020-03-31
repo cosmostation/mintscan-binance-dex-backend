@@ -2,7 +2,7 @@ package schema
 
 import "time"
 
-// Block represents the block information
+// Block defines the schema for block information
 type Block struct {
 	ID            int32     `json:"id" sql:",pk"`
 	Height        int64     `json:"height" sql:",notnull"`

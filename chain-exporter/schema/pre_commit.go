@@ -2,7 +2,7 @@ package schema
 
 import "time"
 
-// PreCommit represents the information about precommit state
+// PreCommit defines the schema for precommit state information
 type PreCommit struct {
 	ID               int32     `json:"id" sql:",pk"`
 	Height           int64     `json:"height" sql:",notnull"`

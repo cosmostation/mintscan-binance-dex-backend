@@ -2,7 +2,7 @@ package schema
 
 import "time"
 
-// Validator represents validator information
+// Validator defines the structure for validator information
 type Validator struct {
 	ID                      int32     `json:"id" sql:",pk"`
 	Moniker                 string    `json:"moniker"`

@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 )
 
-// ChosenAssetNames are chosen four asset names for the card view on Asset page
+// ChosenAssetNames define 4 asset names
+// that are displayed on the card view on Asset page
 var ChosenAssetNames = []string{
 	"TUSDB-888",
 	"USDSB-1AC",
@@ -12,7 +13,7 @@ var ChosenAssetNames = []string{
 	"IRIS-D88",
 }
 
-// Asset represents asset detail information
+// Asset defines the structure for asset detail information
 type Asset struct {
 	CreateTime      interface{} `json:"createTime"`
 	UpdateTime      interface{} `json:"updateTime"`
@@ -41,7 +42,7 @@ type Asset struct {
 	} `json:"mediaList"`
 }
 
-// Assets represents asset information list
+// Assets defines the structure for asset information list
 type Assets struct {
 	TotalNum      int `json:"totalNum"`
 	AssetInfoList []struct {

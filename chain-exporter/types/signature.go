@@ -1,6 +1,6 @@
 package types
 
-// Signature represents tx signature
+// Signature defines the structure for transaction signature
 type Signature struct {
 	Address       string `json:"address,omitempty"`
 	AccountNumber int64  `json:"account_number,omitempty"`

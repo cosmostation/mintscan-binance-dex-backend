@@ -32,7 +32,7 @@ type Client struct {
 	rpcClient         rpc.Client
 }
 
-// NewClient returns Client
+// NewClient creates a new client with the given config
 func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
 
 	acceleratedClient := resty.New().

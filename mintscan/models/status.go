@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-// Status represents status on the active chain
+// Status defines the structure for current status on the active chain
 type Status struct {
 	ChainID           string    `json:"chain_id"`
 	BlockTime         float64   `json:"block_time"`

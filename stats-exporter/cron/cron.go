@@ -27,13 +27,7 @@ type Cron struct {
 func NewCron() Cron {
 	cfg := config.ParseConfig()
 
-	client := client.NewClient(
-		cfg.Node.RPCNode,
-		cfg.Node.AcceleratedNode,
-		cfg.Node.APIServerEndpoint,
-		cfg.Node.ExplorerServerEndpoint,
-		cfg.Node.NetworkType,
-	)
+	client := client.NewClient(cfg.Node)
 
 	db := db.Connect(cfg.DB)
 
