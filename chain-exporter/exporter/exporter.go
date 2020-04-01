@@ -45,9 +45,6 @@ func NewExporter() Exporter {
 // Start creates database tables and indexes using Postgres ORM library go-pg and
 // starts syncing blockchain.
 func (ex *Exporter) Start() error {
-	c1 := make(chan string)
-	c2 := make(chan string)
-
 	go func() {
 		for {
 			fmt.Println("start - sync blockchain")
@@ -60,37 +57,8 @@ func (ex *Exporter) Start() error {
 		}
 	}()
 
-	go func() {
-		for {
-			time.Sleep(1 * time.Hour)
-			c1 <- "saving asset information list every hour..."
-		}
-	}()
-
-	go func() {
-		for {
-			time.Sleep(24 * time.Hour)
-			c2 <- "parsing from keybase server using keybase identity"
-		}
-	}()
-
 	for {
-		select {
-		case msg1 := <-c1:
-			assetInfoList1H, err := ex.getAssetInfoList1H()
-			if err != nil {
-				log.Printf("failed to get asset into list 1H: %s", err)
-			}
-			ex.db.SaveAssetInfoList1H(assetInfoList1H)
-			log.Println("finish - ", msg1)
-		case msg2 := <-c2:
-			assetInfoList24H, err := ex.getAssetInfoList24H()
-			if err != nil {
-				log.Printf("failed to get asset into list 24H: %s", err)
-			}
-			ex.db.SaveAssetInfoList24H(assetInfoList24H)
-			log.Println("finish - ", msg2)
-		}
+		select {}
 	}
 }
 
