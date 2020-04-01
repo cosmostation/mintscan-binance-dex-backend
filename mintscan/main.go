@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	l := log.New(os.Stdout, "Mintscan API ", log.LstdFlags)
+	l := log.New(os.Stdout, "Mintscan API ", log.Lshortfile|log.LstdFlags)
 
 	cfg := config.ParseConfig()
 
@@ -64,10 +64,10 @@ func main() {
 	// create a new server
 	sm := &http.Server{
 		Addr:         ":" + cfg.Web.Port,
-		Handler:      r,                 // set the default handler
-		ErrorLog:     l,                 // set the logger for the server
-		ReadTimeout:  10 * time.Second,  // max time to read request from the client
-		WriteTimeout: 20 * time.Second,  // max time to write response to the client
+		Handler:      r,
+		ErrorLog:     l,
+		ReadTimeout:  50 * time.Second,  // max time to read request from the client
+		WriteTimeout: 10 * time.Second,  // max time to write response to the client
 		IdleTimeout:  120 * time.Second, // max time for connections using TCP Keep-Alive
 	}
 
