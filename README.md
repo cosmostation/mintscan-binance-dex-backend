@@ -10,64 +10,74 @@
 
 ## Overview
 
-This project is sponsored by [Binance X Fellowship Program](https://binancex.dev/fellowship.html).
+This project is sponsored by [Binance X Fellowship Program](https://binancex.dev/fellowship.html). The program supports talented developers and researchers in creating free and open-source software that would enable new innovations and businesses in the crypto community.
 
-This repository provides backend code for [Mintscan Block Explorer for Binance Chain](https://binance.mintscan.io/).
-
-- [chain-exporter](https://github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter) watches a full node of Binance Chain and export data into PostgreSQL database.
-
-- [mintscan](https://github.com/cosmostation/mintscan-binance-dex-backend/mintscan) is where all custom APIs are located.
+This repository provides backend code for [Mintscan Block Explorer for Binance Chain](https://binance.mintscan.io/), and you can find frontend code in [this repository](https://github.com/cosmostation/mintscan-binance-dex-frontend).
 
 **_Note that this repository is currently being developed meaning that most likely there will be many breaking changes._**
 
 ## Prerequisite
 
-- Endpoints for [Binance Chain Node RPC](https://docs.binance.org/api-reference/node-rpc.html) and [API Server](https://docs.binance.org/api-reference/api-server.html)
+- Requires [Go 1.14+](https://golang.org/dl/)
 
-- PostgreSQL Database
+- Prepare endpoints for [Binance Chain Node RPC](https://docs.binance.org/api-reference/node-rpc.html) and [API Server](https://docs.binance.org/api-reference/api-server.html)
+
+- Prepare PostgreSQL Database
+
+## Folder Structure
+
+    /
+    |- chain-exporter
+    |- mintscan
+    |- stats-exporter
+
+#### Chain Exporter
+
+[chain-exporter](https://github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter) watches a full node of Binance Chain and export chain data into PostgreSQL database.
+
+#### Mintscan
+
+[mintscan](https://github.com/cosmostation/mintscan-binance-dex-backend/mintscan) provides any necesarry custom APIs.
+
+#### Stats Exporter
+
+[stats-exporter](https://github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter) creates cron jobs to export market data to build chart history API.
+
+## Configuration
+
+For configuration, it uses human readable data-serialization configuration file format called [YAML](https://en.wikipedia.org/wiki/YAML).
+
+To configure `chain-exporter` | `mintscan` | `stats-exporter`, you need to configure  `config.yaml` file in each folder. Reference `example.yaml`.
+
+**_Note that the configuration needs to be passed in via `config.yaml` file, so make sure to change the name to `config.yaml`._**
 
 ## Install
 
-**Note:** Requires [Go 1.13+](https://golang.org/dl/)
-
-Git clone this repo
+#### Git clone this repo
 ```shell
 git clone https://github.com/cosmostation/mintscan-binance-dex-backend.git
 ```
 
-Chain Exporter
+#### Build by Makefile
 ```shell
 cd mintscan-binance-dex-backend/chain-exporter
-go run main.go
+make build
+
+cd mintscan-binance-dex-backend/mintscan
+make build
+
+cd mintscan-binance-dex-backend/stats-exporter
+make build
 ```
-
-Mintscan API
-```shell
-cd mintscan-binance-dex-backend/chain-exporter
-go run application.go
-```
-
-**_Makefile will be supported soon._**
-
-## Configuration
-
-It uses human readable data-serialization configuration file format, [YAML](https://en.wikipedia.org/wiki/YAML).
-
-Reference `example.yaml` inside both `chain-exporter` and `mintscan`.
-
-The configuration needs to be passed in via `config.yaml` file, so make sure to change the name to `config.yaml`.
 
 ## Database 
 
-This project uses [Golang ORM with focus on PostgreSQL features and performance](https://github.com/go-pg/pg).
-
-Database tables are:
+This project uses [Golang ORM with focus on PostgreSQL features and performance](https://github.com/go-pg/pg). Once `chain-exporter` begins to run, it creates the following database tables if not exist already.
 
 - Block
 - PreCommit
 - Transaction
 - Validator
-- More to add...
 
 ## Contributing
 

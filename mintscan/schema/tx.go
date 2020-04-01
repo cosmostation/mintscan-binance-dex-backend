@@ -2,7 +2,7 @@ package schema
 
 import "time"
 
-// Transaction represents the information in a transaction
+// Transaction defines the schema for transaction information
 type Transaction struct {
 	ID         int32     `json:"id" sql:",pk"`
 	Height     int64     `json:"height" sql:",notnull"`

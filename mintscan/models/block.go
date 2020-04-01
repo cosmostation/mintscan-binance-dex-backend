@@ -3,7 +3,7 @@ package models
 import "time"
 
 type (
-	// ResultBlocks is a block result response
+	// ResultBlocks defines the structure for block result response
 	ResultBlocks struct {
 		Paging Paging      `json:"paging"`
 		Data   []BlockData `json:"data"`

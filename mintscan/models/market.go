@@ -2,7 +2,8 @@ package models
 
 import "time"
 
-// Market represents market data
+// Market defines the structure for market data
+// This project uses CoinGecko API
 type Market struct {
 	Name              string    `json:"name"`
 	Symbol            string    `json:"symbol"`

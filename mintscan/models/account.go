@@ -2,7 +2,7 @@ package models
 
 import "encoding/json"
 
-// Account represents account information
+// Account defines the structure for account information
 type Account struct {
 	Address       string          `json:"address"`
 	PublicKey     json.RawMessage `json:"public_key"`
@@ -17,7 +17,7 @@ type Account struct {
 	} `json:"balances"`
 }
 
-// AccountTxs represents asset transactions
+// AccountTxs defines the structure for asset transactions
 type AccountTxs struct {
 	TxNums  int `json:"txNums"`
 	TxArray []struct {
@@ -43,7 +43,7 @@ type AccountTxs struct {
 	} `json:"txArray"`
 }
 
-// ResultAccountTxs represents response data for AssetTxs
+// ResultAccountTxs defines the structure for response data for AssetTxs
 type ResultAccountTxs struct {
 	TxNums  int              `json:"txNums"`
 	TxArray []AccountTxArray `json:"txArray"`
@@ -72,7 +72,7 @@ type AccountTxArray struct {
 	Timestamp     int64          `json:"timeStamp"`
 }
 
-// AccountTxData wraps ResultAccountTxs Data
+// AccountTxData defines the structure for ResultAccountTxs Data
 type AccountTxData struct {
 	OrderData struct {
 		Symbol      string `json:"symbol"`

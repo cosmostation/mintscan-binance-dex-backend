@@ -1,6 +1,6 @@
 package models
 
-// Token represents token information
+// Token defines the structure for token information
 type Token struct {
 	Name           string `json:"name"`
 	Symbol         string `json:"symbol"`

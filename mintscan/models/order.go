@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-// Order represents order information
+// Order defines the structure for order information
 type Order struct {
 	OrderID              string    `json:"orderId"`
 	Symbol               string    `json:"symbol"`

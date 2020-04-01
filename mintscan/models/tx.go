@@ -5,39 +5,24 @@ import (
 	"time"
 )
 
-// Txs represents transaction data for result block
-type Txs struct {
-	Height    int64     `json:"height"`
-	Result    bool      `json:"result"`
-	TxHash    string    `json:"tx_hash"`
-	Messages  []Message `json:"messages"`
-	Memo      string    `json:"memo"`
-	Code      uint32    `json:"code"`
-	Timestamp time.Time `json:"timestamp"`
-}
+// Txs defines the structure for transaction data for result block
+type (
+	Txs struct {
+		Height    int64     `json:"height"`
+		Result    bool      `json:"result"`
+		TxHash    string    `json:"tx_hash"`
+		Messages  []Message `json:"messages"`
+		Memo      string    `json:"memo"`
+		Code      uint32    `json:"code"`
+		Timestamp time.Time `json:"timestamp"`
+	}
 
-// Message wraps tx message
-type Message struct {
-	Type  string          `json:"type"`
-	Value json.RawMessage `json:"value"`
-}
-
-// Signature wraps tx signature
-type Signature struct {
-	Pubkey        string `json:"pubkey"`
-	Address       string `json:"address"`
-	Sequence      string `json:"sequence"`
-	Signature     string `json:"signature"`
-	AccountNumber string `json:"account_number"`
-}
-
-// TxRequestPayload respresents the data when
-// receiving transaction request by its type and date
-type TxRequestPayload struct {
-	TxType    string `json:"tx_type"`
-	StartTime int64  `json:"start_time"`
-	EndTime   int64  `json:"end_time"`
-}
+	// Message wraps tx message
+	Message struct {
+		Type  string          `json:"type"`
+		Value json.RawMessage `json:"value"`
+	}
+)
 
 type (
 	// ResultTxs is transaction result response
@@ -58,9 +43,26 @@ type (
 		Code       uint32      `json:"code"`
 		Timestamp  time.Time   `json:"timestamp"`
 	}
+
+	// Signature wraps tx signature
+	Signature struct {
+		Pubkey        string `json:"pubkey"`
+		Address       string `json:"address"`
+		Sequence      string `json:"sequence"`
+		Signature     string `json:"signature"`
+		AccountNumber string `json:"account_number"`
+	}
 )
 
-// ValidatorMsgType verifies transaction message type
+// TxRequestPayload defines the structure for the data when
+// receiving transaction request by its type and date
+type TxRequestPayload struct {
+	TxType    string `json:"tx_type"`
+	StartTime int64  `json:"start_time"`
+	EndTime   int64  `json:"end_time"`
+}
+
+// ValidatorMsgType verifies transaction by its message type
 func ValidatorMsgType(msgType string) bool {
 	msgTypes := []struct {
 		msg, name string

@@ -2,7 +2,7 @@ package schema
 
 import "time"
 
-// StatAssetInfoList1H represents statistics for assets in an hour
+// StatAssetInfoList1H defines the schema for asset statistics in an hourly basis
 type StatAssetInfoList1H struct {
 	ID           int32     `json:"id" sql:",pk"`
 	Name         string    `json:"name" sql:",notnull"`
@@ -20,7 +20,7 @@ type StatAssetInfoList1H struct {
 	Timestamp    time.Time `json:"timestamp" sql:"default:now()"`
 }
 
-// StatAssetInfoList24H represents statistics for assets in 24 hours
+// StatAssetInfoList24H defines the schema for asset statistics in 24 hourly basis
 type StatAssetInfoList24H struct {
 	ID           int32     `json:"id" sql:",pk"`
 	Asset        string    `json:"asset" sql:",notnull"`

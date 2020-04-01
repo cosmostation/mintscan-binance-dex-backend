@@ -1,4 +1,4 @@
-package services
+package handlers
 
 import (
 	"encoding/json"
@@ -11,46 +11,59 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
+
 	"github.com/gorilla/mux"
 )
 
+// Account is a account handler
+type Account struct {
+	l      *log.Logger
+	client *client.Client
+	db     *db.Database
+}
+
+// NewAccount creates a new account handler with the given params
+func NewAccount(l *log.Logger, client *client.Client, db *db.Database) *Account {
+	return &Account{l, client, db}
+}
+
 // GetAccount returns account information
-func GetAccount(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func (a *Account) GetAccount(wr http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
 	if address == "" {
-		errors.ErrRequiredParam(w, http.StatusBadRequest, "address is required")
-		return nil
+		errors.ErrRequiredParam(wr, http.StatusBadRequest, "address is required")
+		return
 	}
 
 	if len(address) != 42 {
-		errors.ErrInvalidParam(w, http.StatusBadRequest, "address is invalid")
-		return nil
+		errors.ErrInvalidParam(wr, http.StatusBadRequest, "address is invalid")
+		return
 	}
 
-	account, err := c.Account(address)
+	account, err := a.client.Account(address)
 	if err != nil {
-		log.Printf("failed to request account information: %s\n", err)
+		a.l.Printf("failed to request account information: %s\n", err)
 	}
 
-	utils.Respond(w, account)
-	return nil
+	utils.Respond(wr, account)
+	return
 }
 
 // GetAccountTxs returns transactions associated with an account
-func GetAccountTxs(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func (a *Account) GetAccountTxs(wr http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
 	if address == "" {
-		errors.ErrRequiredParam(w, http.StatusBadRequest, "address is required")
-		return nil
+		errors.ErrRequiredParam(wr, http.StatusBadRequest, "address is required")
+		return
 	}
 
 	if len(address) != 42 {
-		errors.ErrInvalidParam(w, http.StatusBadRequest, "address is invalid")
-		return nil
+		errors.ErrInvalidParam(wr, http.StatusBadRequest, "address is invalid")
+		return
 	}
 
 	page := int(1)
@@ -65,18 +78,18 @@ func GetAccountTxs(c *client.Client, db *db.Database, w http.ResponseWriter, r *
 	}
 
 	if rows < 1 {
-		errors.ErrInvalidParam(w, http.StatusBadRequest, "'rows' cannot be less than")
-		return nil
+		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be less than")
+		return
 	}
 
 	if rows > 50 {
-		errors.ErrInvalidParam(w, http.StatusBadRequest, "'rows' cannot be greater than 50")
-		return nil
+		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be greater than 50")
+		return
 	}
 
-	acctTxs, err := c.AccountTxs(address, page, rows)
+	acctTxs, err := a.client.AccountTxs(address, page, rows)
 	if err != nil {
-		log.Printf("failed to get account txs: %s\n", err)
+		a.l.Printf("failed to get account txs: %s\n", err)
 	}
 
 	txArray := make([]models.AccountTxArray, 0)
@@ -111,7 +124,7 @@ func GetAccountTxs(c *client.Client, db *db.Database, w http.ResponseWriter, r *
 		if tx.Data != "" {
 			err = json.Unmarshal([]byte(tx.Data), &data)
 			if err != nil {
-				log.Printf("failed to unmarshal AssetTxData: %s", err)
+				a.l.Printf("failed to unmarshal AssetTxData: %s", err)
 			}
 
 			tempTxArray.Message = &data
@@ -125,6 +138,6 @@ func GetAccountTxs(c *client.Client, db *db.Database, w http.ResponseWriter, r *
 		TxArray: txArray,
 	}
 
-	utils.Respond(w, result)
-	return nil
+	utils.Respond(wr, result)
+	return
 }

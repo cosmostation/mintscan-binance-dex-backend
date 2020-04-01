@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-// AssetInfo represents asset information list
+// AssetInfo defines the structure for asset information list
 type AssetInfo struct {
 	TotalNum      int `json:"totalNum"`
 	AssetInfoList []struct {

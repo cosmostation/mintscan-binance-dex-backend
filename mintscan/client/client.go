@@ -32,7 +32,7 @@ type Client struct {
 	rpcClient         rpc.Client
 }
 
-// NewClient returns Client
+// NewClient creates a new client with the given config
 func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
 
 	acceleratedClient := resty.New().
@@ -49,7 +49,7 @@ func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
 
 	explorerClient := resty.New().
 		SetHostURL(cfg.ExplorerServerEndpoint).
-		SetTimeout(time.Duration(10 * time.Second))
+		SetTimeout(time.Duration(30 * time.Second))
 
 	rpcClient := rpc.NewRPCClient(cfg.RPCNode, cfg.NetworkType)
 
