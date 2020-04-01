@@ -126,20 +126,3 @@ func (c Client) Tokens(limit int, offset int) ([]*types.Token, error) {
 
 	return tokens, nil
 }
-
-// AssetInfoList returns asset info list in active chain
-// An error returns if the query fails.
-func (c Client) AssetInfoList(page int, rows int) (types.AssetInfo, error) {
-	resp, err := c.explorerClient.R().Get("/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
-	if err != nil {
-		return types.AssetInfo{}, err
-	}
-
-	var assets types.AssetInfo
-	err = json.Unmarshal(resp.Body(), &assets)
-	if err != nil {
-		return types.AssetInfo{}, err
-	}
-
-	return assets, nil
-}

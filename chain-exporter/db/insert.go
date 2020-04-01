@@ -50,23 +50,3 @@ func (db *Database) InsertExportedData(block []*schema.Block, txs []*schema.Tran
 	return nil
 
 }
-
-// SaveAssetInfoList1H inserts asset information list every hour
-func (db *Database) SaveAssetInfoList1H(assets []*schema.StatAssetInfoList1H) error {
-	err := db.Insert(&assets)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// SaveAssetInfoList24H inserts asset information list every 24 hours
-func (db *Database) SaveAssetInfoList24H(assets []*schema.StatAssetInfoList24H) error {
-	err := db.Insert(&assets)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

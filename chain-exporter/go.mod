@@ -3,7 +3,6 @@ module github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter
 go 1.13
 
 require (
-	github.com/binance-chain/bnc-go-amino v0.14.1 // indirect
 	github.com/binance-chain/go-sdk v1.2.1
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/go-resty/resty/v2 v2.2.0
@@ -12,7 +11,6 @@ require (
 	github.com/onsi/ginkgo v1.11.0 // indirect
 	github.com/onsi/gomega v1.8.1 // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/robfig/cron v1.2.0
 	github.com/spf13/afero v1.2.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
