@@ -10,8 +10,8 @@ import (
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/config"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/controllers"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/handlers"
 
 	"github.com/pkg/errors"
 
@@ -35,17 +35,27 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	s := r.PathPrefix("/v1").Subrouter()
 
-	controllers.AccountController(client, db, s)
-	controllers.AssetController(client, db, s)
-	controllers.BlockController(client, db, s)
-	controllers.StatusController(client, db, s)
-	controllers.StatsController(client, db, s)
-	controllers.MarketController(client, db, s)
-	controllers.OrderController(client, db, s)
-	controllers.TokenController(client, db, s)
-	controllers.TxController(client, db, s)
+	getR := r.Methods(http.MethodGet).PathPrefix("/v1").Subrouter()
+	getR.HandleFunc("/account/{address}", handlers.NewAccount(l, client, db).GetAccount)
+	getR.HandleFunc("/account/txs/{address}", handlers.NewAccount(l, client, db).GetAccountTxs)
+	getR.HandleFunc("/asset", handlers.NewAsset(l, client, db).GetAsset)
+	getR.HandleFunc("/assets", handlers.NewAsset(l, client, db).GetAssets)
+	getR.HandleFunc("/assets/txs", handlers.NewAsset(l, client, db).GetAssetTxs)
+	getR.HandleFunc("/asset-holders", handlers.NewAsset(l, client, db).GetAssetHolders)
+	getR.HandleFunc("/assets-images", handlers.NewAsset(l, client, db).GetAssetsImages)
+	getR.HandleFunc("/blocks", handlers.NewBlock(l, client, db).GetBlocks)
+	getR.HandleFunc("/market", handlers.NewMarket(l, client, db).GetCoinMarketData)
+	getR.HandleFunc("/market/chart", handlers.NewMarket(l, client, db).GetCoinMarketChartData)
+	getR.HandleFunc("/orders/{id}", handlers.NewOrder(l, client, db).GetOrders)
+	getR.HandleFunc("/stats/assets/chart", handlers.NewStatistic(l, client, db).GetAssetsChartHistory)
+	getR.HandleFunc("/status", handlers.NewStatus(l, client, db).GetStatus)
+	getR.HandleFunc("/tokens", handlers.NewToken(l, client, db).GetTokens)
+	getR.HandleFunc("/txs", handlers.NewTransaction(l, client, db).GetTxs)
+	getR.HandleFunc("/txs/{hash}", handlers.NewTransaction(l, client, db).GetTxByHash)
+
+	postR := r.Methods(http.MethodPost).PathPrefix("/v1").Subrouter()
+	postR.HandleFunc("/txs", handlers.NewTransaction(l, client, db).GetTxsByType)
 
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) { // catch-all
 		w.Write([]byte("No route is found matching the URL"))

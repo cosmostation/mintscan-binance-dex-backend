@@ -1,6 +1,7 @@
-package services
+package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -10,8 +11,20 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
+// Token is a token handler
+type Token struct {
+	l      *log.Logger
+	client *client.Client
+	db     *db.Database
+}
+
+// NewToken creates a new token handler with the given params
+func NewToken(l *log.Logger, client *client.Client, db *db.Database) *Token {
+	return &Token{l, client, db}
+}
+
 // GetTokens returns assets based upon the request params
-func GetTokens(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func (t *Token) GetTokens(wr http.ResponseWriter, r *http.Request) {
 	limit := 100
 	offset := 0
 
@@ -24,12 +37,12 @@ func GetTokens(c *client.Client, db *db.Database, w http.ResponseWriter, r *http
 	}
 
 	if limit > 1000 {
-		errors.ErrOverMaxLimit(w, http.StatusUnauthorized)
-		return nil
+		errors.ErrOverMaxLimit(wr, http.StatusUnauthorized)
+		return
 	}
 
-	tks, _ := c.Tokens(limit, offset)
+	tks, _ := t.client.Tokens(limit, offset)
 
-	utils.Respond(w, tks)
-	return nil
+	utils.Respond(wr, tks)
+	return
 }

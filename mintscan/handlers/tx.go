@@ -1,4 +1,4 @@
-package services
+package handlers
 
 import (
 	"encoding/json"
@@ -18,8 +18,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Transaction is a transaction handler
+type Transaction struct {
+	l      *log.Logger
+	client *client.Client
+	db     *db.Database
+}
+
+// NewTransaction creates a new transaction handler with the given params
+func NewTransaction(l *log.Logger, client *client.Client, db *db.Database) *Transaction {
+	return &Transaction{l, client, db}
+}
+
 // GetTxs returns transactions based upon the request params
-func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func (t *Transaction) GetTxs(wr http.ResponseWriter, r *http.Request) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
@@ -37,28 +49,28 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if limit > 100 {
-		errors.ErrOverMaxLimit(w, http.StatusUnauthorized)
-		return nil
+		errors.ErrOverMaxLimit(wr, http.StatusUnauthorized)
+		return
 	}
 
-	txs, err := db.QueryTxs(before, after, limit)
+	txs, err := t.db.QueryTxs(before, after, limit)
 	if err != nil {
-		log.Printf("failed to query txs: %s\n", err)
+		t.l.Printf("failed to query txs: %s\n", err)
 	}
 
 	if len(txs) <= 0 {
-		utils.Respond(w, models.ResultTxs{})
-		return nil
+		utils.Respond(wr, models.ResultTxs{})
+		return
 	}
 
-	result, err := setTxs(txs)
+	result, err := t.setTxs(txs)
 	if err != nil {
-		log.Printf("failed to set txs: %s\n", err)
+		t.l.Printf("failed to set txs: %s\n", err)
 	}
 
-	totalTxsNum, err := db.CountTotalTxsNum()
+	totalTxsNum, err := t.db.CountTotalTxsNum()
 	if err != nil {
-		log.Printf("failed to query total number of txs: %s\n", err)
+		t.l.Printf("failed to query total number of txs: %s\n", err)
 	}
 
 	// Handling before and after since their ordering data is different
@@ -72,33 +84,33 @@ func GetTxs(db *db.Database, w http.ResponseWriter, r *http.Request) error {
 		result.Paging.After = result.Data[0].ID
 	}
 
-	utils.Respond(w, result)
-	return nil
+	utils.Respond(wr, result)
+	return
 }
 
 // GetTxByHash returns certain transaction information by its tx hash
-func GetTxByHash(db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func (t *Transaction) GetTxByHash(wr http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	hash := vars["hash"]
 
-	tx, err := db.QueryTxByHash(hash)
+	tx, err := t.db.QueryTxByHash(hash)
 	if err != nil {
-		log.Printf("failed to query tx: %s\n", err)
-		utils.Respond(w, models.TxData{})
-		return nil
+		t.l.Printf("failed to query tx: %s\n", err)
+		utils.Respond(wr, models.TxData{})
+		return
 	}
 
-	result, err := setTx(tx)
+	result, err := t.setTx(tx)
 	if err != nil {
-		log.Printf("failed to set tx: %s\n", err)
+		t.l.Printf("failed to set tx: %s\n", err)
 	}
 
-	utils.Respond(w, result)
-	return nil
+	utils.Respond(wr, result)
+	return
 }
 
 // GetTxsByType returns transactions based upon the request params
-func GetTxsByType(c *client.Client, db *db.Database, w http.ResponseWriter, r *http.Request) error {
+func (t *Transaction) GetTxsByType(wr http.ResponseWriter, r *http.Request) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
@@ -116,14 +128,14 @@ func GetTxsByType(c *client.Client, db *db.Database, w http.ResponseWriter, r *h
 	}
 
 	if limit > 100 {
-		errors.ErrOverMaxLimit(w, http.StatusUnauthorized)
-		return nil
+		errors.ErrOverMaxLimit(wr, http.StatusUnauthorized)
+		return
 	}
 
 	var txrp models.TxRequestPayload
 	err := json.NewDecoder(r.Body).Decode(&txrp)
 	if err != nil {
-		log.Printf("failed to decode txrp: %s\n", err)
+		t.l.Printf("failed to decode txrp: %s\n", err)
 	}
 
 	// Set the first block time if StartTime is not parsed
@@ -140,27 +152,27 @@ func GetTxsByType(c *client.Client, db *db.Database, w http.ResponseWriter, r *h
 	// Validate transaction message type
 	ok := models.ValidatorMsgType(txrp.TxType)
 	if !ok {
-		errors.ErrInvalidMessageType(w, http.StatusUnauthorized)
-		return nil
+		errors.ErrInvalidMessageType(wr, http.StatusUnauthorized)
+		return
 	}
 
-	txs, err := db.QueryTxsByType(txrp.TxType, txrp.StartTime, txrp.EndTime, before, after, limit)
+	txs, err := t.db.QueryTxsByType(txrp.TxType, txrp.StartTime, txrp.EndTime, before, after, limit)
 	if err != nil {
-		log.Printf("failed to query txs: %s\n", err)
+		t.l.Printf("failed to query txs: %s\n", err)
 	}
 
 	if len(txs) <= 0 {
-		return nil
+		return
 	}
 
-	result, err := setTxs(txs)
+	result, err := t.setTxs(txs)
 	if err != nil {
-		log.Printf("failed to set txs: %s\n", err)
+		t.l.Printf("failed to set txs: %s\n", err)
 	}
 
-	totalTxsNum, err := db.CountTotalTxsNum()
+	totalTxsNum, err := t.db.CountTotalTxsNum()
 	if err != nil {
-		log.Printf("failed to query total number of txs: %s\n", err)
+		t.l.Printf("failed to query total number of txs: %s\n", err)
 	}
 
 	// Handling before and after since their ordering data is different
@@ -174,12 +186,12 @@ func GetTxsByType(c *client.Client, db *db.Database, w http.ResponseWriter, r *h
 		result.Paging.After = result.Data[0].ID
 	}
 
-	utils.Respond(w, result)
-	return nil
+	utils.Respond(wr, result)
+	return
 }
 
 // setTx handles tx and return result response
-func setTx(tx schema.Transaction) (*models.TxData, error) {
+func (t *Transaction) setTx(tx schema.Transaction) (*models.TxData, error) {
 	msgs := make([]models.Message, 0)
 	err := json.Unmarshal([]byte(tx.Messages), &msgs)
 	if err != nil {
@@ -212,7 +224,7 @@ func setTx(tx schema.Transaction) (*models.TxData, error) {
 }
 
 // setTxs handles txs and return result response
-func setTxs(txs []schema.Transaction) (*models.ResultTxs, error) {
+func (t *Transaction) setTxs(txs []schema.Transaction) (*models.ResultTxs, error) {
 	data := make([]models.TxData, 0)
 
 	for _, tx := range txs {
