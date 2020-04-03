@@ -23,7 +23,7 @@ func NewStatistic(l *log.Logger, client *client.Client, db *db.Database) *Statis
 }
 
 // GetAssetsChartHistory returns
-func (s *Statistic) GetAssetsChartHistory(wr http.ResponseWriter, r *http.Request) {
+func (s *Statistic) GetAssetsChartHistory(rw http.ResponseWriter, r *http.Request) {
 	result := make([]models.AssetChartHistory, 0)
 
 	limit := int(24)
@@ -66,6 +66,6 @@ func (s *Statistic) GetAssetsChartHistory(wr http.ResponseWriter, r *http.Reques
 		result = append(result, *tempResult)
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }

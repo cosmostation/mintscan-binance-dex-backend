@@ -26,9 +26,9 @@ func NewAsset(l *log.Logger, client *client.Client, db *db.Database) *Asset {
 }
 
 // GetAsset returns asset based upon the request params
-func (a *Asset) GetAsset(wr http.ResponseWriter, r *http.Request) {
+func (a *Asset) GetAsset(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["asset"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'asset' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'asset' is not present")
 		return
 	}
 
@@ -39,21 +39,21 @@ func (a *Asset) GetAsset(wr http.ResponseWriter, r *http.Request) {
 		a.l.Printf("failed to get asset detail information: %s\n", err)
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }
 
 // GetAssets returns assets based upon the request params
-func (a *Asset) GetAssets(wr http.ResponseWriter, r *http.Request) {
+func (a *Asset) GetAssets(rw http.ResponseWriter, r *http.Request) {
 	onlyPrice := "false" // default is false, when true it only show assets price information
 
 	if len(r.URL.Query()["page"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'page' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
 		return
 	}
 
 	if len(r.URL.Query()["rows"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'rows' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
 		return
 	}
 
@@ -65,12 +65,12 @@ func (a *Asset) GetAssets(wr http.ResponseWriter, r *http.Request) {
 	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
 
 	if rows < 1 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be less than 1")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
 	if rows > 1000 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return
 	}
 
@@ -99,28 +99,28 @@ func (a *Asset) GetAssets(wr http.ResponseWriter, r *http.Request) {
 			AssetInfoList: assetInfoList,
 		}
 
-		utils.Respond(wr, result)
+		utils.Respond(rw, result)
 		return
 	}
 
-	utils.Respond(wr, assets)
+	utils.Respond(rw, assets)
 	return
 }
 
 // GetAssetHolders returns asset holders based upon the request params
-func (a *Asset) GetAssetHolders(wr http.ResponseWriter, r *http.Request) {
+func (a *Asset) GetAssetHolders(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["asset"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'asset' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'asset' is not present")
 		return
 	}
 
 	if len(r.URL.Query()["page"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'page' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
 		return
 	}
 
 	if len(r.URL.Query()["rows"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'rows' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
 		return
 	}
 
@@ -129,12 +129,12 @@ func (a *Asset) GetAssetHolders(wr http.ResponseWriter, r *http.Request) {
 	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
 
 	if rows < 1 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be less than 1")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
 	if rows > 100 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return
 	}
 
@@ -143,19 +143,19 @@ func (a *Asset) GetAssetHolders(wr http.ResponseWriter, r *http.Request) {
 		a.l.Printf("failed to get asset holders list: %s\n", err)
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }
 
 // GetAssetsImages returns images of all assets
-func (a *Asset) GetAssetsImages(wr http.ResponseWriter, r *http.Request) {
+func (a *Asset) GetAssetsImages(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["page"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'page' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
 		return
 	}
 
 	if len(r.URL.Query()["rows"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'rows' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
 		return
 	}
 
@@ -163,12 +163,12 @@ func (a *Asset) GetAssetsImages(wr http.ResponseWriter, r *http.Request) {
 	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
 
 	if rows < 1 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be less than 1")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
 	if rows > 100 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return
 	}
 
@@ -194,24 +194,24 @@ func (a *Asset) GetAssetsImages(wr http.ResponseWriter, r *http.Request) {
 		ImageList: imageList,
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }
 
 // GetAssetTxs returns asset txs
-func (a *Asset) GetAssetTxs(wr http.ResponseWriter, r *http.Request) {
+func (a *Asset) GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["txAsset"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'txAsset' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'txAsset' is not present")
 		return
 	}
 
 	if len(r.URL.Query()["page"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'page' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
 		return
 	}
 
 	if len(r.URL.Query()["rows"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'rows' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
 		return
 	}
 
@@ -220,12 +220,12 @@ func (a *Asset) GetAssetTxs(wr http.ResponseWriter, r *http.Request) {
 	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
 
 	if rows < 1 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be less than 1")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
 	if rows > 100 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return
 	}
 
@@ -280,6 +280,6 @@ func (a *Asset) GetAssetTxs(wr http.ResponseWriter, r *http.Request) {
 		TxArray: txArray,
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }

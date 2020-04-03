@@ -282,3 +282,19 @@ func (c Client) Order(id string) (models.Order, error) {
 
 	return order, nil
 }
+
+// TxMsgFees returns fees for different transaciton message types
+func (c Client) TxMsgFees() ([]*models.TxMsgFee, error) {
+	resp, err := c.acceleratedClient.R().Get("/fees")
+	if err != nil {
+		return []*models.TxMsgFee{}, err
+	}
+
+	var fees []*models.TxMsgFee
+	err = json.Unmarshal(resp.Body(), &fees)
+	if err != nil {
+		return []*models.TxMsgFee{}, err
+	}
+
+	return fees, nil
+}

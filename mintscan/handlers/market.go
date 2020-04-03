@@ -26,9 +26,9 @@ func NewMarket(l *log.Logger, client *client.Client, db *db.Database) *Market {
 }
 
 // GetCoinMarketData returns market data from CoinGecko API
-func (m *Market) GetCoinMarketData(wr http.ResponseWriter, r *http.Request) {
+func (m *Market) GetCoinMarketData(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["id"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'id' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'id' is not present")
 		return
 	}
 
@@ -55,14 +55,14 @@ func (m *Market) GetCoinMarketData(wr http.ResponseWriter, r *http.Request) {
 		LastUpdated:       data.MarketData.LastUpdated,
 	}
 
-	utils.Respond(wr, marketData)
+	utils.Respond(rw, marketData)
 	return
 }
 
 // GetCoinMarketChartData returns market chart data from CoinGecko API
-func (m *Market) GetCoinMarketChartData(wr http.ResponseWriter, r *http.Request) {
+func (m *Market) GetCoinMarketChartData(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["id"]) <= 0 {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "'id' is not present")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'id' is not present")
 		return
 	}
 
@@ -77,6 +77,6 @@ func (m *Market) GetCoinMarketChartData(wr http.ResponseWriter, r *http.Request)
 		m.l.Printf("failed to fetch coin market chart data: %s\n", err)
 	}
 
-	utils.Respond(wr, marketChartData)
+	utils.Respond(rw, marketChartData)
 	return
 }

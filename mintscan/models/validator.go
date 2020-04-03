@@ -41,3 +41,12 @@ type (
 		UpdateTime    time.Time `json:"update_time"`
 	}
 )
+
+// ResultValidators defines the structure for validators response
+type ResultValidators struct {
+	Moniker          string    `json:"moniker"`
+	ValidatorAddress string    `json:"validator_address"`
+	ConsensusPubKey  string    `json:"consensus_pubkey"`
+	VotingPower      int64     `json:"voting_power"`
+	Timestamp        time.Time `json:"timestamp" sql:"default:now()"`
+}

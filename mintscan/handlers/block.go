@@ -27,7 +27,7 @@ func NewBlock(l *log.Logger, client *client.Client, db *db.Database) *Block {
 }
 
 // GetBlocks returns blocks based upon the request params
-func (b *Block) GetBlocks(wr http.ResponseWriter, r *http.Request) {
+func (b *Block) GetBlocks(rw http.ResponseWriter, r *http.Request) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
@@ -45,7 +45,7 @@ func (b *Block) GetBlocks(wr http.ResponseWriter, r *http.Request) {
 	}
 
 	if limit > 100 {
-		errors.ErrOverMaxLimit(wr, http.StatusUnauthorized)
+		errors.ErrOverMaxLimit(rw, http.StatusUnauthorized)
 		return
 	}
 
@@ -79,7 +79,7 @@ func (b *Block) GetBlocks(wr http.ResponseWriter, r *http.Request) {
 		result.Paging.After = int32(result.Data[0].Height)
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }
 

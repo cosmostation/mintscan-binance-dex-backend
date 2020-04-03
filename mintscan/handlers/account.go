@@ -28,17 +28,17 @@ func NewAccount(l *log.Logger, client *client.Client, db *db.Database) *Account 
 }
 
 // GetAccount returns account information
-func (a *Account) GetAccount(wr http.ResponseWriter, r *http.Request) {
+func (a *Account) GetAccount(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
 	if address == "" {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "address is required")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "address is required")
 		return
 	}
 
 	if len(address) != 42 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "address is invalid")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "address is invalid")
 		return
 	}
 
@@ -47,22 +47,22 @@ func (a *Account) GetAccount(wr http.ResponseWriter, r *http.Request) {
 		a.l.Printf("failed to request account information: %s\n", err)
 	}
 
-	utils.Respond(wr, account)
+	utils.Respond(rw, account)
 	return
 }
 
 // GetAccountTxs returns transactions associated with an account
-func (a *Account) GetAccountTxs(wr http.ResponseWriter, r *http.Request) {
+func (a *Account) GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
 	if address == "" {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "address is required")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "address is required")
 		return
 	}
 
 	if len(address) != 42 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "address is invalid")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "address is invalid")
 		return
 	}
 
@@ -78,12 +78,12 @@ func (a *Account) GetAccountTxs(wr http.ResponseWriter, r *http.Request) {
 	}
 
 	if rows < 1 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be less than")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than")
 		return
 	}
 
 	if rows > 50 {
-		errors.ErrInvalidParam(wr, http.StatusBadRequest, "'rows' cannot be greater than 50")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 50")
 		return
 	}
 
@@ -138,6 +138,6 @@ func (a *Account) GetAccountTxs(wr http.ResponseWriter, r *http.Request) {
 		TxArray: txArray,
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }
