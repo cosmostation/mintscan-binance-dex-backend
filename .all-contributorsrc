@@ -17,6 +17,16 @@
         "test",
         "maintenance"
       ]
+    },
+    {
+      "login": "fl-y",
+      "name": "fl-y",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/31615341?v=4",
+      "profile": "http://dev.to/fly",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
