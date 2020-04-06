@@ -1,4 +1,6 @@
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 <p align="center">    
@@ -89,6 +91,18 @@ We encourage and support an active, healthy community of contributors — any co
 ## Contributors ✨
 
 ## Our Services and Community 
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://jaybdev.net"><img src="https://avatars1.githubusercontent.com/u/20435620?v=4" width="100px;" alt=""/><br /><sub><b>JayB</b></sub></a><br /><a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=kogisin" title="Code">💻</a> <a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=kogisin" title="Documentation">📖</a> <a href="#projectManagement-kogisin" title="Project Management">📆</a> <a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=kogisin" title="Tests">⚠️</a> <a href="#maintenance-kogisin" title="Maintenance">🚧</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 - [Official Website](https://www.cosmostation.io)
 - [Mintscan Explorer](https://www.mintscan.io)
