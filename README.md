@@ -1,5 +1,5 @@
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 <p align="center">    
   <a href="https://www.cosmostation.io" target="_blank" rel="noopener noreferrer"><img width="400" src="https://user-images.githubusercontent.com/31615341/78533120-614f5900-7823-11ea-901a-b745880594cf.png" alt="Cosmostation logo"></a>    
@@ -96,6 +96,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://jaybdev.net"><img src="https://avatars1.githubusercontent.com/u/20435620?v=4" width="100px;" alt=""/><br /><sub><b>JayB</b></sub></a><br /><a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=kogisin" title="Code">💻</a> <a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=kogisin" title="Documentation">📖</a> <a href="#projectManagement-kogisin" title="Project Management">📆</a> <a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=kogisin" title="Tests">⚠️</a> <a href="#maintenance-kogisin" title="Maintenance">🚧</a></td>
+    <td align="center"><a href="http://well.com/~fl"><img src="https://avatars2.githubusercontent.com/u/531960?v=4" width="100px;" alt=""/><br /><sub><b>Florenz Kley</b></sub></a><br /><a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=fl" title="Code">💻</a> <a href="#ideas-fl" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
