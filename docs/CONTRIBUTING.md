@@ -30,3 +30,7 @@ Please follow these instructions when submitting a pull request (PR):
 * Once the pull request is approved and merged you can pull the changes from upstream to your local repo and delete
 your extra branch(es).
 
+# Update your Contributing documentation
+
+This project follows the [all-contributors specification](https://github.com/all-contributors/all-contributors). 
+Follow this [bot usage documentation](https://allcontributors.org/docs/en/bot/usage) to let others know your contribution!

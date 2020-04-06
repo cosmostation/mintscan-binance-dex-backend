@@ -24,7 +24,7 @@ func NewToken(l *log.Logger, client *client.Client, db *db.Database) *Token {
 }
 
 // GetTokens returns assets based upon the request params
-func (t *Token) GetTokens(wr http.ResponseWriter, r *http.Request) {
+func (t *Token) GetTokens(rw http.ResponseWriter, r *http.Request) {
 	limit := 100
 	offset := 0
 
@@ -37,12 +37,12 @@ func (t *Token) GetTokens(wr http.ResponseWriter, r *http.Request) {
 	}
 
 	if limit > 1000 {
-		errors.ErrOverMaxLimit(wr, http.StatusUnauthorized)
+		errors.ErrOverMaxLimit(rw, http.StatusUnauthorized)
 		return
 	}
 
 	tks, _ := t.client.Tokens(limit, offset)
 
-	utils.Respond(wr, tks)
+	utils.Respond(rw, tks)
 	return
 }

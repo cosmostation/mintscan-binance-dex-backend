@@ -25,12 +25,12 @@ func NewOrder(l *log.Logger, client *client.Client, db *db.Database) *Order {
 }
 
 // GetOrders returns order information based up on order id
-func (o *Order) GetOrders(wr http.ResponseWriter, r *http.Request) {
+func (o *Order) GetOrders(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	if id == "" {
-		errors.ErrRequiredParam(wr, http.StatusBadRequest, "order id is required")
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "order id is required")
 		return
 	}
 
@@ -39,6 +39,6 @@ func (o *Order) GetOrders(wr http.ResponseWriter, r *http.Request) {
 		o.l.Printf("failed to request order information: %s\n", err)
 	}
 
-	utils.Respond(wr, order)
+	utils.Respond(rw, order)
 	return
 }

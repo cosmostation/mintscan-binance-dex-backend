@@ -275,3 +275,102 @@ func (db *Database) QueryAssetChartHistory(asset string, limit int) ([]schema.St
 
 	return chartHistory, nil
 }
+
+// QueryValidators queries validators in a validator set saved in database
+func (db *Database) QueryValidators() ([]*schema.Validator, error) {
+	vals := make([]*schema.Validator, 0)
+
+	err := db.Model(&vals).
+		Order("tokens DESC").
+		Select()
+
+	if err == pg.ErrNoRows {
+		return vals, fmt.Errorf("no rows in block table: %s", err)
+	}
+
+	if err != nil {
+		return vals, fmt.Errorf("unexpected database error: %s", err)
+	}
+
+	return vals, nil
+}
+
+// QueryValidatorByOperAddr queries validators in a validator set saved in database
+func (db *Database) QueryValidatorByOperAddr(address string) (schema.Validator, error) {
+	var val schema.Validator
+
+	err := db.Model(&val).
+		Where("operator_address = ?", address).
+		Limit(1).
+		Select()
+
+	if err == pg.ErrNoRows {
+		return val, fmt.Errorf("no rows in block table: %s", err)
+	}
+
+	if err != nil {
+		return val, fmt.Errorf("unexpected database error: %s", err)
+	}
+
+	return val, nil
+}
+
+// QueryValidatorByAccountAddr queries validators in a validator set saved in database
+func (db *Database) QueryValidatorByAccountAddr(address string) (schema.Validator, error) {
+	var val schema.Validator
+
+	err := db.Model(&val).
+		Where("account_address = ?", address).
+		Limit(1).
+		Select()
+
+	if err == pg.ErrNoRows {
+		return val, fmt.Errorf("no rows in block table: %s", err)
+	}
+
+	if err != nil {
+		return val, fmt.Errorf("unexpected database error: %s", err)
+	}
+
+	return val, nil
+}
+
+// QueryValidatorByConsAddr queries validators in a validator set saved in database
+func (db *Database) QueryValidatorByConsAddr(address string) (schema.Validator, error) {
+	var val schema.Validator
+
+	err := db.Model(&val).
+		Where("consensus_address = ?", address).
+		Limit(1).
+		Select()
+
+	if err == pg.ErrNoRows {
+		return val, fmt.Errorf("no rows in block table: %s", err)
+	}
+
+	if err != nil {
+		return val, fmt.Errorf("unexpected database error: %s", err)
+	}
+
+	return val, nil
+}
+
+// QueryValidatorByMoniker queries validators in a validator set saved in database
+func (db *Database) QueryValidatorByMoniker(address string) (schema.Validator, error) {
+	var val schema.Validator
+
+	err := db.Model(&val).
+		Where("moniker = ?", address).
+		Limit(1).
+		Select()
+
+	if err == pg.ErrNoRows {
+		return val, fmt.Errorf("no rows in block table: %s", err)
+	}
+
+	if err != nil {
+		return val, fmt.Errorf("unexpected database error: %s", err)
+	}
+
+	return val, nil
+}

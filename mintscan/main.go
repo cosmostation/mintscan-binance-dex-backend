@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	l := log.New(os.Stdout, "Mintscan API ", log.LstdFlags)
+	l := log.New(os.Stdout, "Mintscan API ", log.Lshortfile|log.LstdFlags)
 
 	cfg := config.ParseConfig()
 
@@ -45,6 +45,9 @@ func main() {
 	getR.HandleFunc("/asset-holders", handlers.NewAsset(l, client, db).GetAssetHolders)
 	getR.HandleFunc("/assets-images", handlers.NewAsset(l, client, db).GetAssetsImages)
 	getR.HandleFunc("/blocks", handlers.NewBlock(l, client, db).GetBlocks)
+	getR.HandleFunc("/fees", handlers.NewFee(l, client, db).GetFees)
+	getR.HandleFunc("/validators", handlers.NewValidator(l, client, db, cfg.Node.NetworkType).GetValidators)
+	getR.HandleFunc("/validator/{address}", handlers.NewValidator(l, client, db, cfg.Node.NetworkType).GetValidator)
 	getR.HandleFunc("/market", handlers.NewMarket(l, client, db).GetCoinMarketData)
 	getR.HandleFunc("/market/chart", handlers.NewMarket(l, client, db).GetCoinMarketChartData)
 	getR.HandleFunc("/orders/{id}", handlers.NewOrder(l, client, db).GetOrders)
@@ -64,10 +67,10 @@ func main() {
 	// create a new server
 	sm := &http.Server{
 		Addr:         ":" + cfg.Web.Port,
-		Handler:      r,                 // set the default handler
-		ErrorLog:     l,                 // set the logger for the server
-		ReadTimeout:  10 * time.Second,  // max time to read request from the client
-		WriteTimeout: 20 * time.Second,  // max time to write response to the client
+		Handler:      r,
+		ErrorLog:     l,
+		ReadTimeout:  50 * time.Second,  // max time to read request from the client
+		WriteTimeout: 10 * time.Second,  // max time to write response to the client
 		IdleTimeout:  120 * time.Second, // max time for connections using TCP Keep-Alive
 	}
 

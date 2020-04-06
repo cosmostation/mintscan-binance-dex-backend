@@ -49,7 +49,7 @@ func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
 
 	explorerClient := resty.New().
 		SetHostURL(cfg.ExplorerServerEndpoint).
-		SetTimeout(time.Duration(30 * time.Second))
+		SetTimeout(time.Duration(50 * time.Second))
 
 	rpcClient := rpc.NewRPCClient(cfg.RPCNode, cfg.NetworkType)
 
@@ -281,4 +281,20 @@ func (c Client) Order(id string) (models.Order, error) {
 	}
 
 	return order, nil
+}
+
+// TxMsgFees returns fees for different transaciton message types
+func (c Client) TxMsgFees() ([]*models.TxMsgFee, error) {
+	resp, err := c.acceleratedClient.R().Get("/fees")
+	if err != nil {
+		return []*models.TxMsgFee{}, err
+	}
+
+	var fees []*models.TxMsgFee
+	err = json.Unmarshal(resp.Body(), &fees)
+	if err != nil {
+		return []*models.TxMsgFee{}, err
+	}
+
+	return fees, nil
 }

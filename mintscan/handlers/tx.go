@@ -31,7 +31,7 @@ func NewTransaction(l *log.Logger, client *client.Client, db *db.Database) *Tran
 }
 
 // GetTxs returns transactions based upon the request params
-func (t *Transaction) GetTxs(wr http.ResponseWriter, r *http.Request) {
+func (t *Transaction) GetTxs(rw http.ResponseWriter, r *http.Request) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
@@ -49,7 +49,7 @@ func (t *Transaction) GetTxs(wr http.ResponseWriter, r *http.Request) {
 	}
 
 	if limit > 100 {
-		errors.ErrOverMaxLimit(wr, http.StatusUnauthorized)
+		errors.ErrOverMaxLimit(rw, http.StatusUnauthorized)
 		return
 	}
 
@@ -59,7 +59,7 @@ func (t *Transaction) GetTxs(wr http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(txs) <= 0 {
-		utils.Respond(wr, models.ResultTxs{})
+		utils.Respond(rw, models.ResultTxs{})
 		return
 	}
 
@@ -84,19 +84,19 @@ func (t *Transaction) GetTxs(wr http.ResponseWriter, r *http.Request) {
 		result.Paging.After = result.Data[0].ID
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }
 
 // GetTxByHash returns certain transaction information by its tx hash
-func (t *Transaction) GetTxByHash(wr http.ResponseWriter, r *http.Request) {
+func (t *Transaction) GetTxByHash(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	hash := vars["hash"]
 
 	tx, err := t.db.QueryTxByHash(hash)
 	if err != nil {
 		t.l.Printf("failed to query tx: %s\n", err)
-		utils.Respond(wr, models.TxData{})
+		utils.Respond(rw, models.TxData{})
 		return
 	}
 
@@ -105,12 +105,12 @@ func (t *Transaction) GetTxByHash(wr http.ResponseWriter, r *http.Request) {
 		t.l.Printf("failed to set tx: %s\n", err)
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }
 
 // GetTxsByType returns transactions based upon the request params
-func (t *Transaction) GetTxsByType(wr http.ResponseWriter, r *http.Request) {
+func (t *Transaction) GetTxsByType(rw http.ResponseWriter, r *http.Request) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
@@ -128,7 +128,7 @@ func (t *Transaction) GetTxsByType(wr http.ResponseWriter, r *http.Request) {
 	}
 
 	if limit > 100 {
-		errors.ErrOverMaxLimit(wr, http.StatusUnauthorized)
+		errors.ErrOverMaxLimit(rw, http.StatusUnauthorized)
 		return
 	}
 
@@ -152,7 +152,7 @@ func (t *Transaction) GetTxsByType(wr http.ResponseWriter, r *http.Request) {
 	// Validate transaction message type
 	ok := models.ValidatorMsgType(txrp.TxType)
 	if !ok {
-		errors.ErrInvalidMessageType(wr, http.StatusUnauthorized)
+		errors.ErrInvalidMessageType(rw, http.StatusUnauthorized)
 		return
 	}
 
@@ -186,7 +186,7 @@ func (t *Transaction) GetTxsByType(wr http.ResponseWriter, r *http.Request) {
 		result.Paging.After = result.Data[0].ID
 	}
 
-	utils.Respond(wr, result)
+	utils.Respond(rw, result)
 	return
 }
 
