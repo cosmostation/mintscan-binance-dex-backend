@@ -17,6 +17,16 @@
         "test",
         "maintenance"
       ]
+    },
+    {
+      "login": "fl",
+      "name": "Florenz Kley",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/531960?v=4",
+      "profile": "http://well.com/~fl",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
