@@ -1,5 +1,8 @@
-<p align="center">
-  <a href="https://www.cosmostation.io" target="_blank" rel="noopener noreferrer"><img width="100" src="https://user-images.githubusercontent.com/20435620/55696624-d7df2e00-59f8-11e9-9126-edf9a40b11a8.png" alt="Cosmostation logo"></a>
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+<p align="center">    
+  <a href="https://www.cosmostation.io" target="_blank" rel="noopener noreferrer"><img width="400" src="https://user-images.githubusercontent.com/31615341/78533120-614f5900-7823-11ea-901a-b745880594cf.png" alt="Cosmostation logo"></a>    
 </p>
 
 <h2 align="center">
@@ -82,6 +85,8 @@ This project uses [Golang ORM with focus on PostgreSQL features and performance]
 ## Contributing
 
 We encourage and support an active, healthy community of contributors — any contribution, improvements, and suggestions are always welcome! Details are in the [contribution guide](https://github.com/cosmostation/mintscan-binance-dex-backend/docs/CONTRIBUTING.md)
+
+## Contributors ✨
 
 ## Our Services and Community 
 
