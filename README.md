@@ -97,6 +97,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://jaybdev.net"><img src="https://avatars1.githubusercontent.com/u/20435620?v=4" width="100px;" alt=""/><br /><sub><b>JayB</b></sub></a><br /><a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=kogisin" title="Code">💻</a> <a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=kogisin" title="Documentation">📖</a> <a href="#projectManagement-kogisin" title="Project Management">📆</a> <a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=kogisin" title="Tests">⚠️</a> <a href="#maintenance-kogisin" title="Maintenance">🚧</a></td>
     <td align="center"><a href="https://github.com/hyeryeong-lim"><img src="https://avatars1.githubusercontent.com/u/63229379?v=4" width="100px;" alt=""/><br /><sub><b>hyeryeong-lim</b></sub></a><br /><a href="#design-hyeryeong-lim" title="Design">🎨</a></td>
+    <td align="center"><a href="http://dev.to/fly"><img src="https://avatars3.githubusercontent.com/u/31615341?v=4" width="100px;" alt=""/><br /><sub><b>fl-y</b></sub></a><br /><a href="https://github.com/cosmostation/mintscan-binance-dex-backend/commits?author=fl-y" title="Code">💻</a> <a href="#ideas-fl-y" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 
