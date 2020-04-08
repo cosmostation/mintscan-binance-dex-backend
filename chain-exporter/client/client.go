@@ -28,7 +28,7 @@ type Client struct {
 }
 
 // NewClient creates a new client with the given config
-func NewClient(cfg config.NodeConfig) Client {
+func NewClient(cfg config.NodeConfig) *Client {
 
 	acceleratedClient := resty.New().
 		SetHostURL(cfg.AcceleratedNode).
@@ -44,7 +44,7 @@ func NewClient(cfg config.NodeConfig) Client {
 
 	rpcClient := rpc.NewRPCClient(cfg.RPCNode, cfg.NetworkType)
 
-	return Client{
+	return &Client{
 		acceleratedClient,
 		apiClient,
 		codec.Codec,

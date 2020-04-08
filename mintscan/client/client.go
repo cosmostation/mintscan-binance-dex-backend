@@ -123,7 +123,7 @@ func (c Client) Validators() ([]*models.Validator, error) {
 	return vals, nil
 }
 
-// CoinMarketData fetches current market data from CoinGecko API
+// CoinMarketData returns current market data from CoinGecko API based upon params
 func (c Client) CoinMarketData(id string) (models.CoinGeckoMarket, error) {
 	queryStr := "/coins/" + id + "?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false"
 
@@ -145,7 +145,7 @@ func (c Client) CoinMarketData(id string) (models.CoinGeckoMarket, error) {
 	return data, nil
 }
 
-// CoinMarketChartData fetches current market chart data from CoinGecko API
+// CoinMarketChartData returns current market chart data from CoinGecko API based upon params
 func (c Client) CoinMarketChartData(id string, from string, to string) (models.CoinGeckoMarketChart, error) {
 	queryStr := "/coins/" + id + "/market_chart/range?id=" + id + "&vs_currency=usd&from=" + from + "&to=" + to
 
@@ -167,7 +167,7 @@ func (c Client) CoinMarketChartData(id string, from string, to string) (models.C
 	return data, nil
 }
 
-// Asset fetches official explorer asset API and return result
+// Asset returns particular asset information given an asset name
 func (c Client) Asset(assetName string) (models.Asset, error) {
 	resp, err := c.explorerClient.R().Get("/asset?asset=" + assetName)
 	if err != nil {
@@ -183,7 +183,7 @@ func (c Client) Asset(assetName string) (models.Asset, error) {
 	return asset, nil
 }
 
-// Assets fetches official explorer assets API and return result
+// Assets returns information of all assets existing in an active chain
 func (c Client) Assets(page int, rows int) (models.AssetInfo, error) {
 	queryStr := "/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)
@@ -200,7 +200,7 @@ func (c Client) Assets(page int, rows int) (models.AssetInfo, error) {
 	return assets, nil
 }
 
-// AssetHolders fetches official explorer asset API and return result
+// AssetHolders returns all asset holders information based upon params
 func (c Client) AssetHolders(asset string, page int, rows int) (models.AssetHolders, error) {
 	queryStr := "/asset-holders?asset=" + asset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)
@@ -217,7 +217,7 @@ func (c Client) AssetHolders(asset string, page int, rows int) (models.AssetHold
 	return assetHolders, nil
 }
 
-// AssetTxs fetches official explorer asset txs API and return result
+// AssetTxs returns asset transactions given an asset name based upon params
 func (c Client) AssetTxs(txAsset string, page int, rows int) (models.AssetTxs, error) {
 	queryStr := "/txs?txAsset=" + txAsset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)
@@ -234,7 +234,7 @@ func (c Client) AssetTxs(txAsset string, page int, rows int) (models.AssetTxs, e
 	return assetTxs, nil
 }
 
-// Account returns account information
+// Account returns account information given an account address
 func (c Client) Account(address string) (models.Account, error) {
 	resp, err := c.apiClient.R().Get("/account/" + address)
 	if err != nil {
@@ -250,7 +250,7 @@ func (c Client) Account(address string) (models.Account, error) {
 	return account, nil
 }
 
-// AccountTxs fetches official explorer asset txs API and return result
+// AccountTxs retuns tranctions involving in an account based upon params
 func (c Client) AccountTxs(address string, page int, rows int) (models.AccountTxs, error) {
 	queryStr := "/txs?address=" + address + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)
@@ -267,7 +267,7 @@ func (c Client) AccountTxs(address string, page int, rows int) (models.AccountTx
 	return acctTxs, nil
 }
 
-// Order returns order information
+// Order returns order information given an order id
 func (c Client) Order(id string) (models.Order, error) {
 	resp, err := c.acceleratedClient.R().Get("/orders/" + id)
 	if err != nil {
