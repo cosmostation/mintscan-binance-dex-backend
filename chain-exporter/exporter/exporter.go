@@ -3,6 +3,7 @@ package exporter
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/client"
@@ -17,42 +18,47 @@ import (
 
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
+	l      *log.Logger
 	cdc    *amino.Codec
-	client client.Client
+	client *client.Client
 	db     *db.Database
 }
 
 // NewExporter returns Exporter
-func NewExporter() Exporter {
+func NewExporter() *Exporter {
+	l := log.New(os.Stdout, "Chain Exporter ", log.Lshortfile|log.LstdFlags) // [TODO] Project Version
+
 	cfg := config.ParseConfig()
 
 	client := client.NewClient(cfg.Node)
 
 	db := db.Connect(cfg.DB)
 
-	// Ping database to verify connection is succeeded
 	err := db.Ping()
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "failed to ping database."))
 	}
 
-	// Create database tables
-	db.CreateTables() // TODO: handle index already exists error
+	db.CreateTables()
 
-	return Exporter{codec.Codec, client, db}
+	return &Exporter{
+		l,
+		codec.Codec,
+		client,
+		db,
+	}
 }
 
-// Start creates database tables and indexes using Postgres ORM library go-pg and
-// starts syncing blockchain.
+// Start starts to synchronize blockchain data
 func (ex *Exporter) Start() error {
 	go func() {
 		for {
-			fmt.Println("start - sync blockchain")
+			ex.l.Println("start - sync blockchain")
 			err := ex.sync()
 			if err != nil {
-				fmt.Printf("error - sync blockchain: %v\n", err)
+				ex.l.Printf("error - sync blockchain: %v\n", err)
 			}
-			fmt.Println("finish - sync blockchain")
+			ex.l.Println("finish - sync blockchain")
 			time.Sleep(time.Second)
 		}
 	}()
@@ -63,38 +69,40 @@ func (ex *Exporter) Start() error {
 }
 
 // sync compares block height between the height saved in your database and
-// latest block height on the active chain and calls process to start ingesting blocks.
+// the latest block height on the active chain and calls process to start ingesting data.
 func (ex *Exporter) sync() error {
-	// Query latest block height that is saved in your database
-	// Synchronizing blocks from the scratch will return 0 and will ingest accordingly.
+	// Query latest block height saved in database
 	dbHeight, err := ex.db.QueryLatestBlockHeight()
 	if dbHeight == -1 {
-		log.Fatal(errors.Wrap(err, "failed to query the latest block height from database."))
+		log.Fatal(errors.Wrap(err, "failed to query the latest block height saved in database"))
 	}
 
 	// Query latest block height on the active network
 	latestBlockHeight, err := ex.client.LatestBlockHeight()
 	if latestBlockHeight == -1 {
-		log.Fatal(errors.Wrap(err, "failed to query the latest block height on the active network."))
+		log.Fatal(errors.Wrap(err, "failed to query the latest block height on the active network"))
 	}
 
-	// skip the first block since it has no pre-commits
+	// Synchronizing blocks from the scratch will return 0 and will ingest accordingly.
+	// Skip the first block since it has no pre-commits
 	if dbHeight == 0 {
 		dbHeight = 1
 	}
 
-	// Ingest all blocks up to the best height
+	// Ingest all blocks up to the latest height
 	for i := dbHeight + 1; i <= latestBlockHeight; i++ {
 		err = ex.process(i)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("synced block %d/%d \n", i, latestBlockHeight)
+		ex.l.Printf("synced block %d/%d \n", i, latestBlockHeight)
 	}
 
 	return nil
 }
 
+// process ingests chain data, such as block, transaction, validator set information
+// and save them in database
 func (ex *Exporter) process(height int64) error {
 	block, err := ex.client.Block(height)
 	if err != nil {

@@ -17,7 +17,7 @@ This project is sponsored by [Binance X Fellowship Program](https://binancex.dev
 
 This repository provides backend code for [Mintscan Block Explorer for Binance Chain](https://binance.mintscan.io/), and you can find frontend code in [this repository](https://github.com/cosmostation/mintscan-binance-dex-frontend).
 
-**_Note that this repository is currently being developed meaning that most likely there will be many breaking changes._**
+**_Note that this repository has just transitioned from the actively developing phase to the maintaining phase starting from the first official version `v1.0.0`. All intended functionality is implemented; however, it can always go back when there is a reason to go back._**
 
 ## Prerequisite
 

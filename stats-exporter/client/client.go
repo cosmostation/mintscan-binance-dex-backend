@@ -27,7 +27,7 @@ type Client struct {
 }
 
 // NewClient creates a new client with the given config
-func NewClient(cfg config.NodeConfig) Client {
+func NewClient(cfg config.NodeConfig) *Client {
 
 	acceleratedClient := resty.New().
 		SetHostURL(cfg.AcceleratedNode).
@@ -43,7 +43,7 @@ func NewClient(cfg config.NodeConfig) Client {
 
 	rpcClient := rpc.NewRPCClient(cfg.RPCNode, cfg.NetworkType)
 
-	return Client{
+	return &Client{
 		acceleratedClient,
 		apiClient,
 		codec.Codec,
@@ -52,23 +52,7 @@ func NewClient(cfg config.NodeConfig) Client {
 	}
 }
 
-// Assets fetches asset list information from an explorer API
-func (c Client) Assets(page int, rows int) (models.Assets, error) {
-	resp, err := c.explorerClient.R().Get("/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
-	if err != nil {
-		return models.Assets{}, err
-	}
-
-	var assets models.Assets
-	err = json.Unmarshal(resp.Body(), &assets)
-	if err != nil {
-		return models.Assets{}, err
-	}
-
-	return assets, nil
-}
-
-// Asset fetches particular asset information from an explorer API
+// Asset returns particular asset information given an asset name
 func (c Client) Asset(assetName string) (models.Asset, error) {
 	resp, err := c.explorerClient.R().Get("/asset?asset=" + assetName)
 	if err != nil {
@@ -82,4 +66,20 @@ func (c Client) Asset(assetName string) (models.Asset, error) {
 	}
 
 	return asset, nil
+}
+
+// Assets returns information of all assets existing in an active chain based upon params
+func (c Client) Assets(page int, rows int) (models.Assets, error) {
+	resp, err := c.explorerClient.R().Get("/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
+	if err != nil {
+		return models.Assets{}, err
+	}
+
+	var assets models.Assets
+	err = json.Unmarshal(resp.Body(), &assets)
+	if err != nil {
+		return models.Assets{}, err
+	}
+
+	return assets, nil
 }
