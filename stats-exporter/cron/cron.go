@@ -19,12 +19,12 @@ import (
 
 // Cron wraps all required parameters to create cron jobs
 type Cron struct {
-	client client.Client
+	client *client.Client
 	db     *db.Database
 }
 
 // NewCron sets necessary config and clients to begin jobs
-func NewCron() Cron {
+func NewCron() *Cron {
 	cfg := config.ParseConfig()
 
 	client := client.NewClient(cfg.Node)
@@ -38,7 +38,7 @@ func NewCron() Cron {
 
 	db.CreateTables()
 
-	return Cron{client, db}
+	return &Cron{client, db}
 }
 
 // Start starts to create cron jobs which fetches chosen asset list information and
