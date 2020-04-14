@@ -9,6 +9,18 @@ import (
 	"github.com/go-pg/pg"
 )
 
+// Query tx params that are used when querying txs
+const (
+	QueryTxParamInputsAddress = "messages->0->'value'->'inputs'->0->>'address' = "
+	QueryTxParamOutpusAddress = "messages->0->'value'->'outputs'->0->>'address' = "
+	QueryTxParamProposer      = "messages->0->'value'->>'proposer' = "
+	QueryTxParamDepositer     = "messages->0->'value'->>'depositor' = "
+	QueryTxParamVoter         = "messages->0->'value'->>'voter' = "
+	QueryTxsParamSender       = "messages->0->'value'->>'sender' = "
+	QueryTxsParamFrom         = "messages->0->'value'->>'from' = "
+	QueryTxsParamTo           = "messages->0->'value'->>'to' = "
+)
+
 // QueryBlocks queries blocks with pagination params, such as limit, before, after, and offset
 func (db *Database) QueryBlocks(before int, after int, limit int) ([]schema.Block, error) {
 	blocks := make([]schema.Block, 0)
@@ -373,4 +385,35 @@ func (db *Database) QueryValidatorByMoniker(address string) (schema.Validator, e
 	}
 
 	return val, nil
+}
+
+// QueryAccountTxs queries transactions that are involved with the given account
+func (db *Database) QueryAccountTxs(address string, page int, rows int) ([]*schema.Transaction, error) {
+	txs := make([]*schema.Transaction, 0)
+
+	queryParam := "(" + QueryTxParamInputsAddress + "'" + address + "'" + " OR " +
+		QueryTxParamOutpusAddress + "'" + address + "'" + " OR " +
+		QueryTxParamProposer + "'" + address + "'" + " OR " +
+		QueryTxParamDepositer + "'" + address + "'" + " OR " +
+		QueryTxParamVoter + "'" + address + "'" + " OR " +
+		QueryTxsParamSender + "'" + address + "'" + " OR " +
+		QueryTxsParamFrom + "'" + address + "'" + " OR " +
+		QueryTxsParamTo + "'" + address + "')"
+
+	err := db.Model(&txs).
+		Where(queryParam).
+		Limit(rows).
+		Order("id DESC").
+		Offset(page).
+		Select()
+
+	if err == pg.ErrNoRows {
+		return txs, fmt.Errorf("no rows in block table: %s", err)
+	}
+
+	if err != nil {
+		return txs, fmt.Errorf("unexpected database error: %s", err)
+	}
+
+	return txs, nil
 }

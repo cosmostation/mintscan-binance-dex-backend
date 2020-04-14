@@ -38,7 +38,7 @@ type (
 		Result     bool        `json:"result"`
 		TxHash     string      `json:"tx_hash"`
 		Messages   []Message   `json:"messages"`
-		Signatures []Signature `json:"signatures"`
+		Signatures []Signature `json:"signatures,omitempty"`
 		Memo       string      `json:"memo"`
 		Code       uint32      `json:"code"`
 		Timestamp  time.Time   `json:"timestamp"`

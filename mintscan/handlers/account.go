@@ -12,6 +12,8 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 
+	"github.com/tendermint/tmlibs/bech32"
+
 	"github.com/gorilla/mux"
 )
 
@@ -32,17 +34,19 @@ func (a *Account) GetAccount(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
-	if address == "" {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "address is required")
-		return
-	}
-
-	if len(address) != 42 {
+	addrPrefix, decodedAddress, err := bech32.DecodeAndConvert(address)
+	if err != nil {
 		errors.ErrInvalidParam(rw, http.StatusBadRequest, "address is invalid")
 		return
 	}
 
-	account, err := a.client.Account(address)
+	encodedAddress, err := bech32.ConvertAndEncode(addrPrefix, decodedAddress)
+	if err != nil {
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "address is invalid")
+		return
+	}
+
+	account, err := a.client.Account(encodedAddress)
 	if err != nil {
 		a.l.Printf("failed to request account information: %s\n", err)
 	}
@@ -56,12 +60,14 @@ func (a *Account) GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
-	if address == "" {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "address is required")
+	addrPrefix, decodedAddress, err := bech32.DecodeAndConvert(address)
+	if err != nil {
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "address is invalid")
 		return
 	}
 
-	if len(address) != 42 {
+	encodedAddress, err := bech32.ConvertAndEncode(addrPrefix, decodedAddress)
+	if err != nil {
 		errors.ErrInvalidParam(rw, http.StatusBadRequest, "address is invalid")
 		return
 	}
@@ -78,64 +84,42 @@ func (a *Account) GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if rows < 1 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than")
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
-	if rows > 50 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 50")
+	if rows > 30 {
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 30")
 		return
 	}
 
-	acctTxs, err := a.client.AccountTxs(address, page, rows)
+	acctTxs, err := a.db.QueryAccountTxs(encodedAddress, page, rows)
 	if err != nil {
 		a.l.Printf("failed to get account txs: %s\n", err)
 	}
 
-	txArray := make([]models.AccountTxArray, 0)
+	result := make([]models.TxData, 0)
 
-	for _, tx := range acctTxs.TxArray {
-		var toAddr string
-		if tx.ToAddr != "" {
-			toAddr = tx.ToAddr
+	for _, tx := range acctTxs {
+		msgs := make([]models.Message, 0)
+		_ = json.Unmarshal([]byte(tx.Messages), &msgs)
+
+		txResult := true
+		if tx.Code != 0 {
+			txResult = false
 		}
 
-		tempTxArray := &models.AccountTxArray{
-			BlockHeight:   tx.BlockHeight,
-			TxHash:        tx.TxHash,
-			Code:          tx.Code,
-			TxType:        tx.TxType,
-			TxAsset:       tx.TxAsset,
-			TxQuoteAsset:  tx.TxQuoteAsset,
-			Value:         tx.Value,
-			TxFee:         tx.TxFee,
-			TxAge:         tx.TxAge,
-			FromAddr:      tx.FromAddr,
-			ToAddr:        toAddr,
-			Log:           tx.Log,
-			ConfirmBlocks: tx.ConfirmBlocks,
-			Memo:          tx.Memo,
-			Source:        tx.Source,
-			Timestamp:     tx.TimeStamp,
+		tempResult := &models.TxData{
+			Height:    tx.Height,
+			Result:    txResult,
+			TxHash:    tx.TxHash,
+			Code:      tx.Code,
+			Messages:  msgs,
+			Memo:      tx.Memo,
+			Timestamp: tx.Timestamp,
 		}
 
-		// txType TRANSFER shouldn't throw message data
-		var data models.AccountTxData
-		if tx.Data != "" {
-			err = json.Unmarshal([]byte(tx.Data), &data)
-			if err != nil {
-				a.l.Printf("failed to unmarshal AssetTxData: %s", err)
-			}
-
-			tempTxArray.Message = &data
-		}
-
-		txArray = append(txArray, *tempTxArray)
-	}
-
-	result := &models.ResultAccountTxs{
-		TxNums:  acctTxs.TxNums,
-		TxArray: txArray,
+		result = append(result, *tempResult)
 	}
 
 	utils.Respond(rw, result)
