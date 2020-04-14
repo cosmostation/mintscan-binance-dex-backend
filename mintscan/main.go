@@ -67,7 +67,7 @@ func main() {
 	// create a new server
 	sm := &http.Server{
 		Addr:         ":" + cfg.Web.Port,
-		Handler:      r,
+		Handler:      handlers.MiddlewareLogRequest(r),
 		ErrorLog:     l,
 		ReadTimeout:  50 * time.Second,  // max time to read request from the client
 		WriteTimeout: 10 * time.Second,  // max time to write response to the client
