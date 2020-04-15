@@ -1,6 +1,8 @@
 package db
 
 import (
+	"time"
+
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/config"
 
 	"github.com/go-pg/pg"
@@ -20,10 +22,14 @@ func Connect(cfg config.DBConfig) *Database {
 	})
 
 	db := pg.Connect(&pg.Options{
-		Addr:     cfg.Host + ":" + cfg.Port,
-		User:     cfg.User,
-		Password: cfg.Password,
-		Database: cfg.Table,
+		Addr:               cfg.Host + ":" + cfg.Port,
+		User:               cfg.User,
+		Password:           cfg.Password,
+		Database:           cfg.Table,
+		ReadTimeout:        5 * time.Second,
+		WriteTimeout:       5 * time.Second,
+		IdleTimeout:        20 * time.Second,
+		IdleCheckFrequency: 10 * time.Second,
 	})
 
 	return &Database{db}

@@ -391,14 +391,14 @@ func (db *Database) QueryValidatorByMoniker(address string) (schema.Validator, e
 func (db *Database) QueryAccountTxs(address string, page int, rows int) ([]*schema.Transaction, error) {
 	txs := make([]*schema.Transaction, 0)
 
-	queryParam := "(" + QueryTxParamInputsAddress + "'" + address + "'" + " OR " +
+	queryParam := QueryTxParamInputsAddress + "'" + address + "'" + " OR " +
 		QueryTxParamOutpusAddress + "'" + address + "'" + " OR " +
 		QueryTxParamProposer + "'" + address + "'" + " OR " +
 		QueryTxParamDepositer + "'" + address + "'" + " OR " +
 		QueryTxParamVoter + "'" + address + "'" + " OR " +
 		QueryTxsParamSender + "'" + address + "'" + " OR " +
 		QueryTxsParamFrom + "'" + address + "'" + " OR " +
-		QueryTxsParamTo + "'" + address + "')"
+		QueryTxsParamTo + "'" + address + "'"
 
 	err := db.Model(&txs).
 		Where(queryParam).
