@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 )
 
-// AssetInfo defines the structure for asset information list
-type AssetInfo struct {
-	TotalNum      int `json:"totalNum"`
-	AssetInfoList []struct {
+// Asset defines the structure for asset information list
+type Asset struct {
+	TotalNum  int `json:"totalNum"`
+	AssetList []struct {
 		CreateTime      json.RawMessage `json:"createTime"`
 		UpdateTime      json.RawMessage `json:"updateTime"`
 		ID              int32           `json:"id"`

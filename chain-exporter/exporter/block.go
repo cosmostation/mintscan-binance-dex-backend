@@ -6,11 +6,9 @@ import (
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
-// getBlock parses block information and wrap into Block schema struct
-func (ex *Exporter) getBlock(block *tmctypes.ResultBlock) ([]*schema.Block, error) {
-	blocks := make([]*schema.Block, 0)
-
-	tempBlock := &schema.Block{
+// getBlock exports block information.
+func (ex *Exporter) getBlock(block *tmctypes.ResultBlock) (*schema.Block, error) {
+	b := schema.NewBlock(schema.Block{
 		Height:        block.Block.Height,
 		Proposer:      block.Block.ProposerAddress.String(),
 		Moniker:       ex.db.QueryValidatorMoniker(block.Block.ProposerAddress.String()),
@@ -20,9 +18,7 @@ func (ex *Exporter) getBlock(block *tmctypes.ResultBlock) ([]*schema.Block, erro
 		NumTxs:        block.Block.NumTxs,
 		TotalTxs:      block.Block.TotalTxs,
 		Timestamp:     block.Block.Time,
-	}
+	})
 
-	blocks = append(blocks, tempBlock)
-
-	return blocks, nil
+	return b, nil
 }

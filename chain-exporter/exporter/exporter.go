@@ -93,7 +93,7 @@ func (ex *Exporter) sync() error {
 	}
 
 	// Query latest block height on the active network
-	latestBlockHeight, err := ex.client.LatestBlockHeight()
+	latestBlockHeight, err := ex.client.GetLatestBlockHeight()
 	if latestBlockHeight == -1 {
 		log.Fatal(errors.Wrap(err, "failed to query the latest block height on the active network"))
 	}
@@ -119,22 +119,23 @@ func (ex *Exporter) sync() error {
 // process ingests chain data, such as block, transaction, validator set information
 // and save them in database
 func (ex *Exporter) process(height int64) error {
-	block, err := ex.client.Block(height)
+	block, err := ex.client.GetBlock(height)
 	if err != nil {
 		return fmt.Errorf("failed to query block using rpc client: %s", err)
 	}
 
-	valSet, err := ex.client.ValidatorSet(block.Block.LastCommit.Height())
+	valSet, err := ex.client.GetValidatorSet(block.Block.LastCommit.Height())
 	if err != nil {
 		return fmt.Errorf("failed to query validator set using rpc client: %s", err)
 	}
 
-	vals, err := ex.client.Validators()
+	vals, err := ex.client.GetValidators()
 	if err != nil {
 		return fmt.Errorf("failed to query validators using rpc client: %s", err)
 	}
 
-	resultBlock, err := ex.getBlock(block) // TODO: Reward Fees Calculation
+	// TODO: Reward Fees Calculation
+	resultBlock, err := ex.getBlock(block)
 	if err != nil {
 		return fmt.Errorf("failed to get block: %s", err)
 	}

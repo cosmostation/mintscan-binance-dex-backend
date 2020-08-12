@@ -53,13 +53,13 @@ func NewClient(cfg config.NodeConfig) *Client {
 	}
 }
 
-// Block queries for a block by height. An error is returned if the query fails.
-func (c Client) Block(height int64) (*tmctypes.ResultBlock, error) {
+// GetBlock queries for a block by height. An error is returned if the query fails.
+func (c Client) GetBlock(height int64) (*tmctypes.ResultBlock, error) {
 	return c.rpcClient.Block(&height)
 }
 
-// LatestBlockHeight returns the latest block height on the active chain.
-func (c Client) LatestBlockHeight() (int64, error) {
+// GetLatestBlockHeight returns the latest block height on the active chain.
+func (c Client) GetLatestBlockHeight() (int64, error) {
 	status, err := c.rpcClient.Status()
 	if err != nil {
 		return -1, err
@@ -70,9 +70,9 @@ func (c Client) LatestBlockHeight() (int64, error) {
 	return height, nil
 }
 
-// Txs queries for all the transactions in a block height.
+// GetTxs queries for all the transactions in a block height.
 // It uses `Tx` RPC method to query for the transaction.
-func (c Client) Txs(block *tmctypes.ResultBlock) ([]*rpc.ResultTx, error) {
+func (c Client) GetTxs(block *tmctypes.ResultBlock) ([]*rpc.ResultTx, error) {
 	txs := make([]*rpc.ResultTx, len(block.Block.Txs), len(block.Block.Txs))
 
 	for i, tmTx := range block.Block.Txs {
@@ -87,15 +87,15 @@ func (c Client) Txs(block *tmctypes.ResultBlock) ([]*rpc.ResultTx, error) {
 	return txs, nil
 }
 
-// ValidatorSet returns all the known Tendermint validators for a given block
+// GetValidatorSet returns all the known Tendermint validators for a given block
 // height. An error is returned if the query fails.
-func (c Client) ValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
+func (c Client) GetValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
 	return c.rpcClient.Validators(&height)
 }
 
-// Validators returns validators detail information in Tendemrint validators in active chain
+// GetValidators returns validators detail information in Tendemrint validators in active chain
 // An error returns if the query fails.
-func (c Client) Validators() ([]*types.Validator, error) {
+func (c Client) GetValidators() ([]*types.Validator, error) {
 	resp, err := c.apiClient.R().Get("/stake/validators")
 	if err != nil {
 		return nil, err
@@ -111,8 +111,8 @@ func (c Client) Validators() ([]*types.Validator, error) {
 	return vals, nil
 }
 
-// Tokens returns information about existing tokens in active chain.
-func (c Client) Tokens(limit int, offset int) ([]*types.Token, error) {
+// GetTokens returns information about existing tokens in active chain.
+func (c Client) GetTokens(limit int, offset int) ([]*types.Token, error) {
 	resp, err := c.apiClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
 	if err != nil {
 		return nil, err
