@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	// Start exporting chain data
+	// Start exporting chain data.
 	exporter := exporter.NewExporter()
 	exporter.Start()
 }
