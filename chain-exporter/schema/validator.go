@@ -2,7 +2,7 @@ package schema
 
 import "time"
 
-// Validator defines the structure for validator information
+// Validator defines the structure for validator information.
 type Validator struct {
 	ID                      int32     `json:"id" sql:",pk"`
 	Moniker                 string    `json:"moniker"`
@@ -23,4 +23,28 @@ type Validator struct {
 	CommissionMaxChangeRate string    `json:"commission_max_change_rate"`
 	CommissionUpdateTime    string    `json:"commission_update_time"`
 	Timestamp               time.Time `json:"timestamp" sql:"default:now()"`
+}
+
+// NewValidator returns a new Validator.
+func NewValidator(v Validator) *Validator {
+	return &Validator{
+		Moniker:                 v.Moniker,
+		AccountAddress:          v.AccountAddress,
+		OperatorAddress:         v.OperatorAddress,
+		ConsensusAddress:        v.ConsensusAddress,
+		Jailed:                  v.Jailed,
+		Status:                  v.Status,
+		Tokens:                  v.Tokens,
+		VotingPower:             v.VotingPower,
+		DelegatorShares:         v.DelegatorShares,
+		BondHeight:              v.BondHeight,
+		BondIntraTxCounter:      v.BondIntraTxCounter,
+		UnbondingHeight:         v.UnbondingHeight,
+		UnbondingTime:           v.UnbondingTime,
+		CommissionRate:          v.CommissionRate,
+		CommissionMaxRate:       v.CommissionMaxRate,
+		CommissionMaxChangeRate: v.CommissionMaxChangeRate,
+		CommissionUpdateTime:    v.CommissionUpdateTime,
+		Timestamp:               v.Timestamp,
+	}
 }

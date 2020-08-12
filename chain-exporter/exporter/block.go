@@ -13,7 +13,7 @@ func (ex *Exporter) getBlock(block *tmctypes.ResultBlock) ([]*schema.Block, erro
 	tempBlock := &schema.Block{
 		Height:        block.Block.Height,
 		Proposer:      block.Block.ProposerAddress.String(),
-		Moniker:       ex.db.QueryMoniker(block.Block.ProposerAddress.String()),
+		Moniker:       ex.db.QueryValidatorMoniker(block.Block.ProposerAddress.String()),
 		BlockHash:     block.BlockMeta.BlockID.Hash.String(),
 		ParentHash:    block.BlockMeta.Header.LastBlockID.Hash.String(),
 		NumPrecommits: int64(len(block.Block.LastCommit.Precommits)),

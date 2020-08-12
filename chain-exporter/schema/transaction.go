@@ -2,7 +2,7 @@ package schema
 
 import "time"
 
-// Transaction defines the structure for transaction information
+// Transaction defines the structure for transaction information.
 type Transaction struct {
 	ID         int32     `json:"id" sql:",pk"`
 	Height     int64     `json:"height" sql:",notnull"`
@@ -14,4 +14,19 @@ type Transaction struct {
 	GasWanted  int64     `json:"gas_wanted" sql:"default:0"`
 	GasUsed    int64     `json:"gas_used" sql:"default:0"`
 	Timestamp  time.Time `json:"timestamp" sql:"default:now()"`
+}
+
+// NewTransaction returns a new Transaction.
+func NewTransaction(t Transaction) *Transaction {
+	return &Transaction{
+		Height:     t.Height,
+		TxHash:     t.TxHash,
+		Code:       t.Code,
+		Messages:   t.Messages,
+		Signatures: t.Signatures,
+		Memo:       t.Memo,
+		GasWanted:  t.GasWanted,
+		GasUsed:    t.GasUsed,
+		Timestamp:  t.Timestamp,
+	}
 }

@@ -18,7 +18,7 @@ import (
 )
 
 // Client wraps around both Tendermint RPC client and
-// Cosmos SDK LCD REST client that enables to query necessary data
+// Cosmos SDK LCD REST client that enables to query necessary data.
 type Client struct {
 	acceleratedClient *resty.Client
 	apiClient         *resty.Client
@@ -27,7 +27,7 @@ type Client struct {
 	rpcClient         rpc.Client
 }
 
-// NewClient creates a new client with the given config
+// NewClient creates a new Client with the given config.
 func NewClient(cfg config.NodeConfig) *Client {
 
 	acceleratedClient := resty.New().
@@ -58,7 +58,7 @@ func (c Client) Block(height int64) (*tmctypes.ResultBlock, error) {
 	return c.rpcClient.Block(&height)
 }
 
-// LatestBlockHeight returns the latest block height on the active chain
+// LatestBlockHeight returns the latest block height on the active chain.
 func (c Client) LatestBlockHeight() (int64, error) {
 	status, err := c.rpcClient.Status()
 	if err != nil {
@@ -71,7 +71,7 @@ func (c Client) LatestBlockHeight() (int64, error) {
 }
 
 // Txs queries for all the transactions in a block height.
-// It uses `Tx` RPC method to query for the transaction
+// It uses `Tx` RPC method to query for the transaction.
 func (c Client) Txs(block *tmctypes.ResultBlock) ([]*rpc.ResultTx, error) {
 	txs := make([]*rpc.ResultTx, len(block.Block.Txs), len(block.Block.Txs))
 
@@ -111,7 +111,7 @@ func (c Client) Validators() ([]*types.Validator, error) {
 	return vals, nil
 }
 
-// Tokens returns information about existing tokens in active chain
+// Tokens returns information about existing tokens in active chain.
 func (c Client) Tokens(limit int, offset int) ([]*types.Token, error) {
 	resp, err := c.apiClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
 	if err != nil {

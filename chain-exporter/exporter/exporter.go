@@ -34,19 +34,23 @@ type Exporter struct {
 
 // NewExporter returns Exporter
 func NewExporter() *Exporter {
-	l := log.New(os.Stdout, "Chain Exporter ", log.Lshortfile|log.LstdFlags) // [TODO] Project Version
+	l := log.New(os.Stdout, "Chain Exporter ", log.Lshortfile|log.LstdFlags)
 
-	cfg := config.ParseConfig()
+	// Parse config from configuration file (config.yaml).
+	config := config.ParseConfig()
 
-	client := client.NewClient(cfg.Node)
+	// Create new client with node configruation.
+	client := client.NewClient(config.Node)
 
-	db := db.Connect(cfg.DB)
-
+	// Create connection with PostgreSQL database and
+	// Ping database to verify connection is success.
+	db := db.Connect(config.DB)
 	err := db.Ping()
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "failed to ping database."))
 	}
 
+	// Create database tables if not exist already
 	db.CreateTables()
 
 	return &Exporter{
@@ -57,7 +61,7 @@ func NewExporter() *Exporter {
 	}
 }
 
-// Start starts to synchronize blockchain data
+// Start starts to synchronize Binance Chain data.
 func (ex *Exporter) Start() error {
 	ex.l.Println("Starting Chain Exporter...")
 	ex.l.Printf("Version: %s | Commit Hash: %s", Version, Commit)
