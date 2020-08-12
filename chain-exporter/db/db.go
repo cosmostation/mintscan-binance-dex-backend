@@ -187,7 +187,7 @@ func (db *Database) InsertExportedData(block *schema.Block, txs []*schema.Transa
 	vals []*schema.Validator, precommits []*schema.PreCommit) error {
 
 	err := db.RunInTransaction(func(tx *pg.Tx) error {
-		err := tx.Insert(&block)
+		err := tx.Insert(block)
 		if err != nil {
 			return fmt.Errorf("failed to insert block: %s", err)
 		}
