@@ -1,9 +1,8 @@
-# VERSION               := $(shell echo $(shell git describe --tags) | sed 's/^v//')
-VERSION 			  ?= manual
+VERSION               := $(shell echo $(shell git describe --tags) | sed 's/^v//')
 COMMIT                := $(shell git log -1 --format='%H')
 TOOLS_DESTDIR         ?= $(GOPATH)/bin/chain-exporter
-BUILD_FLAGS 		  := -ldflags "-X main.buildHash=${COMMIT} -X util.BuildVersion=${VERSION}"
-
+BUILD_FLAGS 		  := -ldflags "-X github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/exporter.Version=${VERSION} \
+									-X github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/exporter.Commit=${COMMIT}"
 build: go.sum
 	@echo "building chain-exporter binary..."
 	@go build -mod=readonly $(BUILD_FLAGS) -o $(TOOLS_DESTDIR) .

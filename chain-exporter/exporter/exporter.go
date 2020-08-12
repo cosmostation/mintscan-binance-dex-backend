@@ -16,6 +16,14 @@ import (
 	amino "github.com/tendermint/go-amino"
 )
 
+var (
+	// Version is this application's version.
+	Version = "Development"
+
+	// Commit is this application's commit hash.
+	Commit = ""
+)
+
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
 	l      *log.Logger
@@ -51,6 +59,9 @@ func NewExporter() *Exporter {
 
 // Start starts to synchronize blockchain data
 func (ex *Exporter) Start() error {
+	ex.l.Println("Starting Chain Exporter...")
+	ex.l.Printf("Version: %s | Commit Hash: %s", Version, Commit)
+
 	go func() {
 		for {
 			ex.l.Println("start - sync blockchain")
