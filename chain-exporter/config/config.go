@@ -60,5 +60,11 @@ func ParseConfig() *Config {
 	sub := viper.Sub(viper.GetString("network_type"))
 	sub.Unmarshal(&config)
 
+	if viper.GetString("network_type") == "mainnet" {
+		config.Node.NetworkType = cmtypes.ProdNetwork
+	} else {
+		config.Node.NetworkType = cmtypes.TestNetwork
+	}
+
 	return &config
 }
