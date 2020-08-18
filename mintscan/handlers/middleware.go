@@ -8,8 +8,6 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
 
 	"github.com/tomasen/realip"
-
-	"go.uber.org/zap"
 )
 
 // TODO: Response Status Code needs to be logged. Find out how others do to resolve this, maybe third party library?
@@ -19,7 +17,7 @@ import (
 func Middleware(next http.Handler, c *client.Client, db *db.Database, l *log.Logger) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		clientIP := realip.FromRequest(r)
-		zap.S().Infof("%s %s [%s]", r.Method, r.URL, clientIP)
+		l.Printf("%s %s [%s]", r.Method, r.URL, clientIP)
 
 		// Session will wrap both client and database and be used throughout all handlers.
 		SetSession(c, db, l)
