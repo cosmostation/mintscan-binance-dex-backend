@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 )
 
 // GetFees returns current fee on the active chain
@@ -14,6 +14,6 @@ func GetFees(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.Respond(rw, fees)
+	models.Respond(rw, fees)
 	return
 }

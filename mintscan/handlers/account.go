@@ -7,7 +7,6 @@ import (
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -32,7 +31,7 @@ func GetAccount(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to request account information: %s\n", err)
 	}
 
-	utils.Respond(rw, account)
+	models.Respond(rw, account)
 	return
 }
 
@@ -123,6 +122,6 @@ func GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 		TxArray: txArray,
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }

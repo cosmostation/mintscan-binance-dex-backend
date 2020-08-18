@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 )
 
 // GetTokens returns assets based upon the request params
@@ -28,6 +28,6 @@ func GetTokens(rw http.ResponseWriter, r *http.Request) {
 
 	tks, _ := s.client.GetTokens(limit, offset)
 
-	utils.Respond(rw, tks)
+	models.Respond(rw, tks)
 	return
 }

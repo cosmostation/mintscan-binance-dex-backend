@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
 // GetAssetsChartHistory returns
@@ -51,6 +50,6 @@ func GetAssetsChartHistory(rw http.ResponseWriter, r *http.Request) {
 		result = append(result, *tempResult)
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }

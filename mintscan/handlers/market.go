@@ -7,7 +7,6 @@ import (
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
 // GetCoinMarketData returns market data from CoinGecko API
@@ -40,7 +39,7 @@ func GetCoinMarketData(rw http.ResponseWriter, r *http.Request) {
 		LastUpdated:       data.MarketData.LastUpdated,
 	}
 
-	utils.Respond(rw, marketData)
+	models.Respond(rw, marketData)
 	return
 }
 
@@ -62,6 +61,6 @@ func GetCoinMarketChartData(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to fetch coin market chart data: %s\n", err)
 	}
 
-	utils.Respond(rw, marketChartData)
+	models.Respond(rw, marketChartData)
 	return
 }

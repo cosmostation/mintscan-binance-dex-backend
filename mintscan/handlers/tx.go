@@ -10,7 +10,6 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/schema"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -44,7 +43,7 @@ func GetTxs(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(txs) <= 0 {
-		utils.Respond(rw, models.ResultTxs{})
+		models.Respond(rw, models.ResultTxs{})
 		return
 	}
 
@@ -69,7 +68,7 @@ func GetTxs(rw http.ResponseWriter, r *http.Request) {
 		result.Paging.After = result.Data[0].ID
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }
 
@@ -81,7 +80,7 @@ func GetTxByTxHash(rw http.ResponseWriter, r *http.Request) {
 	tx, err := s.db.QueryTxByHash(hash)
 	if err != nil {
 		s.l.Printf("failed to query tx: %s\n", err)
-		utils.Respond(rw, models.TxData{})
+		models.Respond(rw, models.TxData{})
 		return
 	}
 
@@ -90,7 +89,7 @@ func GetTxByTxHash(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to set tx: %s\n", err)
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }
 
@@ -171,7 +170,7 @@ func GetTxsByTxType(rw http.ResponseWriter, r *http.Request) {
 		result.Paging.After = result.Data[0].ID
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }
 

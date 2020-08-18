@@ -8,7 +8,6 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/schema"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
 // GetBlocks returns blocks based upon the request params
@@ -64,7 +63,7 @@ func GetBlocks(rw http.ResponseWriter, r *http.Request) {
 		result.Paging.After = int32(result.Data[0].Height)
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }
 

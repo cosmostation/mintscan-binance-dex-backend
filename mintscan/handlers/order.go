@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 
 	"github.com/gorilla/mux"
 )
@@ -24,6 +24,6 @@ func GetOrders(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to request order information: %s\n", err)
 	}
 
-	utils.Respond(rw, order)
+	models.Respond(rw, order)
 	return
 }

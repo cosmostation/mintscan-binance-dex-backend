@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 	"github.com/gorilla/mux"
 
 	cmtypes "github.com/binance-chain/go-sdk/common/types"
@@ -19,7 +19,7 @@ func GetValidators(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.Respond(rw, vals)
+	models.Respond(rw, vals)
 	return
 }
 
@@ -40,7 +40,7 @@ func GetValidator(rw http.ResponseWriter, r *http.Request) {
 			s.l.Printf("failed to query validator by operator address: %s", err)
 			return
 		}
-		utils.Respond(rw, result)
+		models.Respond(rw, result)
 		return
 	case strings.HasPrefix(address, cmtypes.Network.Bech32Prefixes()):
 		result, err := s.db.QueryValidatorByAccountAddr(address)
@@ -48,7 +48,7 @@ func GetValidator(rw http.ResponseWriter, r *http.Request) {
 			s.l.Printf("failed to query validator by account address: %s", err)
 			return
 		}
-		utils.Respond(rw, result)
+		models.Respond(rw, result)
 		return
 	case len(address) == 40:
 		result, err := s.db.QueryValidatorByConsAddr(address)
@@ -56,7 +56,7 @@ func GetValidator(rw http.ResponseWriter, r *http.Request) {
 			s.l.Printf("failed to query validator by consensus address: %s", err)
 			return
 		}
-		utils.Respond(rw, result)
+		models.Respond(rw, result)
 		return
 	default:
 		result, err := s.db.QueryValidatorByMoniker(address)
@@ -64,7 +64,7 @@ func GetValidator(rw http.ResponseWriter, r *http.Request) {
 			s.l.Printf("failed to query validator by moniker: %s", err)
 			return
 		}
-		utils.Respond(rw, result)
+		models.Respond(rw, result)
 		return
 	}
 }

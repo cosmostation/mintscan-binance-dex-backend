@@ -7,7 +7,6 @@ import (
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
 // GetAsset returns asset based upon the request params
@@ -24,7 +23,7 @@ func GetAsset(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to get asset detail information: %s\n", err)
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }
 
@@ -84,11 +83,11 @@ func GetAssets(rw http.ResponseWriter, r *http.Request) {
 			AssetInfoList: assetInfoList,
 		}
 
-		utils.Respond(rw, result)
+		models.Respond(rw, result)
 		return
 	}
 
-	utils.Respond(rw, assets)
+	models.Respond(rw, assets)
 	return
 }
 
@@ -128,7 +127,7 @@ func GetAssetHolders(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to get asset holders list: %s\n", err)
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }
 
@@ -179,7 +178,7 @@ func GetAssetsImages(rw http.ResponseWriter, r *http.Request) {
 		ImageList: imageList,
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }
 
@@ -265,6 +264,6 @@ func GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
 		TxArray: txArray,
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
 // GetStatus returns current status on the active chain
@@ -40,6 +39,6 @@ func GetStatus(rw http.ResponseWriter, r *http.Request) {
 		Timestamp:         status.SyncInfo.LatestBlockTime,
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }
