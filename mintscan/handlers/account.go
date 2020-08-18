@@ -2,33 +2,17 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 
 	"github.com/gorilla/mux"
 )
 
-// Account is a account handler
-type Account struct {
-	l      *log.Logger
-	client *client.Client
-	db     *db.Database
-}
-
-// NewAccount creates a new account handler with the given params
-func NewAccount(l *log.Logger, client *client.Client, db *db.Database) *Account {
-	return &Account{l, client, db}
-}
-
 // GetAccount returns account information
-func (a *Account) GetAccount(rw http.ResponseWriter, r *http.Request) {
+func GetAccount(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
@@ -42,17 +26,17 @@ func (a *Account) GetAccount(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	account, err := a.client.Account(address)
+	account, err := s.client.GetAccount(address)
 	if err != nil {
-		a.l.Printf("failed to request account information: %s\n", err)
+		s.l.Printf("failed to request account information: %s\n", err)
 	}
 
-	utils.Respond(rw, account)
+	models.Respond(rw, account)
 	return
 }
 
 // GetAccountTxs returns transactions associated with an account
-func (a *Account) GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
+func GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
 
@@ -87,9 +71,9 @@ func (a *Account) GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acctTxs, err := a.client.AccountTxs(address, page, rows)
+	acctTxs, err := s.client.GetAccountTxs(address, page, rows)
 	if err != nil {
-		a.l.Printf("failed to get account txs: %s\n", err)
+		s.l.Printf("failed to get account txs: %s\n", err)
 	}
 
 	txArray := make([]models.AccountTxArray, 0)
@@ -124,7 +108,7 @@ func (a *Account) GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 		if tx.Data != "" {
 			err = json.Unmarshal([]byte(tx.Data), &data)
 			if err != nil {
-				a.l.Printf("failed to unmarshal AssetTxData: %s", err)
+				s.l.Printf("failed to unmarshal AssetTxData: %s", err)
 			}
 
 			tempTxArray.Message = &data
@@ -138,6 +122,6 @@ func (a *Account) GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 		TxArray: txArray,
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }
