@@ -1,4 +1,4 @@
-active: "testnet"
+network_type: "testnet"
 
 mainnet:
   node: 
