@@ -9,7 +9,7 @@ import (
 	cmtypes "github.com/binance-chain/go-sdk/common/types"
 )
 
-// Config wraps all config
+// Config wraps all config.
 type Config struct {
 	Node   NodeConfig   `mapstructure:"node"`
 	DB     DBConfig     `mapstructure:"database"`
@@ -17,7 +17,7 @@ type Config struct {
 	Market MarketConfig `mapstructure:"market"`
 }
 
-// NodeConfig wraps all node endpoints that are used in this project
+// NodeConfig wraps all node endpoints that are used in this project.
 type NodeConfig struct {
 	RPCNode                string               `mapstructure:"rpc_node"`
 	AcceleratedNode        string               `mapstructure:"accelerated_node"`
@@ -26,7 +26,7 @@ type NodeConfig struct {
 	NetworkType            cmtypes.ChainNetwork `mapstructure:"network_type"`
 }
 
-// DBConfig wraps all required parameters for database connection
+// DBConfig wraps all required parameters for database connection.
 type DBConfig struct {
 	Host     string `mapstructure:"host"`
 	Port     string `mapstructure:"port"`
@@ -35,12 +35,12 @@ type DBConfig struct {
 	Table    string `mapstructure:"table"`
 }
 
-// WebConfig wraps all required paramaters for boostraping web server
+// WebConfig wraps all required paramaters for boostraping web server.
 type WebConfig struct {
 	Port string `mapstructure:"port"`
 }
 
-// MarketConfig wraps all required params for market endpoints
+// MarketConfig wraps all required params for market endpoints.
 type MarketConfig struct {
 	CoinGeckoEndpoint string `mapstructure:"coingecko_endpoint"`
 }
