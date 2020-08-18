@@ -34,7 +34,7 @@ func (o *Order) GetOrders(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	order, err := o.client.Order(id)
+	order, err := o.client.GetOrder(id)
 	if err != nil {
 		o.l.Printf("failed to request order information: %s\n", err)
 	}

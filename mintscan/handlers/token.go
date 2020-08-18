@@ -41,7 +41,7 @@ func (t *Token) GetTokens(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tks, _ := t.client.Tokens(limit, offset)
+	tks, _ := t.client.GetTokens(limit, offset)
 
 	utils.Respond(rw, tks)
 	return

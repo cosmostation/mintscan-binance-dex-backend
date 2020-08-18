@@ -18,17 +18,26 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var (
+	// Version is a project's version string.
+	Version = "Development"
+
+	// Commit is commit hash of this project.
+	Commit = ""
+)
+
 func main() {
 	l := log.New(os.Stdout, "Mintscan API ", log.Lshortfile|log.LstdFlags)
 
-	cfg := config.ParseConfig()
+	// Parse config from configuration file (config.yaml).
+	config := config.ParseConfig()
 
 	client := client.NewClient(
-		cfg.Node,
-		cfg.Market,
+		config.Node,
+		config.Market,
 	)
 
-	db := db.Connect(cfg.DB)
+	db := db.Connect(config.DB)
 	err := db.Ping()
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "failed to ping database"))
@@ -46,8 +55,8 @@ func main() {
 	getR.HandleFunc("/assets-images", handlers.NewAsset(l, client, db).GetAssetsImages)
 	getR.HandleFunc("/blocks", handlers.NewBlock(l, client, db).GetBlocks)
 	getR.HandleFunc("/fees", handlers.NewFee(l, client, db).GetFees)
-	getR.HandleFunc("/validators", handlers.NewValidator(l, client, db, cfg.Node.NetworkType).GetValidators)
-	getR.HandleFunc("/validator/{address}", handlers.NewValidator(l, client, db, cfg.Node.NetworkType).GetValidator)
+	getR.HandleFunc("/validators", handlers.NewValidator(l, client, db, config.Node.NetworkType).GetValidators)
+	getR.HandleFunc("/validator/{address}", handlers.NewValidator(l, client, db, config.Node.NetworkType).GetValidator)
 	getR.HandleFunc("/market", handlers.NewMarket(l, client, db).GetCoinMarketData)
 	getR.HandleFunc("/market/chart", handlers.NewMarket(l, client, db).GetCoinMarketChartData)
 	getR.HandleFunc("/orders/{id}", handlers.NewOrder(l, client, db).GetOrders)
@@ -66,17 +75,17 @@ func main() {
 
 	// create a new server
 	sm := &http.Server{
-		Addr:         ":" + cfg.Web.Port,
+		Addr:         ":" + config.Web.Port,
 		Handler:      r,
 		ErrorLog:     l,
-		ReadTimeout:  50 * time.Second,  // max time to read request from the client
-		WriteTimeout: 10 * time.Second,  // max time to write response to the client
-		IdleTimeout:  120 * time.Second, // max time for connections using TCP Keep-Alive
+		ReadTimeout:  50 * time.Second, // max time to read request from the client
+		WriteTimeout: 10 * time.Second, // max time to write response to the client
 	}
 
 	// start the server
 	go func() {
-		l.Printf("Server is running on http://localhost:%s\n", cfg.Web.Port)
+		l.Printf("Server is running on http://localhost:%s\n", config.Web.Port)
+		l.Printf("Version: %s | Commit: %s", Version, Commit)
 
 		err := sm.ListenAndServe()
 		if err != nil {

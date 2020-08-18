@@ -29,7 +29,7 @@ func (s *Statistic) GetAssetsChartHistory(rw http.ResponseWriter, r *http.Reques
 	limit := int(24)
 
 	for _, assetName := range models.ChosenAssetNames {
-		asset, err := s.client.Asset(assetName)
+		asset, err := s.client.GetAsset(assetName)
 		if err != nil {
 			s.l.Printf("failed to get asset detail information: %s\n", err)
 		}

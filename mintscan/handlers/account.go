@@ -42,7 +42,7 @@ func (a *Account) GetAccount(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	account, err := a.client.Account(address)
+	account, err := a.client.GetAccount(address)
 	if err != nil {
 		a.l.Printf("failed to request account information: %s\n", err)
 	}
@@ -87,7 +87,7 @@ func (a *Account) GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acctTxs, err := a.client.AccountTxs(address, page, rows)
+	acctTxs, err := a.client.GetAccountTxs(address, page, rows)
 	if err != nil {
 		a.l.Printf("failed to get account txs: %s\n", err)
 	}

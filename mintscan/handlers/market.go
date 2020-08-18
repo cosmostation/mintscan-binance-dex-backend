@@ -34,7 +34,7 @@ func (m *Market) GetCoinMarketData(rw http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Query()["id"][0]
 
-	data, err := m.client.CoinMarketData(id)
+	data, err := m.client.GetCoinMarketData(id)
 	if err != nil {
 		m.l.Printf("failed to fetch coin market data: %s\n", err)
 	}
@@ -72,7 +72,7 @@ func (m *Market) GetCoinMarketChartData(rw http.ResponseWriter, r *http.Request)
 	to := time.Now().UTC()
 	from := to.AddDate(0, 0, -1)
 
-	marketChartData, err := m.client.CoinMarketChartData(id, fmt.Sprintf("%d", from.Unix()), fmt.Sprintf("%d", to.Unix()))
+	marketChartData, err := m.client.GetCoinMarketChartData(id, fmt.Sprintf("%d", from.Unix()), fmt.Sprintf("%d", to.Unix()))
 	if err != nil {
 		m.l.Printf("failed to fetch coin market chart data: %s\n", err)
 	}

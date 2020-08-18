@@ -34,7 +34,6 @@ type Client struct {
 
 // NewClient creates a new client with the given config
 func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
-
 	acceleratedClient := resty.New().
 		SetHostURL(cfg.AcceleratedNode).
 		SetTimeout(time.Duration(5 * time.Second))
@@ -63,18 +62,18 @@ func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
 	}
 }
 
-// Status returns status info on the active chain
-func (c Client) Status() (*ctypes.ResultStatus, error) {
+// GetStatus returns status info on the active chain
+func (c Client) GetStatus() (*ctypes.ResultStatus, error) {
 	return c.rpcClient.Status()
 }
 
-// Block queries for a block by height. An error is returned if the query fails.
-func (c Client) Block(height int64) (*tmctypes.ResultBlock, error) {
+// GetBlock queries for a block by height. An error is returned if the query fails.
+func (c Client) GetBlock(height int64) (*tmctypes.ResultBlock, error) {
 	return c.rpcClient.Block(&height)
 }
 
-// LatestBlockHeight returns the latest block height on the active chain
-func (c Client) LatestBlockHeight() (int64, error) {
+// GetLatestBlockHeight returns the latest block height on the active chain
+func (c Client) GetLatestBlockHeight() (int64, error) {
 	status, err := c.rpcClient.Status()
 	if err != nil {
 		return -1, err
@@ -83,8 +82,8 @@ func (c Client) LatestBlockHeight() (int64, error) {
 	return status.SyncInfo.LatestBlockHeight, nil
 }
 
-// Tokens returns information about existing tokens in active chain
-func (c Client) Tokens(limit int, offset int) ([]*models.Token, error) {
+// GetTokens returns information about existing tokens in active chain
+func (c Client) GetTokens(limit int, offset int) ([]*models.Token, error) {
 	resp, err := c.apiClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
 	if err != nil {
 		return nil, err
@@ -99,15 +98,15 @@ func (c Client) Tokens(limit int, offset int) ([]*models.Token, error) {
 	return tokens, nil
 }
 
-// ValidatorSet returns all the known Tendermint validators for a given block
+// GetValidatorSet returns all the known Tendermint validators for a given block
 // height. An error is returned if the query fails.
-func (c Client) ValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
+func (c Client) GetValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
 	return c.rpcClient.Validators(&height)
 }
 
-// Validators returns validators detail information in Tendemrint validators in active chain
+// GetValidators returns validators detail information in Tendemrint validators in active chain
 // An error is returns if the query fails.
-func (c Client) Validators() ([]*models.Validator, error) {
+func (c Client) GetValidators() ([]*models.Validator, error) {
 	resp, err := c.apiClient.R().Get("/stake/validators")
 	if err != nil {
 		return nil, err
@@ -123,8 +122,8 @@ func (c Client) Validators() ([]*models.Validator, error) {
 	return vals, nil
 }
 
-// CoinMarketData returns current market data from CoinGecko API based upon params
-func (c Client) CoinMarketData(id string) (models.CoinGeckoMarket, error) {
+// GetCoinMarketData returns current market data from CoinGecko API based upon params
+func (c Client) GetCoinMarketData(id string) (models.CoinGeckoMarket, error) {
 	queryStr := "/coins/" + id + "?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false"
 
 	resp, err := c.coinGeckoClient.R().Get(queryStr)
@@ -145,8 +144,8 @@ func (c Client) CoinMarketData(id string) (models.CoinGeckoMarket, error) {
 	return data, nil
 }
 
-// CoinMarketChartData returns current market chart data from CoinGecko API based upon params
-func (c Client) CoinMarketChartData(id string, from string, to string) (models.CoinGeckoMarketChart, error) {
+// GetCoinMarketChartData returns current market chart data from CoinGecko API based upon params
+func (c Client) GetCoinMarketChartData(id string, from string, to string) (models.CoinGeckoMarketChart, error) {
 	queryStr := "/coins/" + id + "/market_chart/range?id=" + id + "&vs_currency=usd&from=" + from + "&to=" + to
 
 	resp, err := c.coinGeckoClient.R().Get(queryStr)
@@ -167,8 +166,8 @@ func (c Client) CoinMarketChartData(id string, from string, to string) (models.C
 	return data, nil
 }
 
-// Asset returns particular asset information given an asset name
-func (c Client) Asset(assetName string) (models.Asset, error) {
+// GetAsset returns particular asset information given an asset name
+func (c Client) GetAsset(assetName string) (models.Asset, error) {
 	resp, err := c.explorerClient.R().Get("/asset?asset=" + assetName)
 	if err != nil {
 		return models.Asset{}, err
@@ -183,8 +182,8 @@ func (c Client) Asset(assetName string) (models.Asset, error) {
 	return asset, nil
 }
 
-// Assets returns information of all assets existing in an active chain
-func (c Client) Assets(page int, rows int) (models.AssetInfo, error) {
+// GetAssets returns information of all assets existing in an active chain
+func (c Client) GetAssets(page int, rows int) (models.AssetInfo, error) {
 	queryStr := "/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)
 	if err != nil {
@@ -200,8 +199,8 @@ func (c Client) Assets(page int, rows int) (models.AssetInfo, error) {
 	return assets, nil
 }
 
-// AssetHolders returns all asset holders information based upon params
-func (c Client) AssetHolders(asset string, page int, rows int) (models.AssetHolders, error) {
+// GetAssetHolders returns all asset holders information based upon params
+func (c Client) GetAssetHolders(asset string, page int, rows int) (models.AssetHolders, error) {
 	queryStr := "/asset-holders?asset=" + asset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)
 	if err != nil {
@@ -217,8 +216,8 @@ func (c Client) AssetHolders(asset string, page int, rows int) (models.AssetHold
 	return assetHolders, nil
 }
 
-// AssetTxs returns asset transactions given an asset name based upon params
-func (c Client) AssetTxs(txAsset string, page int, rows int) (models.AssetTxs, error) {
+// GetAssetTxs returns asset transactions given an asset name based upon params
+func (c Client) GetAssetTxs(txAsset string, page int, rows int) (models.AssetTxs, error) {
 	queryStr := "/txs?txAsset=" + txAsset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)
 	if err != nil {
@@ -234,8 +233,8 @@ func (c Client) AssetTxs(txAsset string, page int, rows int) (models.AssetTxs, e
 	return assetTxs, nil
 }
 
-// Account returns account information given an account address
-func (c Client) Account(address string) (models.Account, error) {
+// GetAccount returns account information given an account address
+func (c Client) GetAccount(address string) (models.Account, error) {
 	resp, err := c.apiClient.R().Get("/account/" + address)
 	if err != nil {
 		return models.Account{}, err
@@ -250,8 +249,8 @@ func (c Client) Account(address string) (models.Account, error) {
 	return account, nil
 }
 
-// AccountTxs retuns tranctions involving in an account based upon params
-func (c Client) AccountTxs(address string, page int, rows int) (models.AccountTxs, error) {
+// GetAccountTxs retuns tranctions involving in an account based upon params
+func (c Client) GetAccountTxs(address string, page int, rows int) (models.AccountTxs, error) {
 	queryStr := "/txs?address=" + address + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
 	resp, err := c.explorerClient.R().Get(queryStr)
 	if err != nil {
@@ -267,8 +266,8 @@ func (c Client) AccountTxs(address string, page int, rows int) (models.AccountTx
 	return acctTxs, nil
 }
 
-// Order returns order information given an order id
-func (c Client) Order(id string) (models.Order, error) {
+// GetOrder returns order information given an order id
+func (c Client) GetOrder(id string) (models.Order, error) {
 	resp, err := c.acceleratedClient.R().Get("/orders/" + id)
 	if err != nil {
 		return models.Order{}, err
@@ -283,8 +282,8 @@ func (c Client) Order(id string) (models.Order, error) {
 	return order, nil
 }
 
-// TxMsgFees returns fees for different transaciton message types
-func (c Client) TxMsgFees() ([]*models.TxMsgFee, error) {
+// GetTxMsgFees returns fees for different transaciton message types
+func (c Client) GetTxMsgFees() ([]*models.TxMsgFee, error) {
 	resp, err := c.acceleratedClient.R().Get("/fees")
 	if err != nil {
 		return []*models.TxMsgFee{}, err

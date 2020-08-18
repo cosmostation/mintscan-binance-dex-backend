@@ -34,7 +34,7 @@ func (a *Asset) GetAsset(rw http.ResponseWriter, r *http.Request) {
 
 	asset := r.URL.Query()["asset"][0]
 
-	result, err := a.client.Asset(asset)
+	result, err := a.client.GetAsset(asset)
 	if err != nil {
 		a.l.Printf("failed to get asset detail information: %s\n", err)
 	}
@@ -74,7 +74,7 @@ func (a *Asset) GetAssets(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assets, err := a.client.Assets(page, rows)
+	assets, err := a.client.GetAssets(page, rows)
 	if err != nil {
 		a.l.Printf("failed to get asset list: %s\n", err)
 	}
@@ -138,7 +138,7 @@ func (a *Asset) GetAssetHolders(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := a.client.AssetHolders(asset, page, rows)
+	result, err := a.client.GetAssetHolders(asset, page, rows)
 	if err != nil {
 		a.l.Printf("failed to get asset holders list: %s\n", err)
 	}
@@ -172,7 +172,7 @@ func (a *Asset) GetAssetsImages(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assets, err := a.client.Assets(page, rows)
+	assets, err := a.client.GetAssets(page, rows)
 	if err != nil {
 		a.l.Printf("failed to get asset list: %s\n", err)
 	}
@@ -229,7 +229,7 @@ func (a *Asset) GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assetTxs, err := a.client.AssetTxs(txAsset, page, rows)
+	assetTxs, err := a.client.GetAssetTxs(txAsset, page, rows)
 	if err != nil {
 		a.l.Printf("failed to get asset list: %s\n", err)
 	}

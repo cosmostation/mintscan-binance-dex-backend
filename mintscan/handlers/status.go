@@ -24,22 +24,22 @@ func NewStatus(l *log.Logger, client *client.Client, db *db.Database) *Status {
 
 // GetStatus returns current status on the active chain
 func (s *Status) GetStatus(rw http.ResponseWriter, r *http.Request) {
-	status, err := s.client.Status()
+	status, err := s.client.GetStatus()
 	if err != nil {
 		s.l.Printf("failed to query status: %s\n", err)
 	}
 
-	validatorSet, err := s.client.ValidatorSet(status.SyncInfo.LatestBlockHeight)
+	validatorSet, err := s.client.GetValidatorSet(status.SyncInfo.LatestBlockHeight)
 	if err != nil {
 		s.l.Printf("failed to query validators et: %s\n", err)
 	}
 
-	block, err := s.client.Block(status.SyncInfo.LatestBlockHeight)
+	block, err := s.client.GetBlock(status.SyncInfo.LatestBlockHeight)
 	if err != nil {
 		s.l.Printf("failed to query block: %s\n", err)
 	}
 
-	prevBlock, err := s.client.Block(status.SyncInfo.LatestBlockHeight - 1)
+	prevBlock, err := s.client.GetBlock(status.SyncInfo.LatestBlockHeight - 1)
 	if err != nil {
 		s.l.Printf("failed to query previous block: %s\n", err)
 	}

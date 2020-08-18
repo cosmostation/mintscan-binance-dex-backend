@@ -23,7 +23,7 @@ func NewFee(l *log.Logger, client *client.Client, db *db.Database) *Fee {
 
 // GetFees returns current fee on the active chain
 func (f *Fee) GetFees(rw http.ResponseWriter, r *http.Request) {
-	fees, err := f.client.TxMsgFees()
+	fees, err := f.client.GetTxMsgFees()
 	if err != nil {
 		f.l.Printf("failed to fetch tx msg fees: %s", err)
 		return
