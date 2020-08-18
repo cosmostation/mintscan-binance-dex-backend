@@ -2,32 +2,17 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/schema"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
-// Block is a block handler
-type Block struct {
-	l      *log.Logger
-	client *client.Client
-	db     *db.Database
-}
-
-// NewBlock creates a new block handler with the given params
-func NewBlock(l *log.Logger, client *client.Client, db *db.Database) *Block {
-	return &Block{l, client, db}
-}
-
 // GetBlocks returns blocks based upon the request params
-func (b *Block) GetBlocks(rw http.ResponseWriter, r *http.Request) {
+func GetBlocks(rw http.ResponseWriter, r *http.Request) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
@@ -49,23 +34,23 @@ func (b *Block) GetBlocks(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blocks, err := b.db.QueryBlocks(before, after, limit)
+	blocks, err := s.db.QueryBlocks(before, after, limit)
 	if err != nil {
-		b.l.Printf("failed to query blocks: %s\n", err)
+		s.l.Printf("failed to query blocks: %s\n", err)
 	}
 
 	if len(blocks) <= 0 {
 		return
 	}
 
-	result, err := b.setBlocks(blocks)
+	result, err := setBlocks(blocks)
 	if err != nil {
-		b.l.Printf("failed to set blocks: %s\n", err)
+		s.l.Printf("failed to set blocks: %s\n", err)
 	}
 
-	latestBlockHeight, err := b.db.QueryLatestBlockHeight()
+	latestBlockHeight, err := s.db.QueryLatestBlockHeight()
 	if err != nil {
-		b.l.Printf("failed to query latest block height: %s\n", err)
+		s.l.Printf("failed to query latest block height: %s\n", err)
 	}
 
 	// Handling before and after since their ordering data is different
@@ -84,7 +69,7 @@ func (b *Block) GetBlocks(rw http.ResponseWriter, r *http.Request) {
 }
 
 // setBlocks handles blocks and return result response
-func (b *Block) setBlocks(blocks []schema.Block) (*models.ResultBlocks, error) {
+func setBlocks(blocks []schema.Block) (*models.ResultBlocks, error) {
 	data := make([]models.BlockData, 0)
 
 	for _, block := range blocks {
@@ -92,12 +77,12 @@ func (b *Block) setBlocks(blocks []schema.Block) (*models.ResultBlocks, error) {
 
 		// Check if any transaction exists in this block
 		if block.NumTxs > 0 {
-			txs, _ := b.db.QueryTx(block.Height)
+			txs, _ := s.db.QueryTx(block.Height)
 			for _, tx := range txs {
 				msgs := make([]models.Message, 0)
 				err := json.Unmarshal([]byte(tx.Messages), &msgs)
 				if err != nil {
-					b.l.Printf("failed to unmarshal msgs: %s\n", err)
+					s.l.Printf("failed to unmarshal msgs: %s\n", err)
 				}
 
 				txResult := true

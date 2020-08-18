@@ -1,29 +1,14 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
-// Status is a status handler
-type Status struct {
-	l      *log.Logger
-	client *client.Client
-	db     *db.Database
-}
-
-// NewStatus creates a new Status handler with the given params
-func NewStatus(l *log.Logger, client *client.Client, db *db.Database) *Status {
-	return &Status{l, client, db}
-}
-
 // GetStatus returns current status on the active chain
-func (s *Status) GetStatus(rw http.ResponseWriter, r *http.Request) {
+func GetStatus(rw http.ResponseWriter, r *http.Request) {
 	status, err := s.client.GetStatus()
 	if err != nil {
 		s.l.Printf("failed to query status: %s\n", err)

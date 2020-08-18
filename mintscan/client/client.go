@@ -62,18 +62,22 @@ func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
 	}
 }
 
-// GetStatus returns status info on the active chain
-func (c Client) GetStatus() (*ctypes.ResultStatus, error) {
+// --------------------
+// RPC APIs
+// --------------------
+
+// GetStatus returns status info on the active chain.
+func (c *Client) GetStatus() (*ctypes.ResultStatus, error) {
 	return c.rpcClient.Status()
 }
 
 // GetBlock queries for a block by height. An error is returned if the query fails.
-func (c Client) GetBlock(height int64) (*tmctypes.ResultBlock, error) {
+func (c *Client) GetBlock(height int64) (*tmctypes.ResultBlock, error) {
 	return c.rpcClient.Block(&height)
 }
 
-// GetLatestBlockHeight returns the latest block height on the active chain
-func (c Client) GetLatestBlockHeight() (int64, error) {
+// GetLatestBlockHeight returns the latest block height on the active chain.
+func (c *Client) GetLatestBlockHeight() (int64, error) {
 	status, err := c.rpcClient.Status()
 	if err != nil {
 		return -1, err
@@ -82,60 +86,66 @@ func (c Client) GetLatestBlockHeight() (int64, error) {
 	return status.SyncInfo.LatestBlockHeight, nil
 }
 
+// GetValidatorSet returns all the known Tendermint validators for a given block
+// height. An error is returned if the query fails.
+func (c *Client) GetValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
+	return c.rpcClient.Validators(&height)
+}
+
+// --------------------
+// REST SERVER APIs
+// --------------------
+
 // GetTokens returns information about existing tokens in active chain
-func (c Client) GetTokens(limit int, offset int) ([]*models.Token, error) {
+func (c *Client) GetTokens(limit int, offset int) (tokens []models.Token, err error) {
 	resp, err := c.apiClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
 	if err != nil {
-		return nil, err
+		return []models.Token{}, err
 	}
 
-	var tokens []*models.Token
+	if resp.IsError() {
+		return []models.Token{}, fmt.Errorf("failed to request: %s", err)
+	}
+
 	err = json.Unmarshal(resp.Body(), &tokens)
 	if err != nil {
-		return nil, err
+		return []models.Token{}, err
 	}
 
 	return tokens, nil
 }
 
-// GetValidatorSet returns all the known Tendermint validators for a given block
-// height. An error is returned if the query fails.
-func (c Client) GetValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
-	return c.rpcClient.Validators(&height)
-}
-
 // GetValidators returns validators detail information in Tendemrint validators in active chain
 // An error is returns if the query fails.
-func (c Client) GetValidators() ([]*models.Validator, error) {
+func (c *Client) GetValidators() (validators []models.Validator, err error) {
 	resp, err := c.apiClient.R().Get("/stake/validators")
 	if err != nil {
-		return nil, err
+		return []models.Validator{}, err
 	}
 
-	var vals []*models.Validator
+	if resp.IsError() {
+		return []models.Validator{}, fmt.Errorf("failed to request: %s", err)
+	}
 
-	err = json.Unmarshal(resp.Body(), &vals)
+	err = json.Unmarshal(resp.Body(), &validators)
 	if err != nil {
-		return nil, err
+		return []models.Validator{}, err
 	}
 
-	return vals, nil
+	return validators, nil
 }
 
-// GetCoinMarketData returns current market data from CoinGecko API based upon params
-func (c Client) GetCoinMarketData(id string) (models.CoinGeckoMarket, error) {
-	queryStr := "/coins/" + id + "?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false"
-
-	resp, err := c.coinGeckoClient.R().Get(queryStr)
+// GetCoinMarketData returns market data from CoinGecko API based upon params.
+func (c *Client) GetCoinMarketData(id string) (data models.CoinGeckoMarket, err error) {
+	resp, err := c.coinGeckoClient.R().Get("/coins/" + id + "?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false")
 	if err != nil {
 		return models.CoinGeckoMarket{}, err
 	}
 
 	if resp.IsError() {
-		return models.CoinGeckoMarket{}, fmt.Errorf("failed to respond: %s", err)
+		return models.CoinGeckoMarket{}, fmt.Errorf("failed to request: %s", err)
 	}
 
-	var data models.CoinGeckoMarket
 	err = json.Unmarshal(resp.Body(), &data)
 	if err != nil {
 		return models.CoinGeckoMarket{}, err
@@ -144,8 +154,8 @@ func (c Client) GetCoinMarketData(id string) (models.CoinGeckoMarket, error) {
 	return data, nil
 }
 
-// GetCoinMarketChartData returns current market chart data from CoinGecko API based upon params
-func (c Client) GetCoinMarketChartData(id string, from string, to string) (models.CoinGeckoMarketChart, error) {
+// GetCoinMarketChartData returns current market chart data from CoinGecko API based upon params.
+func (c *Client) GetCoinMarketChartData(id string, from string, to string) (data models.CoinGeckoMarketChart, err error) {
 	queryStr := "/coins/" + id + "/market_chart/range?id=" + id + "&vs_currency=usd&from=" + from + "&to=" + to
 
 	resp, err := c.coinGeckoClient.R().Get(queryStr)
@@ -154,10 +164,9 @@ func (c Client) GetCoinMarketChartData(id string, from string, to string) (model
 	}
 
 	if resp.IsError() {
-		return models.CoinGeckoMarketChart{}, fmt.Errorf("failed to respond: %s", err)
+		return models.CoinGeckoMarketChart{}, fmt.Errorf("failed to request: %s", err)
 	}
 
-	var data models.CoinGeckoMarketChart
 	err = json.Unmarshal(resp.Body(), &data)
 	if err != nil {
 		return models.CoinGeckoMarketChart{}, err
@@ -166,14 +175,17 @@ func (c Client) GetCoinMarketChartData(id string, from string, to string) (model
 	return data, nil
 }
 
-// GetAsset returns particular asset information given an asset name
-func (c Client) GetAsset(assetName string) (models.Asset, error) {
+// GetAsset returns particular asset information given an asset name.
+func (c *Client) GetAsset(assetName string) (asset models.Asset, err error) {
 	resp, err := c.explorerClient.R().Get("/asset?asset=" + assetName)
 	if err != nil {
 		return models.Asset{}, err
 	}
 
-	var asset models.Asset
+	if resp.IsError() {
+		return models.Asset{}, fmt.Errorf("failed to request: %s", err)
+	}
+
 	err = json.Unmarshal(resp.Body(), &asset)
 	if err != nil {
 		return models.Asset{}, err
@@ -182,15 +194,17 @@ func (c Client) GetAsset(assetName string) (models.Asset, error) {
 	return asset, nil
 }
 
-// GetAssets returns information of all assets existing in an active chain
-func (c Client) GetAssets(page int, rows int) (models.AssetInfo, error) {
-	queryStr := "/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
-	resp, err := c.explorerClient.R().Get(queryStr)
+// GetAssets returns information of all assets existing in an active chain.
+func (c *Client) GetAssets(page int, rows int) (assets models.AssetInfo, err error) {
+	resp, err := c.explorerClient.R().Get("/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
 		return models.AssetInfo{}, err
 	}
 
-	var assets models.AssetInfo
+	if resp.IsError() {
+		return models.AssetInfo{}, fmt.Errorf("failed to request: %s", err)
+	}
+
 	err = json.Unmarshal(resp.Body(), &assets)
 	if err != nil {
 		return models.AssetInfo{}, err
@@ -199,48 +213,55 @@ func (c Client) GetAssets(page int, rows int) (models.AssetInfo, error) {
 	return assets, nil
 }
 
-// GetAssetHolders returns all asset holders information based upon params
-func (c Client) GetAssetHolders(asset string, page int, rows int) (models.AssetHolders, error) {
-	queryStr := "/asset-holders?asset=" + asset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
-	resp, err := c.explorerClient.R().Get(queryStr)
+// GetAssetHolders returns all asset holders information based upon params.
+func (c *Client) GetAssetHolders(asset string, page int, rows int) (holders models.AssetHolders, err error) {
+	resp, err := c.explorerClient.R().Get("/asset-holders?asset=" + asset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
 		return models.AssetHolders{}, err
 	}
 
-	var assetHolders models.AssetHolders
-	err = json.Unmarshal(resp.Body(), &assetHolders)
+	if resp.IsError() {
+		return models.AssetHolders{}, fmt.Errorf("failed to request: %s", err)
+	}
+
+	err = json.Unmarshal(resp.Body(), &holders)
 	if err != nil {
 		return models.AssetHolders{}, err
 	}
 
-	return assetHolders, nil
+	return holders, nil
 }
 
-// GetAssetTxs returns asset transactions given an asset name based upon params
-func (c Client) GetAssetTxs(txAsset string, page int, rows int) (models.AssetTxs, error) {
-	queryStr := "/txs?txAsset=" + txAsset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
-	resp, err := c.explorerClient.R().Get(queryStr)
+// GetAssetTxs returns asset transactions given an asset name based upon params.
+func (c *Client) GetAssetTxs(txAsset string, page int, rows int) (txs models.AssetTxs, err error) {
+	resp, err := c.explorerClient.R().Get("/txs?txAsset=" + txAsset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
 		return models.AssetTxs{}, err
 	}
 
-	var assetTxs models.AssetTxs
-	err = json.Unmarshal(resp.Body(), &assetTxs)
+	if resp.IsError() {
+		return models.AssetTxs{}, fmt.Errorf("failed to request: %s", err)
+	}
+
+	err = json.Unmarshal(resp.Body(), &txs)
 	if err != nil {
 		return models.AssetTxs{}, err
 	}
 
-	return assetTxs, nil
+	return txs, nil
 }
 
-// GetAccount returns account information given an account address
-func (c Client) GetAccount(address string) (models.Account, error) {
+// GetAccount returns account information given an account address.
+func (c *Client) GetAccount(address string) (account models.Account, err error) {
 	resp, err := c.apiClient.R().Get("/account/" + address)
 	if err != nil {
 		return models.Account{}, err
 	}
 
-	var account models.Account
+	if resp.IsError() {
+		return models.Account{}, fmt.Errorf("failed to request: %s", err)
+	}
+
 	err = json.Unmarshal(resp.Body(), &account)
 	if err != nil {
 		return models.Account{}, err
@@ -249,31 +270,36 @@ func (c Client) GetAccount(address string) (models.Account, error) {
 	return account, nil
 }
 
-// GetAccountTxs retuns tranctions involving in an account based upon params
-func (c Client) GetAccountTxs(address string, page int, rows int) (models.AccountTxs, error) {
-	queryStr := "/txs?address=" + address + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows)
-	resp, err := c.explorerClient.R().Get(queryStr)
+// GetAccountTxs retuns tranctions involving in an account based upon params.
+func (c *Client) GetAccountTxs(address string, page int, rows int) (txs models.AccountTxs, err error) {
+	resp, err := c.explorerClient.R().Get("/txs?address=" + address + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
 		return models.AccountTxs{}, err
 	}
 
-	var acctTxs models.AccountTxs
-	err = json.Unmarshal(resp.Body(), &acctTxs)
+	if resp.IsError() {
+		return models.AccountTxs{}, fmt.Errorf("failed to request: %s", err)
+	}
+
+	err = json.Unmarshal(resp.Body(), &txs)
 	if err != nil {
 		return models.AccountTxs{}, err
 	}
 
-	return acctTxs, nil
+	return txs, nil
 }
 
-// GetOrder returns order information given an order id
-func (c Client) GetOrder(id string) (models.Order, error) {
+// GetOrder returns order information given an order id.
+func (c *Client) GetOrder(id string) (order models.Order, err error) {
 	resp, err := c.acceleratedClient.R().Get("/orders/" + id)
 	if err != nil {
 		return models.Order{}, err
 	}
 
-	var order models.Order
+	if resp.IsError() {
+		return models.Order{}, fmt.Errorf("failed to request: %s", err)
+	}
+
 	err = json.Unmarshal(resp.Body(), &order)
 	if err != nil {
 		return models.Order{}, err
@@ -282,14 +308,17 @@ func (c Client) GetOrder(id string) (models.Order, error) {
 	return order, nil
 }
 
-// GetTxMsgFees returns fees for different transaciton message types
-func (c Client) GetTxMsgFees() ([]*models.TxMsgFee, error) {
+// GetTxMsgFees returns fees for different transaciton message types.
+func (c *Client) GetTxMsgFees() (fees []*models.TxMsgFee, err error) {
 	resp, err := c.acceleratedClient.R().Get("/fees")
 	if err != nil {
 		return []*models.TxMsgFee{}, err
 	}
 
-	var fees []*models.TxMsgFee
+	if resp.IsError() {
+		return []*models.TxMsgFee{}, fmt.Errorf("failed to request: %s", err)
+	}
+
 	err = json.Unmarshal(resp.Body(), &fees)
 	if err != nil {
 		return []*models.TxMsgFee{}, err

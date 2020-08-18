@@ -44,30 +44,27 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-
-	getR := r.Methods(http.MethodGet).PathPrefix("/v1").Subrouter()
-	getR.HandleFunc("/account/{address}", handlers.NewAccount(l, client, db).GetAccount)
-	getR.HandleFunc("/account/txs/{address}", handlers.NewAccount(l, client, db).GetAccountTxs)
-	getR.HandleFunc("/asset", handlers.NewAsset(l, client, db).GetAsset)
-	getR.HandleFunc("/assets", handlers.NewAsset(l, client, db).GetAssets)
-	getR.HandleFunc("/assets/txs", handlers.NewAsset(l, client, db).GetAssetTxs)
-	getR.HandleFunc("/asset-holders", handlers.NewAsset(l, client, db).GetAssetHolders)
-	getR.HandleFunc("/assets-images", handlers.NewAsset(l, client, db).GetAssetsImages)
-	getR.HandleFunc("/blocks", handlers.NewBlock(l, client, db).GetBlocks)
-	getR.HandleFunc("/fees", handlers.NewFee(l, client, db).GetFees)
-	getR.HandleFunc("/validators", handlers.NewValidator(l, client, db, config.Node.NetworkType).GetValidators)
-	getR.HandleFunc("/validator/{address}", handlers.NewValidator(l, client, db, config.Node.NetworkType).GetValidator)
-	getR.HandleFunc("/market", handlers.NewMarket(l, client, db).GetCoinMarketData)
-	getR.HandleFunc("/market/chart", handlers.NewMarket(l, client, db).GetCoinMarketChartData)
-	getR.HandleFunc("/orders/{id}", handlers.NewOrder(l, client, db).GetOrders)
-	getR.HandleFunc("/stats/assets/chart", handlers.NewStatistic(l, client, db).GetAssetsChartHistory)
-	getR.HandleFunc("/status", handlers.NewStatus(l, client, db).GetStatus)
-	getR.HandleFunc("/tokens", handlers.NewToken(l, client, db).GetTokens)
-	getR.HandleFunc("/txs", handlers.NewTransaction(l, client, db).GetTxs)
-	getR.HandleFunc("/txs/{hash}", handlers.NewTransaction(l, client, db).GetTxByHash)
-
-	postR := r.Methods(http.MethodPost).PathPrefix("/v1").Subrouter()
-	postR.HandleFunc("/txs", handlers.NewTransaction(l, client, db).GetTxsByType)
+	r = r.PathPrefix("/v1").Subrouter()
+	r.HandleFunc("/account/{address}", handlers.GetAccount).Methods("GET")
+	r.HandleFunc("/account/txs/{address}", handlers.GetAccountTxs).Methods("GET")
+	r.HandleFunc("/asset", handlers.GetAsset).Methods("GET")
+	r.HandleFunc("/assets", handlers.GetAssets).Methods("GET")
+	r.HandleFunc("/assets/txs", handlers.GetAssetTxs).Methods("GET")
+	r.HandleFunc("/asset-holders", handlers.GetAssetHolders).Methods("GET")
+	r.HandleFunc("/assets-images", handlers.GetAssetsImages).Methods("GET")
+	r.HandleFunc("/blocks", handlers.GetBlocks).Methods("GET")
+	r.HandleFunc("/fees", handlers.GetFees).Methods("GET")
+	r.HandleFunc("/validators", handlers.GetValidators).Methods("GET")
+	r.HandleFunc("/validator/{address}", handlers.GetValidator).Methods("GET")
+	r.HandleFunc("/market", handlers.GetCoinMarketData).Methods("GET")
+	r.HandleFunc("/market/chart", handlers.GetCoinMarketChartData).Methods("GET")
+	r.HandleFunc("/orders/{id}", handlers.GetOrders).Methods("GET")
+	r.HandleFunc("/stats/assets/chart", handlers.GetAssetsChartHistory).Methods("GET")
+	r.HandleFunc("/status", handlers.GetStatus).Methods("GET")
+	r.HandleFunc("/tokens", handlers.GetTokens).Methods("GET")
+	r.HandleFunc("/txs", handlers.GetTxs).Methods("GET")
+	r.HandleFunc("/txs", handlers.GetTxsByTxType).Methods("POST")
+	r.HandleFunc("/txs/{hash}", handlers.GetTxByTxHash).Methods("GET")
 
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) { // catch-all
 		w.Write([]byte("No route is found matching the URL"))
@@ -76,7 +73,7 @@ func main() {
 	// create a new server
 	sm := &http.Server{
 		Addr:         ":" + config.Web.Port,
-		Handler:      r,
+		Handler:      handlers.Middleware(r, client, db, l),
 		ErrorLog:     l,
 		ReadTimeout:  50 * time.Second, // max time to read request from the client
 		WriteTimeout: 10 * time.Second, // max time to write response to the client

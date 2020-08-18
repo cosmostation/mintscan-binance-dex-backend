@@ -2,31 +2,16 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
-// Asset is a asset handler
-type Asset struct {
-	l      *log.Logger
-	client *client.Client
-	db     *db.Database
-}
-
-// NewAsset creates a new asset handler with the given params
-func NewAsset(l *log.Logger, client *client.Client, db *db.Database) *Asset {
-	return &Asset{l, client, db}
-}
-
 // GetAsset returns asset based upon the request params
-func (a *Asset) GetAsset(rw http.ResponseWriter, r *http.Request) {
+func GetAsset(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["asset"]) <= 0 {
 		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'asset' is not present")
 		return
@@ -34,9 +19,9 @@ func (a *Asset) GetAsset(rw http.ResponseWriter, r *http.Request) {
 
 	asset := r.URL.Query()["asset"][0]
 
-	result, err := a.client.GetAsset(asset)
+	result, err := s.client.GetAsset(asset)
 	if err != nil {
-		a.l.Printf("failed to get asset detail information: %s\n", err)
+		s.l.Printf("failed to get asset detail information: %s\n", err)
 	}
 
 	utils.Respond(rw, result)
@@ -44,7 +29,7 @@ func (a *Asset) GetAsset(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GetAssets returns assets based upon the request params
-func (a *Asset) GetAssets(rw http.ResponseWriter, r *http.Request) {
+func GetAssets(rw http.ResponseWriter, r *http.Request) {
 	onlyPrice := "false" // default is false, when true it only show assets price information
 
 	if len(r.URL.Query()["page"]) <= 0 {
@@ -74,9 +59,9 @@ func (a *Asset) GetAssets(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assets, err := a.client.GetAssets(page, rows)
+	assets, err := s.client.GetAssets(page, rows)
 	if err != nil {
-		a.l.Printf("failed to get asset list: %s\n", err)
+		s.l.Printf("failed to get asset list: %s\n", err)
 	}
 
 	if onlyPrice == "true" {
@@ -108,7 +93,7 @@ func (a *Asset) GetAssets(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GetAssetHolders returns asset holders based upon the request params
-func (a *Asset) GetAssetHolders(rw http.ResponseWriter, r *http.Request) {
+func GetAssetHolders(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["asset"]) <= 0 {
 		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'asset' is not present")
 		return
@@ -138,9 +123,9 @@ func (a *Asset) GetAssetHolders(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := a.client.GetAssetHolders(asset, page, rows)
+	result, err := s.client.GetAssetHolders(asset, page, rows)
 	if err != nil {
-		a.l.Printf("failed to get asset holders list: %s\n", err)
+		s.l.Printf("failed to get asset holders list: %s\n", err)
 	}
 
 	utils.Respond(rw, result)
@@ -148,7 +133,7 @@ func (a *Asset) GetAssetHolders(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GetAssetsImages returns images of all assets
-func (a *Asset) GetAssetsImages(rw http.ResponseWriter, r *http.Request) {
+func GetAssetsImages(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["page"]) <= 0 {
 		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
 		return
@@ -172,9 +157,9 @@ func (a *Asset) GetAssetsImages(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assets, err := a.client.GetAssets(page, rows)
+	assets, err := s.client.GetAssets(page, rows)
 	if err != nil {
-		a.l.Printf("failed to get asset list: %s\n", err)
+		s.l.Printf("failed to get asset list: %s\n", err)
 	}
 
 	imageList := make([]models.ImageList, 0)
@@ -199,7 +184,7 @@ func (a *Asset) GetAssetsImages(rw http.ResponseWriter, r *http.Request) {
 }
 
 // GetAssetTxs returns asset txs
-func (a *Asset) GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
+func GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
 	if len(r.URL.Query()["txAsset"]) <= 0 {
 		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'txAsset' is not present")
 		return
@@ -229,9 +214,9 @@ func (a *Asset) GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	assetTxs, err := a.client.GetAssetTxs(txAsset, page, rows)
+	assetTxs, err := s.client.GetAssetTxs(txAsset, page, rows)
 	if err != nil {
-		a.l.Printf("failed to get asset list: %s\n", err)
+		s.l.Printf("failed to get asset list: %s\n", err)
 	}
 
 	txArray := make([]models.AssetTxArray, 0)
@@ -266,7 +251,7 @@ func (a *Asset) GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
 		if tx.Data != "" {
 			err = json.Unmarshal([]byte(tx.Data), &data)
 			if err != nil {
-				a.l.Printf("failed to unmarshal AssetTxData: %s", err)
+				s.l.Printf("failed to unmarshal AssetTxData: %s", err)
 			}
 
 			tempTxArray.Message = &data

@@ -3,13 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/schema"
@@ -18,20 +15,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Transaction is a transaction handler
-type Transaction struct {
-	l      *log.Logger
-	client *client.Client
-	db     *db.Database
-}
-
-// NewTransaction creates a new transaction handler with the given params
-func NewTransaction(l *log.Logger, client *client.Client, db *db.Database) *Transaction {
-	return &Transaction{l, client, db}
-}
-
 // GetTxs returns transactions based upon the request params
-func (t *Transaction) GetTxs(rw http.ResponseWriter, r *http.Request) {
+func GetTxs(rw http.ResponseWriter, r *http.Request) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
@@ -53,9 +38,9 @@ func (t *Transaction) GetTxs(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	txs, err := t.db.QueryTxs(before, after, limit)
+	txs, err := s.db.QueryTxs(before, after, limit)
 	if err != nil {
-		t.l.Printf("failed to query txs: %s\n", err)
+		s.l.Printf("failed to query txs: %s\n", err)
 	}
 
 	if len(txs) <= 0 {
@@ -63,14 +48,14 @@ func (t *Transaction) GetTxs(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := t.setTxs(txs)
+	result, err := setTxs(txs)
 	if err != nil {
-		t.l.Printf("failed to set txs: %s\n", err)
+		s.l.Printf("failed to set txs: %s\n", err)
 	}
 
-	totalTxsNum, err := t.db.CountTotalTxsNum()
+	totalTxsNum, err := s.db.CountTotalTxsNum()
 	if err != nil {
-		t.l.Printf("failed to query total number of txs: %s\n", err)
+		s.l.Printf("failed to query total number of txs: %s\n", err)
 	}
 
 	// Handling before and after since their ordering data is different
@@ -88,29 +73,29 @@ func (t *Transaction) GetTxs(rw http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// GetTxByHash returns certain transaction information by its tx hash
-func (t *Transaction) GetTxByHash(rw http.ResponseWriter, r *http.Request) {
+// GetTxByTxHash returns certain transaction information by its tx hash
+func GetTxByTxHash(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	hash := vars["hash"]
 
-	tx, err := t.db.QueryTxByHash(hash)
+	tx, err := s.db.QueryTxByHash(hash)
 	if err != nil {
-		t.l.Printf("failed to query tx: %s\n", err)
+		s.l.Printf("failed to query tx: %s\n", err)
 		utils.Respond(rw, models.TxData{})
 		return
 	}
 
-	result, err := t.setTx(tx)
+	result, err := setTx(tx)
 	if err != nil {
-		t.l.Printf("failed to set tx: %s\n", err)
+		s.l.Printf("failed to set tx: %s\n", err)
 	}
 
 	utils.Respond(rw, result)
 	return
 }
 
-// GetTxsByType returns transactions based upon the request params
-func (t *Transaction) GetTxsByType(rw http.ResponseWriter, r *http.Request) {
+// GetTxsByTxType returns transactions based upon the request params
+func GetTxsByTxType(rw http.ResponseWriter, r *http.Request) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
@@ -135,7 +120,7 @@ func (t *Transaction) GetTxsByType(rw http.ResponseWriter, r *http.Request) {
 	var txrp models.TxRequestPayload
 	err := json.NewDecoder(r.Body).Decode(&txrp)
 	if err != nil {
-		t.l.Printf("failed to decode txrp: %s\n", err)
+		s.l.Printf("failed to decode txrp: %s\n", err)
 	}
 
 	// Set the first block time if StartTime is not parsed
@@ -156,23 +141,23 @@ func (t *Transaction) GetTxsByType(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	txs, err := t.db.QueryTxsByType(txrp.TxType, txrp.StartTime, txrp.EndTime, before, after, limit)
+	txs, err := s.db.QueryTxsByType(txrp.TxType, txrp.StartTime, txrp.EndTime, before, after, limit)
 	if err != nil {
-		t.l.Printf("failed to query txs: %s\n", err)
+		s.l.Printf("failed to query txs: %s\n", err)
 	}
 
 	if len(txs) <= 0 {
 		return
 	}
 
-	result, err := t.setTxs(txs)
+	result, err := setTxs(txs)
 	if err != nil {
-		t.l.Printf("failed to set txs: %s\n", err)
+		s.l.Printf("failed to set txs: %s\n", err)
 	}
 
-	totalTxsNum, err := t.db.CountTotalTxsNum()
+	totalTxsNum, err := s.db.CountTotalTxsNum()
 	if err != nil {
-		t.l.Printf("failed to query total number of txs: %s\n", err)
+		s.l.Printf("failed to query total number of txs: %s\n", err)
 	}
 
 	// Handling before and after since their ordering data is different
@@ -191,7 +176,7 @@ func (t *Transaction) GetTxsByType(rw http.ResponseWriter, r *http.Request) {
 }
 
 // setTx handles tx and return result response
-func (t *Transaction) setTx(tx schema.Transaction) (*models.TxData, error) {
+func setTx(tx schema.Transaction) (*models.TxData, error) {
 	msgs := make([]models.Message, 0)
 	err := json.Unmarshal([]byte(tx.Messages), &msgs)
 	if err != nil {
@@ -224,7 +209,7 @@ func (t *Transaction) setTx(tx schema.Transaction) (*models.TxData, error) {
 }
 
 // setTxs handles txs and return result response
-func (t *Transaction) setTxs(txs []schema.Transaction) (*models.ResultTxs, error) {
+func setTxs(txs []schema.Transaction) (*models.ResultTxs, error) {
 	data := make([]models.TxData, 0)
 
 	for _, tx := range txs {

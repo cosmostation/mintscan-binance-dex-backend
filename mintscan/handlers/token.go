@@ -1,30 +1,15 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
-// Token is a token handler
-type Token struct {
-	l      *log.Logger
-	client *client.Client
-	db     *db.Database
-}
-
-// NewToken creates a new token handler with the given params
-func NewToken(l *log.Logger, client *client.Client, db *db.Database) *Token {
-	return &Token{l, client, db}
-}
-
 // GetTokens returns assets based upon the request params
-func (t *Token) GetTokens(rw http.ResponseWriter, r *http.Request) {
+func GetTokens(rw http.ResponseWriter, r *http.Request) {
 	limit := 100
 	offset := 0
 
@@ -41,7 +26,7 @@ func (t *Token) GetTokens(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tks, _ := t.client.GetTokens(limit, offset)
+	tks, _ := s.client.GetTokens(limit, offset)
 
 	utils.Respond(rw, tks)
 	return
