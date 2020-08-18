@@ -70,7 +70,7 @@ func main() {
 		w.Write([]byte("No route is found matching the URL"))
 	})
 
-	// create a new server
+	// Create a new server
 	sm := &http.Server{
 		Addr:         ":" + config.Web.Port,
 		Handler:      handlers.Middleware(r, client, db, l),
@@ -79,7 +79,7 @@ func main() {
 		WriteTimeout: 10 * time.Second, // max time to write response to the client
 	}
 
-	// start the server
+	// Start the API server
 	go func() {
 		l.Printf("Server is running on http://localhost:%s\n", config.Web.Port)
 		l.Printf("Version: %s | Commit: %s", Version, Commit)
@@ -90,12 +90,16 @@ func main() {
 		}
 	}()
 
-	// trap sigterm or interupt and gracefully shutdown the server
+	TrapSignal(sm)
+}
+
+// TrapSignal traps sigterm or interupt and gracefully shutdown the server
+func TrapSignal(sm *http.Server) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, os.Kill)
 
-	// Block until a signal is received.
+	// block until a signal is received.
 	sig := <-c
 
 	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
@@ -103,5 +107,5 @@ func main() {
 	defer cancel()
 	sm.Shutdown(ctx)
 
-	l.Println("Gracefully shutting down the server: ", sig)
+	log.Println("Gracefully shutting down the server: ", sig)
 }

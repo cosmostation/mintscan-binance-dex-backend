@@ -6,11 +6,13 @@ import (
 	"net/http"
 )
 
-// Error code and msg
+// ErrorCode represents custom error code used in this application.
 type ErrorCode uint32
+
+// ErrorMsg represents error message that will be returned to client for any error.
 type ErrorMsg string
 
-// WrapError parses the error into an object-like struct for exporting
+// WrapError wraps both error code and error message.
 type WrapError struct {
 	ErrorCode ErrorCode `json:"error_code"`
 	ErrorMsg  ErrorMsg  `json:"error_msg"`
@@ -74,9 +76,9 @@ func ErrorCodeToErrorMsgs(code ErrorCode, msg string) ErrorMsg {
 	}
 }
 
-/*
-	----------------------------------------------- Error Types
-*/
+// --------------------
+// Error Types
+// --------------------
 
 func ErrInternalServer(w http.ResponseWriter, statusCode int) {
 	wrapError := WrapError{
@@ -174,9 +176,9 @@ func ErrInvalidParam(w http.ResponseWriter, statusCode int, msg string) {
 	PrintException(w, statusCode, wrapError)
 }
 
-/*
-	----------------------------------------------- PrintException
-*/
+// --------------------
+// PrintException
+// --------------------
 
 // PrintException prints out the exception result
 func PrintException(w http.ResponseWriter, statusCode int, err WrapError) {
