@@ -65,6 +65,7 @@ func main() {
 	r.HandleFunc("/txs", handlers.GetTxs).Methods("GET")
 	r.HandleFunc("/txs", handlers.GetTxsByTxType).Methods("POST")
 	r.HandleFunc("/txs/{hash}", handlers.GetTxByTxHash).Methods("GET")
+	r.HandleFunc("/mini/tokens", handlers.GetMiniTokens).Methods("GET")
 
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) { // catch-all
 		w.Write([]byte("No route is found matching the URL"))

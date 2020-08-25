@@ -251,6 +251,25 @@ func (c *Client) GetAssetTxs(txAsset string, page int, rows int) (txs models.Ass
 	return txs, nil
 }
 
+// GetMiniTokens returns a list of available mini tokens.
+func (c *Client) GetMiniTokens(limit int) (tokens []models.MiniTokens, err error) {
+	resp, err := c.acceleratedClient.R().Get("/mini/tokens?limit=" + strconv.Itoa(limit))
+	if err != nil {
+		return []models.MiniTokens{}, err
+	}
+
+	if resp.IsError() {
+		return []models.MiniTokens{}, fmt.Errorf("failed to request: %s", err)
+	}
+
+	err = json.Unmarshal(resp.Body(), &tokens)
+	if err != nil {
+		return []models.MiniTokens{}, err
+	}
+
+	return tokens, nil
+}
+
 // GetAccount returns account information given an account address.
 func (c *Client) GetAccount(address string) (account models.Account, err error) {
 	resp, err := c.apiClient.R().Get("/account/" + address)
