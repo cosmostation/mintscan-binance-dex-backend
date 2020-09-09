@@ -327,6 +327,25 @@ func (c *Client) GetOrder(id string) (order models.Order, err error) {
 	return order, nil
 }
 
+// GetMiniTokenOrder returns order information given an order id.
+func (c *Client) GetMiniTokenOrder(id string) (order models.Order, err error) {
+	resp, err := c.acceleratedClient.R().Get("/mini/orders/" + id)
+	if err != nil {
+		return models.Order{}, err
+	}
+
+	if resp.IsError() {
+		return models.Order{}, fmt.Errorf("failed to request mini token order information: %d", resp.StatusCode())
+	}
+
+	err = json.Unmarshal(resp.Body(), &order)
+	if err != nil {
+		return models.Order{}, err
+	}
+
+	return order, nil
+}
+
 // GetTxMsgFees returns fees for different transaciton message types.
 func (c *Client) GetTxMsgFees() (fees []*models.TxMsgFee, err error) {
 	resp, err := c.acceleratedClient.R().Get("/fees")

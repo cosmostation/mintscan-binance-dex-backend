@@ -60,6 +60,7 @@ func main() {
 	r.HandleFunc("/market", handlers.GetCoinMarketData).Methods("GET")
 	r.HandleFunc("/market/chart", handlers.GetCoinMarketChartData).Methods("GET")
 	r.HandleFunc("/orders/{id}", handlers.GetOrders).Methods("GET")
+	r.HandleFunc("/orders/mini-token/{id}", handlers.GetMiniTokenOrders).Methods("GET")
 	r.HandleFunc("/stats/assets/chart", handlers.GetAssetsChartHistory).Methods("GET")
 	r.HandleFunc("/status", handlers.GetStatus).Methods("GET")
 	r.HandleFunc("/tokens", handlers.GetTokens).Methods("GET")
