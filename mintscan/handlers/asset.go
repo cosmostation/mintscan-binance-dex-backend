@@ -67,7 +67,7 @@ func GetAssets(rw http.ResponseWriter, r *http.Request) {
 		assetInfoList := make([]models.ResultAssetInfoList, 0)
 
 		for _, asset := range assets.AssetInfoList {
-			tempAssetInfoList := &models.ResultAssetInfoList{
+			assetInfo := &models.ResultAssetInfoList{
 				Asset:       asset.Asset,
 				MappedAsset: asset.MappedAsset,
 				Name:        asset.Name,
@@ -75,7 +75,7 @@ func GetAssets(rw http.ResponseWriter, r *http.Request) {
 				QuoteUnit:   asset.QuoteUnit,
 			}
 
-			assetInfoList = append(assetInfoList, *tempAssetInfoList)
+			assetInfoList = append(assetInfoList, *assetInfo)
 		}
 
 		result := &models.ResultAssetInfo{
@@ -265,5 +265,69 @@ func GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	models.Respond(rw, result)
+	return
+}
+
+// GetAssetsMiniTokens returns a list of mini tokens based upon the request params.
+func GetAssetsMiniTokens(rw http.ResponseWriter, r *http.Request) {
+	onlyPrice := "false" // default is false, when true it only show assets price information
+
+	if len(r.URL.Query()["page"]) <= 0 {
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
+		return
+	}
+
+	if len(r.URL.Query()["rows"]) <= 0 {
+		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
+		return
+	}
+
+	if len(r.URL.Query()["only_price"]) > 0 {
+		onlyPrice = r.URL.Query()["only_price"][0]
+	}
+
+	page, _ := strconv.Atoi(r.URL.Query()["page"][0])
+	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
+
+	if rows < 1 {
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
+		return
+	}
+
+	if rows > 1000 {
+		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		return
+	}
+
+	assets, err := s.client.GetMiniTokens(page, rows)
+	if err != nil {
+		s.l.Printf("failed to get mini tokens list: %s\n", err)
+	}
+
+	if onlyPrice == "true" {
+		assetInfoList := make([]models.ResultAssetInfoList, 0)
+
+		for _, asset := range assets.AssetInfoList {
+			assetInfo := &models.ResultAssetInfoList{
+				Asset:       asset.Asset,
+				MappedAsset: asset.MappedAsset,
+				Name:        asset.Name,
+				Price:       asset.Price,
+				QuoteUnit:   asset.QuoteUnit,
+			}
+
+			assetInfoList = append(assetInfoList, *assetInfo)
+		}
+
+		result := &models.ResultAssetInfo{
+			TotalNum:      assets.TotalNum,
+			AssetInfoList: assetInfoList,
+		}
+
+		models.Respond(rw, result)
+		return
+	}
+
+	models.Respond(rw, assets)
 	return
 }

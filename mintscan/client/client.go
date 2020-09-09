@@ -104,7 +104,7 @@ func (c *Client) GetTokens(limit int, offset int) (tokens []models.Token, err er
 	}
 
 	if resp.IsError() {
-		return []models.Token{}, fmt.Errorf("failed to request: %s", err)
+		return []models.Token{}, fmt.Errorf("failed to request tokens: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &tokens)
@@ -124,7 +124,7 @@ func (c *Client) GetValidators() (validators []models.Validator, err error) {
 	}
 
 	if resp.IsError() {
-		return []models.Validator{}, fmt.Errorf("failed to request: %s", err)
+		return []models.Validator{}, fmt.Errorf("failed to request validators: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &validators)
@@ -143,7 +143,7 @@ func (c *Client) GetCoinMarketData(id string) (data models.CoinGeckoMarket, err 
 	}
 
 	if resp.IsError() {
-		return models.CoinGeckoMarket{}, fmt.Errorf("failed to request: %s", err)
+		return models.CoinGeckoMarket{}, fmt.Errorf("failed to request market data: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &data)
@@ -164,7 +164,7 @@ func (c *Client) GetCoinMarketChartData(id string, from string, to string) (data
 	}
 
 	if resp.IsError() {
-		return models.CoinGeckoMarketChart{}, fmt.Errorf("failed to request: %s", err)
+		return models.CoinGeckoMarketChart{}, fmt.Errorf("failed to request chart data: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &data)
@@ -183,7 +183,7 @@ func (c *Client) GetAsset(assetName string) (asset models.Asset, err error) {
 	}
 
 	if resp.IsError() {
-		return models.Asset{}, fmt.Errorf("failed to request: %s", err)
+		return models.Asset{}, fmt.Errorf("failed to request asset: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &asset)
@@ -202,7 +202,7 @@ func (c *Client) GetAssets(page int, rows int) (assets models.AssetInfo, err err
 	}
 
 	if resp.IsError() {
-		return models.AssetInfo{}, fmt.Errorf("failed to request: %s", err)
+		return models.AssetInfo{}, fmt.Errorf("failed to request assets: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &assets)
@@ -221,7 +221,7 @@ func (c *Client) GetAssetHolders(asset string, page int, rows int) (holders mode
 	}
 
 	if resp.IsError() {
-		return models.AssetHolders{}, fmt.Errorf("failed to request: %s", err)
+		return models.AssetHolders{}, fmt.Errorf("failed to request asset holders: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &holders)
@@ -240,7 +240,7 @@ func (c *Client) GetAssetTxs(txAsset string, page int, rows int) (txs models.Ass
 	}
 
 	if resp.IsError() {
-		return models.AssetTxs{}, fmt.Errorf("failed to request: %s", err)
+		return models.AssetTxs{}, fmt.Errorf("failed to request asset transactions: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &txs)
@@ -252,22 +252,22 @@ func (c *Client) GetAssetTxs(txAsset string, page int, rows int) (txs models.Ass
 }
 
 // GetMiniTokens returns a list of available mini tokens.
-func (c *Client) GetMiniTokens(limit int) (tokens []models.MiniTokens, err error) {
-	resp, err := c.acceleratedClient.R().Get("/mini/tokens?limit=" + strconv.Itoa(limit))
+func (c *Client) GetMiniTokens(page int, rows int) (assets models.AssetInfo, err error) {
+	resp, err := c.explorerClient.R().Get("/mini-token/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
-		return []models.MiniTokens{}, err
+		return models.AssetInfo{}, err
 	}
 
 	if resp.IsError() {
-		return []models.MiniTokens{}, fmt.Errorf("failed to request: %s", err)
+		return models.AssetInfo{}, fmt.Errorf("failed to request bep8 tokens: %d", resp.StatusCode())
 	}
 
-	err = json.Unmarshal(resp.Body(), &tokens)
+	err = json.Unmarshal(resp.Body(), &assets)
 	if err != nil {
-		return []models.MiniTokens{}, err
+		return models.AssetInfo{}, err
 	}
 
-	return tokens, nil
+	return assets, nil
 }
 
 // GetAccount returns account information given an account address.
@@ -278,7 +278,7 @@ func (c *Client) GetAccount(address string) (account models.Account, err error) 
 	}
 
 	if resp.IsError() {
-		return models.Account{}, fmt.Errorf("failed to request: %s", err)
+		return models.Account{}, fmt.Errorf("failed to request account information: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &account)
@@ -297,7 +297,7 @@ func (c *Client) GetAccountTxs(address string, page int, rows int) (txs models.A
 	}
 
 	if resp.IsError() {
-		return models.AccountTxs{}, fmt.Errorf("failed to request: %s", err)
+		return models.AccountTxs{}, fmt.Errorf("failed to request account transactinos: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &txs)
@@ -316,7 +316,7 @@ func (c *Client) GetOrder(id string) (order models.Order, err error) {
 	}
 
 	if resp.IsError() {
-		return models.Order{}, fmt.Errorf("failed to request: %s", err)
+		return models.Order{}, fmt.Errorf("failed to request order information: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &order)
@@ -335,7 +335,7 @@ func (c *Client) GetTxMsgFees() (fees []*models.TxMsgFee, err error) {
 	}
 
 	if resp.IsError() {
-		return []*models.TxMsgFee{}, fmt.Errorf("failed to request: %s", err)
+		return []*models.TxMsgFee{}, fmt.Errorf("failed to request tx msg fees: %d", resp.StatusCode())
 	}
 
 	err = json.Unmarshal(resp.Body(), &fees)

@@ -49,6 +49,7 @@ func main() {
 	r.HandleFunc("/account/txs/{address}", handlers.GetAccountTxs).Methods("GET")
 	r.HandleFunc("/asset", handlers.GetAsset).Methods("GET")
 	r.HandleFunc("/assets", handlers.GetAssets).Methods("GET")
+	r.HandleFunc("/assets/mini-tokens", handlers.GetAssetsMiniTokens).Methods("GET")
 	r.HandleFunc("/assets/txs", handlers.GetAssetTxs).Methods("GET")
 	r.HandleFunc("/asset-holders", handlers.GetAssetHolders).Methods("GET")
 	r.HandleFunc("/assets-images", handlers.GetAssetsImages).Methods("GET")
@@ -65,7 +66,6 @@ func main() {
 	r.HandleFunc("/txs", handlers.GetTxs).Methods("GET")
 	r.HandleFunc("/txs", handlers.GetTxsByTxType).Methods("POST")
 	r.HandleFunc("/txs/{hash}", handlers.GetTxByTxHash).Methods("GET")
-	r.HandleFunc("/mini/tokens", handlers.GetMiniTokens).Methods("GET")
 
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) { // catch-all
 		w.Write([]byte("No route is found matching the URL"))
