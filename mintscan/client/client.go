@@ -308,34 +308,28 @@ func (c *Client) GetAccountTxs(address string, page int, rows int) (txs models.A
 	return txs, nil
 }
 
-// GetOrder returns order information given an order id.
+// GetOrder returns order information with given order id.
 func (c *Client) GetOrder(id string) (order models.Order, err error) {
-	resp, err := c.acceleratedClient.R().Get("/orders/" + id)
+	var resp *resty.Response
+
+	resp, err = c.acceleratedClient.R().Get("/orders/" + id)
 	if err != nil {
 		return models.Order{}, err
 	}
 
 	if resp.IsError() {
-		return models.Order{}, fmt.Errorf("failed to request order information: %d", resp.StatusCode())
+		return models.Order{}, fmt.Errorf("failed to request bep2 token order information: %d", resp.StatusCode())
 	}
 
-	err = json.Unmarshal(resp.Body(), &order)
-	if err != nil {
-		return models.Order{}, err
-	}
+	if resp.String() == "" {
+		resp, err = c.acceleratedClient.R().Get("/mini/orders/" + id)
+		if err != nil {
+			return models.Order{}, err
+		}
 
-	return order, nil
-}
-
-// GetMiniTokenOrder returns order information given an order id.
-func (c *Client) GetMiniTokenOrder(id string) (order models.Order, err error) {
-	resp, err := c.acceleratedClient.R().Get("/mini/orders/" + id)
-	if err != nil {
-		return models.Order{}, err
-	}
-
-	if resp.IsError() {
-		return models.Order{}, fmt.Errorf("failed to request mini token order information: %d", resp.StatusCode())
+		if resp.IsError() {
+			return models.Order{}, fmt.Errorf("failed to request bep8 token order information: %d", resp.StatusCode())
+		}
 	}
 
 	err = json.Unmarshal(resp.Body(), &order)
