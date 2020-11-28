@@ -2,14 +2,13 @@ package client
 
 import (
 	"context"
-	"encoding/json"
-	"strconv"
-	"time"
 
-	resty "github.com/go-resty/resty/v2"
+	"google.golang.org/grpc"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/legacy"
+	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/pkg/errors"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
@@ -20,17 +19,17 @@ import (
 )
 
 type Client struct {
-	cdc            *codec.LegacyAmino
-	rpcClient      rpcclient.Client
-	exchangeClient *resty.Client
+	cdc       *codec.LegacyAmino
+	rpcClient rpcclient.Client
+	grpcConn  *grpc.ClientConn
 }
 
 // NewClient creates a new Client with the given config.
 func NewClient(cfg config.NodeConfig) *Client {
-
-	exchangeClient := resty.New().
-		SetHostURL(cfg.ExchangeAPIEndpoint).
-		SetTimeout(time.Duration(10 * time.Second))
+	grpcConn, err := grpc.Dial(cfg.GRPCNode, grpc.WithInsecure(), grpc.WithContextDialer(dialerFunc))
+	if err != nil {
+		panic("failed to connect to the gRPC: " + cfg.GRPCNode)
+	}
 
 	rpcClient, err := rpchttp.NewWithTimeout(cfg.RPCNode, "/websocket", 10)
 	if err != nil {
@@ -38,9 +37,9 @@ func NewClient(cfg config.NodeConfig) *Client {
 	}
 
 	return &Client{
-		legacy.Cdc,
-		rpcClient,
-		exchangeClient,
+		cdc:       legacy.Cdc,
+		rpcClient: rpcClient,
+		grpcConn:  grpcConn,
 	}
 }
 
@@ -87,33 +86,39 @@ func (c Client) GetValidatorSet(height int64) (*tmctypes.ResultValidators, error
 // GetValidators returns validators detail information in Tendemrint validators in active chain
 // An error returns if the query fails.
 func (c Client) GetValidators() ([]*types.Validator, error) {
-	resp, err := c.exchangeClient.R().Get("/stake/validators")
+	stakingCli := staking.NewQueryClient(c.grpcConn)
+	resp, err := stakingCli.Validators(context.Background(), &staking.QueryValidatorsRequest{})
 	if err != nil {
+		err = errors.Wrap(err, "failed to query validators from staking module")
 		return nil, err
 	}
 
-	var vals []*types.Validator
-
-	err = json.Unmarshal(resp.Body(), &vals)
-	if err != nil {
-		return nil, err
+	vals := make([]*types.Validator, 0, len(resp.Validators))
+	for _, val := range resp.Validators {
+		vals = append(vals, &types.Validator{
+			OperatorAddress: val.OperatorAddress, // string
+			ConsensusPubKey: val.ConsensusPubkey, // json.RawMessage
+			Jailed:          val.Jailed,          // bool
+			Status:          val.Status.String(), // string
+			Tokens:          val.Tokens.String(), // string
+			Power:           val.ConsensusPower(),
+			DelegatorShares: val.DelegatorShares.String(), // string
+			Description: types.Description{
+				Moniker:  val.Description.Moniker,
+				Identity: val.Description.Identity,
+				Website:  val.Description.Website,
+				Details:  val.Description.Details,
+			}, // Description
+			UnbondingHeight: val.UnbondingHeight,        // int64
+			UnbondingTime:   val.UnbondingTime.String(), // string
+			Commission: types.Commission{
+				Rate:          val.Commission.Rate.String(),
+				MaxRate:       val.Commission.MaxRate.String(),
+				MaxChangeRate: val.Commission.MaxChangeRate.String(),
+				UpdateTime:    val.Commission.UpdateTime.String(),
+			}, // Commission
+		})
 	}
 
 	return vals, nil
-}
-
-// GetTokens returns information about existing tokens in active chain.
-func (c Client) GetTokens(limit int, offset int) ([]*types.Token, error) {
-	resp, err := c.exchangeClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
-	if err != nil {
-		return nil, err
-	}
-
-	var tokens []*types.Token
-	err = json.Unmarshal(resp.Body(), &tokens)
-	if err != nil {
-		return nil, err
-	}
-
-	return tokens, nil
 }

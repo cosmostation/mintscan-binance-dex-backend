@@ -10,20 +10,16 @@ import (
 // getValidators parses validators information and wrap into Precommit schema struct
 func (ex *Exporter) getValidators(vals []*types.Validator) (validators []*schema.Validator, err error) {
 	for _, val := range vals {
-		ok, err := ex.db.ExistValidator(val.ConsensusAddress)
+		ok, err := ex.db.ExistValidator(val.ConsensusPubKey)
 		if !ok {
 			val := &schema.Validator{
 				Moniker:                 val.Description.Moniker,
-				AccountAddress:          val.AccountAddress,
 				OperatorAddress:         val.OperatorAddress,
-				ConsensusAddress:        val.ConsensusAddress,
 				Jailed:                  val.Jailed,
 				Status:                  val.Status,
 				Tokens:                  val.Tokens,
 				VotingPower:             val.Power,
 				DelegatorShares:         val.DelegatorShares,
-				BondHeight:              val.BondHeight,
-				BondIntraTxCounter:      val.BondIntraTxCounter,
 				UnbondingHeight:         val.UnbondingHeight,
 				UnbondingTime:           val.UnbondingTime,
 				CommissionRate:          val.Commission.Rate,

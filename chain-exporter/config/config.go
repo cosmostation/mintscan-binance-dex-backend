@@ -9,16 +9,15 @@ import (
 
 // Config defines all necessary parameters.
 type Config struct {
-	Node   NodeConfig   `mapstructure:"node"`
-	DB     DBConfig     `mapstructure:"database"`
-	Market MarketConfig `mapstructure:"market"`
+	Node NodeConfig `mapstructure:"node"`
+	DB   DBConfig   `mapstructure:"database"`
 }
 
 // NodeConfig wraps all node endpoints that are used in this project.
 type NodeConfig struct {
-	RPCNode             string `mapstructure:"rpc_node"`
-	ExchangeAPIEndpoint string `mapstructure:"exchange_api_endpoint"`
-	ChainID             string `mapstructure:"chain_id"`
+	RPCNode  string `mapstructure:"rpc_node"`
+	GRPCNode string `mapstructure:"grpc_node"`
+	ChainID  string `mapstructure:"chain_id"`
 }
 
 // DBConfig wraps all required parameters for database connection.
@@ -28,11 +27,6 @@ type DBConfig struct {
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	Database string `mapstructure:"dbname"`
-}
-
-// MarketConfig wraps all required params for market endpoints.
-type MarketConfig struct {
-	CoinGeckoEndpoint string `mapstructure:"coingecko_endpoint"`
 }
 
 // ParseConfig attempts to read and parse config.yaml from the given path

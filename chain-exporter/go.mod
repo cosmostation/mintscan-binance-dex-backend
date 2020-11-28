@@ -8,7 +8,6 @@ require (
 	github.com/bugsnag/panicwrap v1.2.0 // indirect
 	github.com/cosmos/cosmos-sdk v0.39.2
 	github.com/go-pg/pg v8.0.6+incompatible
-	github.com/go-resty/resty/v2 v2.2.0
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
@@ -17,6 +16,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/tendermint/tendermint v0.34.0-rc6
 	github.com/xlab/suplog v1.0.0
+	google.golang.org/grpc v1.33.2
 	mellium.im/sasl v0.2.1 // indirect
 )
 
