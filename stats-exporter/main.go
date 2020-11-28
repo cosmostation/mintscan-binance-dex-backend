@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/cron"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/stats-exporter/cron"
 )
 
 func main() {

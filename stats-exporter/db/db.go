@@ -1,8 +1,8 @@
 package db
 
 import (
-	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/config"
-	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/stats-exporter/config"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/stats-exporter/schema"
 
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"

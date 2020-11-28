@@ -5,14 +5,14 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/stats-exporter/schema"
 
 	"github.com/pkg/errors"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/config"
-	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/db"
-	"github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter/models"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/stats-exporter/client"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/stats-exporter/config"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/stats-exporter/db"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/stats-exporter/models"
 
 	"github.com/robfig/cron"
 )

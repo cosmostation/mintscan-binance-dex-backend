@@ -4,10 +4,7 @@ import (
 	"log"
 
 	"github.com/pkg/errors"
-
 	"github.com/spf13/viper"
-
-	cmtypes "github.com/binance-chain/go-sdk/common/types"
 )
 
 // Config wraps all necessary parameters
@@ -18,11 +15,8 @@ type Config struct {
 
 // NodeConfig wraps all node endpoints that are used in this project
 type NodeConfig struct {
-	RPCNode                string               `yaml:"rpc_node"`
-	AcceleratedNode        string               `yaml:"accelerated_node"`
-	APIServerEndpoint      string               `yaml:"api_server_endpoint"`
-	ExplorerServerEndpoint string               `yaml:"explorer_server_endpoint"`
-	NetworkType            cmtypes.ChainNetwork `yaml:"network_type"`
+	ExchangeAPIEndpoint string `yaml:"exchange_api_endpoint"`
+	ChainID             string `yaml:"chain_id"`
 }
 
 // DBConfig wraps all required parameters for database connection
@@ -41,7 +35,6 @@ func ParseConfig() Config {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./")
 	viper.AddConfigPath("../") // for test cases
-	viper.AddConfigPath("/home/ubuntu/mintscan-binance-dex-backend/stats-exporter/")
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(errors.Wrap(err, "failed to read config"))
@@ -50,33 +43,14 @@ func ParseConfig() Config {
 	cfg := Config{}
 
 	if viper.GetString("active") == "" {
-		log.Fatal("define active param in your config file.")
+		log.Fatal("define active chain_id param in your config file.")
 	}
 
 	switch viper.GetString("active") {
-	case "mainnet":
+	case "888":
 		cfg.Node = NodeConfig{
-			RPCNode:                viper.GetString("mainnet.node.rpc_node"),
-			AcceleratedNode:        viper.GetString("mainnet.node.accelerated_node"),
-			APIServerEndpoint:      viper.GetString("mainnet.node.api_server_endpoint"),
-			ExplorerServerEndpoint: viper.GetString("mainnet.node.explorer_server_endpoint"),
-			NetworkType:            cmtypes.ProdNetwork,
-		}
-		cfg.DB = DBConfig{
-			Host:     viper.GetString("mainnet.database.host"),
-			Port:     viper.GetString("mainnet.database.port"),
-			User:     viper.GetString("mainnet.database.user"),
-			Password: viper.GetString("mainnet.database.password"),
-			Table:    viper.GetString("mainnet.database.table"),
-		}
-
-	case "testnet":
-		cfg.Node = NodeConfig{
-			RPCNode:                viper.GetString("testnet.node.rpc_node"),
-			AcceleratedNode:        viper.GetString("testnet.node.accelerated_node"),
-			APIServerEndpoint:      viper.GetString("testnet.node.api_server_endpoint"),
-			ExplorerServerEndpoint: viper.GetString("testnet.node.explorer_server_endpoint"),
-			NetworkType:            cmtypes.TestNetwork,
+			ExchangeAPIEndpoint: viper.GetString("testnet.node.exchange_api_endpoint"),
+			ChainID:             "888",
 		}
 		cfg.DB = DBConfig{
 			Host:     viper.GetString("testnet.database.host"),
@@ -87,7 +61,7 @@ func ParseConfig() Config {
 		}
 
 	default:
-		log.Fatal("active can be either mainnet or testnet.")
+		log.Fatal("active can be only chain-id 888 (testnet).")
 	}
 
 	return cfg
