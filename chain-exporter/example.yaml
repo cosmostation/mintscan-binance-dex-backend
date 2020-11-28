@@ -1,14 +1,14 @@
 chain_id: "888"
 
 "888":
-  node: 
-    rpc_node: "" 
+  node:
+    rpc_node: ""
     exchange_api_endpoint: ""
   database:
     host: ""
     port: 5432
     user: ""
     password: ""
-    table: ""
+    dbname: ""
   market:
     coingecko_endpoint: ""

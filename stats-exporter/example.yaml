@@ -1,11 +1,11 @@
 active: "888"
 
 "888":
-  node: 
+  node:
     exchange_api_endpoint: ""
   database:
     host: ""
     port: 5432
     user: ""
     password: ""
-    table: ""
+    dbname: ""

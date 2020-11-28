@@ -28,7 +28,7 @@ func Connect(cfg config.DBConfig) *Database {
 		Addr:         cfg.Host + ":" + cfg.Port,
 		User:         cfg.User,
 		Password:     cfg.Password,
-		Database:     cfg.Table,
+		Database:     cfg.Database,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	})

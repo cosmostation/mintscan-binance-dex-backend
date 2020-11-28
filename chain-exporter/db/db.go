@@ -39,7 +39,7 @@ func Connect(cfg config.DBConfig) *Database {
 		Addr:     cfg.Host + ":" + cfg.Port,
 		User:     cfg.User,
 		Password: cfg.Password,
-		Database: cfg.Table,
+		Database: cfg.Database,
 	})
 
 	return &Database{db}

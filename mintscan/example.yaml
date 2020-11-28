@@ -1,7 +1,7 @@
 chain_id: "888"
 
 "888":
-  node: 
+  node:
     rpc_node: ""
     exchange_api_endpoint: ""
   database:
@@ -9,7 +9,7 @@ chain_id: "888"
     port: 5432
     user: ""
     password: ""
-    table: ""
+    dbname: ""
   web:
     port: 5000
   market:

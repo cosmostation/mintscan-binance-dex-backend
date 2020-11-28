@@ -27,7 +27,7 @@ type DBConfig struct {
 	Port     string `mapstructure:"port"`
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
-	Table    string `mapstructure:"table"`
+	Database string `mapstructure:"dbname"`
 }
 
 // MarketConfig wraps all required params for market endpoints.

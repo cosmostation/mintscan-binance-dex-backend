@@ -25,7 +25,7 @@ type DBConfig struct {
 	Port     string `yaml:"port"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
-	Table    string `yaml:"table"`
+	Database string `yaml:"dbname"`
 }
 
 // ParseConfig attempts to read and parse config.yaml from the given path
@@ -57,7 +57,7 @@ func ParseConfig() Config {
 			Port:     viper.GetString("testnet.database.port"),
 			User:     viper.GetString("testnet.database.user"),
 			Password: viper.GetString("testnet.database.password"),
-			Table:    viper.GetString("testnet.database.table"),
+			Database: viper.GetString("testnet.database.dbname"),
 		}
 
 	default:
