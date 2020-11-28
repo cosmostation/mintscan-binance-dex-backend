@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/config"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/config"
 
 	"github.com/stretchr/testify/require"
 

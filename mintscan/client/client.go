@@ -1,64 +1,48 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/binance-chain/go-sdk/client/rpc"
-
+	resty "github.com/go-resty/resty/v2"
+	rpcclient "github.com/tendermint/tendermint/rpc/client"
+	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/codec"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/config"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-
-	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
-
-	amino "github.com/tendermint/go-amino"
-
-	resty "github.com/go-resty/resty/v2"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/config"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
 )
 
 // Client wraps for both Tendermint RPC and other API clients that
 // are needed for this project
 type Client struct {
-	acceleratedClient *resty.Client
-	apiClient         *resty.Client
-	cdc               *amino.Codec
-	coinGeckoClient   *resty.Client
-	explorerClient    *resty.Client
-	rpcClient         rpc.Client
+	rpcClient       rpcclient.Client
+	exchangeClient  *resty.Client
+	coinGeckoClient *resty.Client
 }
 
 // NewClient creates a new client with the given config
 func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
-	acceleratedClient := resty.New().
-		SetHostURL(cfg.AcceleratedNode).
-		SetTimeout(time.Duration(5 * time.Second))
-
-	apiClient := resty.New().
-		SetHostURL(cfg.APIServerEndpoint).
-		SetTimeout(time.Duration(5 * time.Second))
-
 	coinGeckoClient := resty.New().
 		SetHostURL(marketCfg.CoinGeckoEndpoint).
 		SetTimeout(time.Duration(5 * time.Second))
 
-	explorerClient := resty.New().
-		SetHostURL(cfg.ExplorerServerEndpoint).
+	exchangeClient := resty.New().
+		SetHostURL(cfg.ExchangeAPIEndpoint).
 		SetTimeout(time.Duration(50 * time.Second))
 
-	rpcClient := rpc.NewRPCClient(cfg.RPCNode, cfg.NetworkType)
+	rpcClient, err := rpchttp.NewWithTimeout(cfg.RPCNode, "/websocket", 10)
+	if err != nil {
+		panic("failed to init rpcClient: " + err.Error())
+	}
 
 	return &Client{
-		acceleratedClient,
-		apiClient,
-		codec.Codec,
-		coinGeckoClient,
-		explorerClient,
 		rpcClient,
+		exchangeClient,
+		coinGeckoClient,
 	}
 }
 
@@ -68,17 +52,17 @@ func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
 
 // GetStatus returns status info on the active chain.
 func (c *Client) GetStatus() (*ctypes.ResultStatus, error) {
-	return c.rpcClient.Status()
+	return c.rpcClient.Status(context.Background())
 }
 
 // GetBlock queries for a block by height. An error is returned if the query fails.
-func (c *Client) GetBlock(height int64) (*tmctypes.ResultBlock, error) {
-	return c.rpcClient.Block(&height)
+func (c *Client) GetBlock(height int64) (*ctypes.ResultBlock, error) {
+	return c.rpcClient.Block(context.Background(), &height)
 }
 
 // GetLatestBlockHeight returns the latest block height on the active chain.
 func (c *Client) GetLatestBlockHeight() (int64, error) {
-	status, err := c.rpcClient.Status()
+	status, err := c.rpcClient.Status(context.Background())
 	if err != nil {
 		return -1, err
 	}
@@ -88,17 +72,17 @@ func (c *Client) GetLatestBlockHeight() (int64, error) {
 
 // GetValidatorSet returns all the known Tendermint validators for a given block
 // height. An error is returned if the query fails.
-func (c *Client) GetValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
-	return c.rpcClient.Validators(&height)
+func (c *Client) GetValidatorSet(height int64) (*ctypes.ResultValidators, error) {
+	return c.rpcClient.Validators(context.Background(), &height, nil, nil)
 }
 
-// --------------------
-// REST SERVER APIs
-// --------------------
+// -------------
+// OFFCHAIN APIs
+// -------------
 
 // GetTokens returns information about existing tokens in active chain
 func (c *Client) GetTokens(limit int, offset int) (tokens []models.Token, err error) {
-	resp, err := c.apiClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
+	resp, err := c.exchangeClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
 	if err != nil {
 		return []models.Token{}, err
 	}
@@ -113,26 +97,6 @@ func (c *Client) GetTokens(limit int, offset int) (tokens []models.Token, err er
 	}
 
 	return tokens, nil
-}
-
-// GetValidators returns validators detail information in Tendemrint validators in active chain
-// An error is returns if the query fails.
-func (c *Client) GetValidators() (validators []models.Validator, err error) {
-	resp, err := c.apiClient.R().Get("/stake/validators")
-	if err != nil {
-		return []models.Validator{}, err
-	}
-
-	if resp.IsError() {
-		return []models.Validator{}, fmt.Errorf("failed to request validators: %d", resp.StatusCode())
-	}
-
-	err = json.Unmarshal(resp.Body(), &validators)
-	if err != nil {
-		return []models.Validator{}, err
-	}
-
-	return validators, nil
 }
 
 // GetCoinMarketData returns market data from CoinGecko API based upon params.
@@ -175,9 +139,29 @@ func (c *Client) GetCoinMarketChartData(id string, from string, to string) (data
 	return data, nil
 }
 
+// GetValidators returns validators detail information on Tendermint validators in active chain
+// An error is returns if the query fails.
+func (c *Client) GetValidators() (validators []models.Validator, err error) {
+	resp, err := c.exchangeClient.R().Get("/stake/validators")
+	if err != nil {
+		return []models.Validator{}, err
+	}
+
+	if resp.IsError() {
+		return []models.Validator{}, fmt.Errorf("failed to request validators: %d", resp.StatusCode())
+	}
+
+	err = json.Unmarshal(resp.Body(), &validators)
+	if err != nil {
+		return []models.Validator{}, err
+	}
+
+	return validators, nil
+}
+
 // GetAsset returns particular asset information given an asset name.
 func (c *Client) GetAsset(assetName string) (asset models.Asset, err error) {
-	resp, err := c.explorerClient.R().Get("/asset?asset=" + assetName)
+	resp, err := c.exchangeClient.R().Get("/asset?asset=" + assetName)
 	if err != nil {
 		return models.Asset{}, err
 	}
@@ -196,7 +180,7 @@ func (c *Client) GetAsset(assetName string) (asset models.Asset, err error) {
 
 // GetAssets returns information of all assets existing in an active chain.
 func (c *Client) GetAssets(page int, rows int) (assets models.AssetInfo, err error) {
-	resp, err := c.explorerClient.R().Get("/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
+	resp, err := c.exchangeClient.R().Get("/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
 		return models.AssetInfo{}, err
 	}
@@ -215,7 +199,7 @@ func (c *Client) GetAssets(page int, rows int) (assets models.AssetInfo, err err
 
 // GetAssetHolders returns all asset holders information based upon params.
 func (c *Client) GetAssetHolders(asset string, page int, rows int) (holders models.AssetHolders, err error) {
-	resp, err := c.explorerClient.R().Get("/asset-holders?asset=" + asset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
+	resp, err := c.exchangeClient.R().Get("/asset-holders?asset=" + asset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
 		return models.AssetHolders{}, err
 	}
@@ -234,7 +218,7 @@ func (c *Client) GetAssetHolders(asset string, page int, rows int) (holders mode
 
 // GetAssetTxs returns asset transactions given an asset name based upon params.
 func (c *Client) GetAssetTxs(txAsset string, page int, rows int) (txs models.AssetTxs, err error) {
-	resp, err := c.explorerClient.R().Get("/txs?txAsset=" + txAsset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
+	resp, err := c.exchangeClient.R().Get("/txs?txAsset=" + txAsset + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
 		return models.AssetTxs{}, err
 	}
@@ -253,7 +237,7 @@ func (c *Client) GetAssetTxs(txAsset string, page int, rows int) (txs models.Ass
 
 // GetMiniTokens returns a list of available mini tokens.
 func (c *Client) GetMiniTokens(page int, rows int) (assets models.AssetInfo, err error) {
-	resp, err := c.explorerClient.R().Get("/mini-token/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
+	resp, err := c.exchangeClient.R().Get("/mini-token/assets?page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
 		return models.AssetInfo{}, err
 	}
@@ -272,7 +256,7 @@ func (c *Client) GetMiniTokens(page int, rows int) (assets models.AssetInfo, err
 
 // GetAccount returns account information given an account address.
 func (c *Client) GetAccount(address string) (account models.Account, err error) {
-	resp, err := c.apiClient.R().Get("/account/" + address)
+	resp, err := c.exchangeClient.R().Get("/account/" + address)
 	if err != nil {
 		return models.Account{}, err
 	}
@@ -291,7 +275,7 @@ func (c *Client) GetAccount(address string) (account models.Account, err error) 
 
 // GetAccountTxs retuns tranctions involving in an account based upon params.
 func (c *Client) GetAccountTxs(address string, page int, rows int) (txs models.AccountTxs, err error) {
-	resp, err := c.explorerClient.R().Get("/txs?address=" + address + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
+	resp, err := c.exchangeClient.R().Get("/txs?address=" + address + "&page=" + strconv.Itoa(page) + "&rows=" + strconv.Itoa(rows))
 	if err != nil {
 		return models.AccountTxs{}, err
 	}
@@ -312,7 +296,7 @@ func (c *Client) GetAccountTxs(address string, page int, rows int) (txs models.A
 func (c *Client) GetOrder(id string) (order models.Order, err error) {
 	var resp *resty.Response
 
-	resp, err = c.acceleratedClient.R().Get("/orders/" + id)
+	resp, err = c.exchangeClient.R().Get("/orders/" + id)
 	if err != nil {
 		return models.Order{}, err
 	}
@@ -322,7 +306,7 @@ func (c *Client) GetOrder(id string) (order models.Order, err error) {
 	}
 
 	if resp.String() == "" {
-		resp, err = c.acceleratedClient.R().Get("/mini/orders/" + id)
+		resp, err = c.exchangeClient.R().Get("/mini/orders/" + id)
 		if err != nil {
 			return models.Order{}, err
 		}
@@ -342,7 +326,7 @@ func (c *Client) GetOrder(id string) (order models.Order, err error) {
 
 // GetTxMsgFees returns fees for different transaciton message types.
 func (c *Client) GetTxMsgFees() (fees []*models.TxMsgFee, err error) {
-	resp, err := c.acceleratedClient.R().Get("/fees")
+	resp, err := c.exchangeClient.R().Get("/fees")
 	if err != nil {
 		return []*models.TxMsgFee{}, err
 	}

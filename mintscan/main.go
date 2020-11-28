@@ -2,33 +2,30 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/config"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/handlers"
-
-	"github.com/pkg/errors"
-
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
+	log "github.com/xlab/suplog"
+
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/client"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/config"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/db"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/handlers"
 )
 
 var (
 	// Version is a project's version string.
-	Version = "Development"
+	Version = "dev"
 
 	// Commit is commit hash of this project.
 	Commit = ""
 )
 
 func main() {
-	l := log.New(os.Stdout, "Mintscan API ", log.Lshortfile|log.LstdFlags)
-
 	// Parse config from configuration file (config.yaml).
 	config := config.ParseConfig()
 
@@ -74,16 +71,15 @@ func main() {
 	// Create a new server
 	sm := &http.Server{
 		Addr:         ":" + config.Web.Port,
-		Handler:      handlers.Middleware(r, client, db, l),
-		ErrorLog:     l,
+		Handler:      handlers.Middleware(r, client, db, log.DefaultLogger),
 		ReadTimeout:  50 * time.Second, // max time to read request from the client
 		WriteTimeout: 10 * time.Second, // max time to write response to the client
 	}
 
 	// Start the API server
 	go func() {
-		l.Printf("Server is running on http://localhost:%s\n", config.Web.Port)
-		l.Printf("Version: %s | Commit: %s", Version, Commit)
+		log.Printf("Server is running on http://localhost:%s\n", config.Web.Port)
+		log.Printf("Version: %s | Commit: %s", Version, Commit)
 
 		err := sm.ListenAndServe()
 		if err != nil {

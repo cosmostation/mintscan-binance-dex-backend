@@ -5,8 +5,6 @@ import (
 	"log"
 
 	"github.com/spf13/viper"
-
-	cmtypes "github.com/binance-chain/go-sdk/common/types"
 )
 
 // Config wraps all config.
@@ -19,11 +17,9 @@ type Config struct {
 
 // NodeConfig wraps all node endpoints that are used in this project.
 type NodeConfig struct {
-	RPCNode                string               `mapstructure:"rpc_node"`
-	AcceleratedNode        string               `mapstructure:"accelerated_node"`
-	APIServerEndpoint      string               `mapstructure:"api_server_endpoint"`
-	ExplorerServerEndpoint string               `mapstructure:"explorer_server_endpoint"`
-	NetworkType            cmtypes.ChainNetwork `mapstructure:"network_type"`
+	RPCNode             string `mapstructure:"rpc_node"`
+	ExchangeAPIEndpoint string `mapstructure:"exchange_api_endpoint"`
+	ChainID             string `mapstructure:"chain_id"`
 }
 
 // DBConfig wraps all required parameters for database connection.
@@ -51,25 +47,25 @@ func ParseConfig() *Config {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./")
-	viper.AddConfigPath("../")                                                 // for test cases
-	viper.AddConfigPath("/home/ubuntu/mintscan-binance-dex-backend/mintscan/") // for production
+	viper.AddConfigPath("../") // for test cases
 
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("fatal error config file: %s ", err))
 	}
 
-	if viper.GetString("network_type") == "" {
-		log.Fatal("define active param in your config file.")
+	chainID := viper.GetString("chain_id")
+	if chainID == "" {
+		log.Fatal("define active chain_id param in your config file.")
 	}
 
 	var config Config
-	sub := viper.Sub(viper.GetString("network_type"))
+	sub := viper.Sub(chainID)
 	sub.Unmarshal(&config)
 
-	if viper.GetString("network_type") == "mainnet" {
-		config.Node.NetworkType = cmtypes.ProdNetwork
+	if chainID == "888" {
+		config.Node.ChainID = chainID
 	} else {
-		config.Node.NetworkType = cmtypes.TestNetwork
+		panic(chainID + " - chain not suppported yet")
 	}
 
 	return &config

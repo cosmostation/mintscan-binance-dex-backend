@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/schema"
 )
 
 // GetBlocks returns blocks based upon the request params

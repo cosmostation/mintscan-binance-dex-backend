@@ -2,8 +2,8 @@ NAME 			    := mintscan
 VERSION 			:= $(shell git describe --tags --abbrev=0)
 COMMIT 				:= $(shell git log -1 --format='%H')
 DESTDIR             ?= $(GOPATH)/bin/${NAME}
-BUILD_FLAGS 		:= -ldflags "-X github.com/cosmostation/mintscan-binance-dex-backend/mintscan/main.Version=${VERSION} \
-								  -X github.com/cosmostation/mintscan-binance-dex-backend/mintscan/main.Commit=${COMMIT}"
+BUILD_FLAGS 		:= -ldflags "-X github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/main.Version=${VERSION} \
+								  -X github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/main.Commit=${COMMIT}"
 
 ## Show all make target commands.
 help:

@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
 
 	"github.com/gorilla/mux"
 )

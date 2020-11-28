@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
 )
 
 // GetStatus returns current status on the active chain

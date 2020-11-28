@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
 )
 
 // GetAsset returns asset based upon the request params

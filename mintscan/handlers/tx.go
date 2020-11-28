@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/schema"
 
 	"github.com/gorilla/mux"
 )

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/config"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/config"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/schema"
 
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
