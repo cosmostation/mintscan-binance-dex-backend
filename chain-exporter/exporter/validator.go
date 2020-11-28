@@ -3,8 +3,8 @@ package exporter
 import (
 	"fmt"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/types"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/types"
 )
 
 // getValidators parses validators information and wrap into Precommit schema struct

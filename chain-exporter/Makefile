@@ -1,8 +1,8 @@
 VERSION               := $(shell echo $(shell git describe --tags) | sed 's/^v//')
 COMMIT                := $(shell git log -1 --format='%H')
 DESTDIR         	  ?= $(GOPATH)/bin/chain-exporter
-BUILD_FLAGS 		  := -ldflags "-X github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/exporter.Version=${VERSION} \
-									-X github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/exporter.Commit=${COMMIT}"
+BUILD_FLAGS 		  := -ldflags "-X github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/exporter.Version=${VERSION} \
+									-X github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/exporter.Commit=${COMMIT}"
 
 # Build executable file in $DESTDIR directory.
 build: go.sum

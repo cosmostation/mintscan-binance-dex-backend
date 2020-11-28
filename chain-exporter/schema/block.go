@@ -12,7 +12,6 @@ type Block struct {
 	ParentHash    string    `json:"parent_hash" sql:",notnull"`
 	NumPrecommits int64     `json:"num_pre_commits" sql:",notnull"`
 	NumTxs        int64     `json:"num_txs" sql:"default:0"`
-	TotalTxs      int64     `json:"total_txs" sql:"default:0"`
 	Timestamp     time.Time `json:"timestamp" sql:"default:now()"`
 }
 
@@ -26,7 +25,6 @@ func NewBlock(b Block) *Block {
 		ParentHash:    b.ParentHash,
 		NumPrecommits: b.NumPrecommits,
 		NumTxs:        b.NumTxs,
-		TotalTxs:      b.TotalTxs,
 		Timestamp:     b.Timestamp,
 	}
 }

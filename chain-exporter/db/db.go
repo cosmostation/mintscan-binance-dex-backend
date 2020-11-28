@@ -3,8 +3,8 @@ package db
 import (
 	"fmt"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/config"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/config"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
 
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"

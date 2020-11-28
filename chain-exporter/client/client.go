@@ -1,66 +1,57 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 	"time"
 
-	"github.com/binance-chain/go-sdk/client/rpc"
+	resty "github.com/go-resty/resty/v2"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/codec"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/config"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/types"
-
-	amino "github.com/tendermint/go-amino"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/legacy"
+	rpcclient "github.com/tendermint/tendermint/rpc/client"
+	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 
-	resty "github.com/go-resty/resty/v2"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/config"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/types"
 )
 
-// Client wraps around both Tendermint RPC client and
-// Cosmos SDK LCD REST client that enables to query necessary data.
 type Client struct {
-	acceleratedClient *resty.Client
-	apiClient         *resty.Client
-	cdc               *amino.Codec
-	explorerClient    *resty.Client
-	rpcClient         rpc.Client
+	apiClient *resty.Client
+	cdc       *codec.LegacyAmino
+	rpcClient rpcclient.Client
 }
 
 // NewClient creates a new Client with the given config.
 func NewClient(cfg config.NodeConfig) *Client {
 
-	acceleratedClient := resty.New().
-		SetHostURL(cfg.AcceleratedNode).
-		SetTimeout(time.Duration(5 * time.Second))
-
 	apiClient := resty.New().
 		SetHostURL(cfg.APIServerEndpoint).
-		SetTimeout(time.Duration(5 * time.Second))
+		SetTimeout(time.Duration(10 * time.Second))
 
-	explorerClient := resty.New().
-		SetHostURL(cfg.ExplorerServerEndpoint).
-		SetTimeout(time.Duration(30 * time.Second))
-
-	rpcClient := rpc.NewRPCClient(cfg.RPCNode, cfg.NetworkType)
+	rpcClient, err := rpchttp.NewWithTimeout(cfg.RPCNode, "/websocket", 10)
+	if err != nil {
+		panic("failed to init rpcClient: " + err.Error())
+	}
 
 	return &Client{
-		acceleratedClient,
 		apiClient,
-		codec.Codec,
-		explorerClient,
+		legacy.Cdc,
 		rpcClient,
 	}
 }
 
 // GetBlock queries for a block by height. An error is returned if the query fails.
 func (c Client) GetBlock(height int64) (*tmctypes.ResultBlock, error) {
-	return c.rpcClient.Block(&height)
+	return c.rpcClient.Block(context.Background(), &height)
 }
 
 // GetLatestBlockHeight returns the latest block height on the active chain.
 func (c Client) GetLatestBlockHeight() (int64, error) {
-	status, err := c.rpcClient.Status()
+	status, err := c.rpcClient.Status(context.Background())
 	if err != nil {
 		return -1, err
 	}
@@ -72,11 +63,11 @@ func (c Client) GetLatestBlockHeight() (int64, error) {
 
 // GetTxs queries for all the transactions in a block height.
 // It uses `Tx` RPC method to query for the transaction.
-func (c Client) GetTxs(block *tmctypes.ResultBlock) ([]*rpc.ResultTx, error) {
-	txs := make([]*rpc.ResultTx, len(block.Block.Txs), len(block.Block.Txs))
+func (c Client) GetTxs(block *tmctypes.ResultBlock) ([]*ctypes.ResultTx, error) {
+	txs := make([]*ctypes.ResultTx, len(block.Block.Txs), len(block.Block.Txs))
 
 	for i, tmTx := range block.Block.Txs {
-		tx, err := c.rpcClient.Tx(tmTx.Hash(), true)
+		tx, err := c.rpcClient.Tx(context.Background(), tmTx.Hash(), true)
 		if err != nil {
 			return nil, err
 		}
@@ -90,7 +81,7 @@ func (c Client) GetTxs(block *tmctypes.ResultBlock) ([]*rpc.ResultTx, error) {
 // GetValidatorSet returns all the known Tendermint validators for a given block
 // height. An error is returned if the query fails.
 func (c Client) GetValidatorSet(height int64) (*tmctypes.ResultValidators, error) {
-	return c.rpcClient.Validators(&height)
+	return c.rpcClient.Validators(context.Background(), &height, nil, nil)
 }
 
 // GetValidators returns validators detail information in Tendemrint validators in active chain

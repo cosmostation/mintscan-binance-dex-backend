@@ -3,7 +3,7 @@ package exporter
 import (
 	"fmt"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
 
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
@@ -11,29 +11,29 @@ import (
 
 // getPreCommits parses validators information and wrap into Precommit schema struct
 func (ex *Exporter) getPreCommits(commit *tmtypes.Commit, vals *tmctypes.ResultValidators) (precommits []*schema.PreCommit, err error) {
-	if len(commit.Precommits) <= 0 {
+	if commit == nil || len(commit.Signatures) == 0 {
 		return []*schema.PreCommit{}, nil
 	}
 
-	for _, precommit := range commit.Precommits {
-		if precommit == nil { // avoid nil-Vote
-			return []*schema.PreCommit{}, nil
+	for _, commitSig := range commit.Signatures {
+		if commitSig.Absent() {
+			continue // OK, some precommits can be missing.
 		}
 
-		valAddr := precommit.ValidatorAddress.String()
+		valAddr := commitSig.ValidatorAddress.String()
 
 		val := findValidatorByAddr(valAddr, vals)
 		if val == nil {
-			return nil, fmt.Errorf("failed to find validator by address %s for block %d", valAddr, precommit.Height)
+			return nil, fmt.Errorf("failed to find validator by address %s for block %d", valAddr, commit.Height)
 		}
 
 		pc := schema.NewPrecommit(schema.PreCommit{
-			Height:           precommit.Height,
-			Round:            precommit.Round,
+			Height:           commit.Height,
+			Round:            commit.Round,
 			ValidatorAddress: valAddr,
 			VotingPower:      val.VotingPower,
 			ProposerPriority: val.ProposerPriority,
-			Timestamp:        precommit.Timestamp,
+			Timestamp:        commitSig.Timestamp,
 		})
 
 		precommits = append(precommits, pc)

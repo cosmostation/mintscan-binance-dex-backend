@@ -1,7 +1,7 @@
 package exporter
 
 import (
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
 
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
@@ -12,11 +12,10 @@ func (ex *Exporter) getBlock(block *tmctypes.ResultBlock) (*schema.Block, error)
 		Height:        block.Block.Height,
 		Proposer:      block.Block.ProposerAddress.String(),
 		Moniker:       ex.db.QueryValidatorMoniker(block.Block.ProposerAddress.String()),
-		BlockHash:     block.BlockMeta.BlockID.Hash.String(),
-		ParentHash:    block.BlockMeta.Header.LastBlockID.Hash.String(),
-		NumPrecommits: int64(len(block.Block.LastCommit.Precommits)),
-		NumTxs:        block.Block.NumTxs,
-		TotalTxs:      block.Block.TotalTxs,
+		BlockHash:     block.BlockID.Hash.String(),
+		ParentHash:    block.Block.Header.LastBlockID.Hash.String(),
+		NumPrecommits: int64(len(block.Block.LastCommit.Signatures)),
+		NumTxs:        int64(len(block.Block.Txs)),
 		Timestamp:     block.Block.Time,
 	})
 

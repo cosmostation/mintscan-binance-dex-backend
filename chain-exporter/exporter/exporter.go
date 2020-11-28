@@ -2,23 +2,24 @@ package exporter
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"time"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/codec"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/config"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/db"
-
 	"github.com/pkg/errors"
+	log "github.com/xlab/suplog"
 
-	amino "github.com/tendermint/go-amino"
+	ctypes "github.com/InjectiveLabs/sdk-go/chain/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/legacy"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/client"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/config"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/db"
 )
 
 var (
 	// Version is this application's version.
-	Version = "Development"
+	Version = "dev"
 
 	// Commit is this application's commit hash.
 	Commit = ""
@@ -26,18 +27,20 @@ var (
 
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
-	l      *log.Logger
-	cdc    *amino.Codec
+	l      log.Logger
+	cdc    *codec.LegacyAmino
 	client *client.Client
 	db     *db.Database
 }
 
 // NewExporter returns Exporter
 func NewExporter() *Exporter {
-	l := log.New(os.Stdout, "Chain Exporter ", log.Lshortfile|log.LstdFlags)
-
 	// Parse config from configuration file (config.yaml).
 	config := config.ParseConfig()
+
+	sdkConfig := sdk.GetConfig()
+	ctypes.SetBech32Prefixes(sdkConfig)
+	ctypes.SetBip44CoinType(sdkConfig)
 
 	// Create new client with node configruation.
 	client := client.NewClient(config.Node)
@@ -54,14 +57,14 @@ func NewExporter() *Exporter {
 	db.CreateTables()
 
 	return &Exporter{
-		l,
-		codec.Codec,
+		log.DefaultLogger,
+		legacy.Cdc,
 		client,
 		db,
 	}
 }
 
-// Start starts to synchronize Binance Chain data.
+// Start starts to synchronize chain data.
 func (ex *Exporter) Start() error {
 	ex.l.Println("Starting Chain Exporter...")
 	ex.l.Printf("Version: %s | Commit Hash: %s", Version, Commit)
@@ -124,7 +127,7 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to query block using rpc client: %s", err)
 	}
 
-	valSet, err := ex.client.GetValidatorSet(block.Block.LastCommit.Height())
+	valSet, err := ex.client.GetValidatorSet(block.Block.LastCommit.GetHeight())
 	if err != nil {
 		return fmt.Errorf("failed to query validator set using rpc client: %s", err)
 	}

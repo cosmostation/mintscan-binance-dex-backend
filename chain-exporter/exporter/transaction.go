@@ -3,13 +3,12 @@ package exporter
 import (
 	"encoding/base64"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/schema"
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/types"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/types"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	txtypes "github.com/cosmos/cosmos-sdk/x/auth/legacy/legacytx"
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
-
-	ctypes "github.com/binance-chain/go-sdk/common/types"
-	txtypes "github.com/binance-chain/go-sdk/types/tx"
 )
 
 // getTxs parses transactions in a block and return transactions.
@@ -38,17 +37,17 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.
 		sigs := make([]types.Signature, len(stdTx.Signatures), len(stdTx.Signatures))
 
 		for i, sig := range stdTx.Signatures {
-			consPubKey, err := ctypes.Bech32ifyConsPub(sig.PubKey)
+			consPubKey := sdk.GetConsAddress(sig.PubKey).String()
 			if err != nil {
 				return []*schema.Transaction{}, err
 			}
 
 			sigs[i] = types.Signature{
-				Address:       sig.Address().String(), // hex string
-				AccountNumber: sig.AccountNumber,
-				Pubkey:        consPubKey,
-				Sequence:      sig.Sequence,
-				Signature:     base64.StdEncoding.EncodeToString(sig.Signature), // encode base64
+				Address: sig.Address().String(), // hex string
+				// AccountNumber: sig.AccountNumber,
+				Pubkey: consPubKey,
+				// Sequence:      sig.Sequence,
+				Signature: base64.StdEncoding.EncodeToString(sig.Signature), // encode base64
 			}
 		}
 

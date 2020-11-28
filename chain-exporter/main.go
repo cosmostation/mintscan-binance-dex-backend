@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/exporter"
+	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/exporter"
 )
 
 func main() {
