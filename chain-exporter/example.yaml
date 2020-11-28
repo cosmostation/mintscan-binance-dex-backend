@@ -3,7 +3,7 @@ chain_id: "888"
 "888":
   node: 
     rpc_node: "" 
-    api_server_endpoint: ""
+    exchange_api_endpoint: ""
   database:
     host: ""
     port: 5432

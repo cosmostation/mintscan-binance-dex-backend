@@ -16,9 +16,9 @@ type Config struct {
 
 // NodeConfig wraps all node endpoints that are used in this project.
 type NodeConfig struct {
-	RPCNode           string `mapstructure:"rpc_node"`
-	APIServerEndpoint string `mapstructure:"api_server_endpoint"`
-	ChainID           string `mapstructure:"chain_id"`
+	RPCNode             string `mapstructure:"rpc_node"`
+	ExchangeAPIEndpoint string `mapstructure:"exchange_api_endpoint"`
+	ChainID             string `mapstructure:"chain_id"`
 }
 
 // DBConfig wraps all required parameters for database connection.
@@ -47,15 +47,16 @@ func ParseConfig() *Config {
 		panic(fmt.Errorf("fatal error config file: %s ", err))
 	}
 
-	if viper.GetString("chain_id") == "" {
+	chainID := viper.GetString("chain_id")
+	if chainID == "" {
 		log.Fatal("define active chain_id param in your config file.")
 	}
 
 	var config Config
-	sub := viper.Sub(viper.GetString("chain_id"))
+	sub := viper.Sub(chainID)
 	sub.Unmarshal(&config)
 
-	if chainID := viper.GetString("chain_id"); chainID == "888" {
+	if chainID == "888" {
 		config.Node.ChainID = chainID
 	} else {
 		panic(chainID + " - chain not suppported yet")

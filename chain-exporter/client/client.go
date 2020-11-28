@@ -20,16 +20,16 @@ import (
 )
 
 type Client struct {
-	apiClient *resty.Client
-	cdc       *codec.LegacyAmino
-	rpcClient rpcclient.Client
+	cdc            *codec.LegacyAmino
+	rpcClient      rpcclient.Client
+	exchangeClient *resty.Client
 }
 
 // NewClient creates a new Client with the given config.
 func NewClient(cfg config.NodeConfig) *Client {
 
-	apiClient := resty.New().
-		SetHostURL(cfg.APIServerEndpoint).
+	exchangeClient := resty.New().
+		SetHostURL(cfg.ExchangeAPIEndpoint).
 		SetTimeout(time.Duration(10 * time.Second))
 
 	rpcClient, err := rpchttp.NewWithTimeout(cfg.RPCNode, "/websocket", 10)
@@ -38,9 +38,9 @@ func NewClient(cfg config.NodeConfig) *Client {
 	}
 
 	return &Client{
-		apiClient,
 		legacy.Cdc,
 		rpcClient,
+		exchangeClient,
 	}
 }
 
@@ -87,7 +87,7 @@ func (c Client) GetValidatorSet(height int64) (*tmctypes.ResultValidators, error
 // GetValidators returns validators detail information in Tendemrint validators in active chain
 // An error returns if the query fails.
 func (c Client) GetValidators() ([]*types.Validator, error) {
-	resp, err := c.apiClient.R().Get("/stake/validators")
+	resp, err := c.exchangeClient.R().Get("/stake/validators")
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (c Client) GetValidators() ([]*types.Validator, error) {
 
 // GetTokens returns information about existing tokens in active chain.
 func (c Client) GetTokens(limit int, offset int) ([]*types.Token, error) {
-	resp, err := c.apiClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
+	resp, err := c.exchangeClient.R().Get("/tokens?limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset))
 	if err != nil {
 		return nil, err
 	}
