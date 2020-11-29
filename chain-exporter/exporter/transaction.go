@@ -134,6 +134,14 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.
 			return []*schema.Transaction{}, err
 		}
 
+		var txLog string
+		txInfo := txResult.TxResult.Info
+		if resultLog := txResult.TxResult.Log; json.Valid([]byte(resultLog)) {
+			txLog = resultLog
+		} else if len(txInfo) == 0 {
+			txInfo = resultLog
+		}
+
 		t := &schema.Transaction{
 			TxType:           txType,
 			Height:           txResult.Height,
@@ -143,8 +151,8 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.
 			Signatures:       string(sigsBz),
 			Events:           string(eventsBz),
 			Memo:             txMemo,
-			Log:              txResult.TxResult.Log,
-			Info:             txResult.TxResult.Info,
+			Log:              txLog,
+			Info:             txInfo,
 			EVMTxData:        string(evmTxData),
 			EVMTxFrom:        evmTxFrom,
 			EVMTxFromAccAddr: evmTxFromAccAddr,
