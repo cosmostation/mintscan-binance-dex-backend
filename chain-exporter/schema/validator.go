@@ -14,7 +14,7 @@ type Validator struct {
 	VotingPower             int64     `json:"voting_power"`
 	DelegatorShares         string    `json:"delegator_shares"`
 	UnbondingHeight         int64     `json:"unbonding_height" sql:"default:0"`
-	UnbondingTime           string    `json:"unbonding_time"`
+	UnbondingTime           time.Time `json:"unbonding_time"`
 	CommissionRate          string    `json:"commission_rate"`
 	CommissionMaxRate       string    `json:"commission_max_rate"`
 	CommissionMaxChangeRate string    `json:"commission_max_change_rate"`

@@ -11,9 +11,8 @@ import (
 )
 
 var (
-	// columnLength is the column length of varchar type in every table.
-	// This needs to be considered again to set it to what specific length is needed, but right now set it to 99999.
-	columnLength = 99999
+	// 4 MiB for VARCHAR text fields
+	varcharLimit = 4 * 1024 * 1024
 )
 
 const (
@@ -71,7 +70,7 @@ func (db *Database) CreateTables() error {
 
 		err := db.CreateTable(model, &orm.CreateTableOptions{
 			IfNotExists: true,
-			Varchar:     columnLength, // replaces data type from text to varchar type length.
+			Varchar:     varcharLimit,
 		})
 
 		if err != nil {

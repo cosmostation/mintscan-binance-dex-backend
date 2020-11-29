@@ -1,15 +1,39 @@
 package exporter
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
+
+	"github.com/pkg/errors"
+	log "github.com/xlab/suplog"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
+	"github.com/tendermint/tendermint/crypto"
+	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	txtypes "github.com/cosmos/cosmos-sdk/x/auth/legacy/legacytx"
-	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
+	evm "github.com/InjectiveLabs/sdk-go/chain/evm/types"
 )
+
+type CosmosTx interface {
+	GetMsgs() []sdk.Msg
+	ValidateBasic() error
+	GetSigners() []sdk.AccAddress
+	GetPubKeys() []crypto.PubKey
+	GetGas() uint64
+	GetFee() sdk.Coins
+	FeePayer() sdk.AccAddress
+	FeeGranter() sdk.AccAddress
+	GetMemo() string
+	GetSignatures() [][]byte
+	GetTimeoutHeight() uint64
+	GetSignaturesV2() ([]signing.SignatureV2, error)
+}
 
 // getTxs parses transactions in a block and return transactions.
 func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.Transaction, err error) {
@@ -22,50 +46,108 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.
 		return []*schema.Transaction{}, nil
 	}
 
-	for _, tx := range txs {
-		var stdTx txtypes.StdTx
-		err = ex.cdc.UnmarshalBinaryLengthPrefixed([]byte(tx.Tx), &stdTx)
+	for _, txResult := range txs {
+		tx, err := ex.client.TxDecoder()(txResult.Tx)
 		if err != nil {
-			return []*schema.Transaction{}, err
+			err := errors.Wrap(err, "failed to decode result Tx bytes")
+			return nil, err
 		}
 
-		msgsBz, err := ex.cdc.MarshalJSON(stdTx.GetMsgs())
-		if err != nil {
-			return []*schema.Transaction{}, err
+		msgsBuf := new(bytes.Buffer)
+		_ = msgsBuf.WriteByte('[')
+		txMsgs := tx.GetMsgs()
+		for idx, msg := range txMsgs {
+			msgsBz := ex.client.JSONMarshaler().MustMarshalJSON(msg)
+			_, _ = msgsBuf.Write(msgsBz)
+
+			if idx != len(txMsgs)-1 {
+				// not last
+				_ = msgsBuf.WriteByte(',')
+			}
+		}
+		_ = msgsBuf.WriteByte(']')
+
+		var txType string
+		var sigs []types.Signature
+		var evmTxData []byte
+		var evmTxFrom string
+		var evmTxFromAccAddr string
+		var txMemo string
+
+		txWithExtensions, ok := tx.(authante.HasExtensionOptionsTx)
+		if ok {
+			opts := txWithExtensions.GetExtensionOptions()
+			if len(opts) > 0 {
+				if typeURL := opts[0].GetTypeUrl(); typeURL == "/injective.evm.v1beta1.ExtensionOptionsEthereumTx" {
+					txType = "evm"
+				}
+			}
 		}
 
-		sigs := make([]types.Signature, len(stdTx.Signatures), len(stdTx.Signatures))
+		if txType == "evm" {
+			impl := tx.GetMsgs()[0].(*evm.MsgEthereumTx)
 
-		for i, sig := range stdTx.Signatures {
-			consPubKey := sdk.GetConsAddress(sig.PubKey).String()
+			from, err := impl.VerifySig(impl.ChainID())
 			if err != nil {
-				return []*schema.Transaction{}, err
+				return nil, err
+			} else {
+				evmTxFrom = from.Hex()
+				evmTxFromAccAddr = sdk.AccAddress(from.Bytes()).String()
 			}
 
-			sigs[i] = types.Signature{
-				Address: sig.Address().String(), // hex string
-				// AccountNumber: sig.AccountNumber,
-				Pubkey: consPubKey,
-				// Sequence:      sig.Sequence,
-				Signature: base64.StdEncoding.EncodeToString(sig.Signature), // encode base64
+			evmTxData, _ = json.Marshal(impl.Data)
+		} else if impl, ok := tx.(CosmosTx); ok {
+			txType = "cosmos"
+			txMemo = impl.GetMemo()
+			txSignatures, _ := impl.GetSignaturesV2()
+			txPubKeys := impl.GetPubKeys()
+			txSigners := impl.GetSigners()
+			sigs = make([]types.Signature, len(txSignatures))
+
+			for i, sig := range txSignatures {
+				consPubKey := sdk.GetConsAddress(txPubKeys[i]).String()
+				if err != nil {
+					return []*schema.Transaction{}, err
+				}
+
+				sigs[i] = types.Signature{
+					Address:   txSigners[i].String(),
+					Pubkey:    consPubKey,
+					Sequence:  sig.Sequence,
+					Signature: base64.StdEncoding.EncodeToString(sig.Data.(*signing.SingleSignatureData).Signature),
+				}
 			}
+		} else {
+			log.WithField("tx_type", fmt.Sprintf("%T", tx)).Warningln("skipping unknown Tx implementation")
 		}
 
-		sigsBz, err := ex.cdc.MarshalJSON(sigs)
+		sigsBz, err := json.Marshal(sigs)
+		if err != nil {
+			return []*schema.Transaction{}, err
+		}
+
+		eventsBz, err := json.Marshal(txResult.TxResult.Events)
 		if err != nil {
 			return []*schema.Transaction{}, err
 		}
 
 		t := &schema.Transaction{
-			Height:     tx.Height,
-			TxHash:     tx.Hash.String(),
-			Code:       tx.TxResult.Code,
-			Messages:   string(msgsBz),
-			Signatures: string(sigsBz),
-			Memo:       stdTx.Memo,
-			GasWanted:  tx.TxResult.GasWanted,
-			GasUsed:    tx.TxResult.GasUsed,
-			Timestamp:  block.Block.Time,
+			TxType:           txType,
+			Height:           txResult.Height,
+			TxHash:           txResult.Hash.String(),
+			Code:             txResult.TxResult.Code,
+			Messages:         msgsBuf.String(),
+			Signatures:       string(sigsBz),
+			Events:           string(eventsBz),
+			Memo:             txMemo,
+			Log:              txResult.TxResult.Log,
+			Info:             txResult.TxResult.Info,
+			EVMTxData:        string(evmTxData),
+			EVMTxFrom:        evmTxFrom,
+			EVMTxFromAccAddr: evmTxFromAccAddr,
+			GasWanted:        txResult.TxResult.GasWanted,
+			GasUsed:          txResult.TxResult.GasUsed,
+			Timestamp:        block.Block.Time,
 		}
 
 		transactions = append(transactions, t)

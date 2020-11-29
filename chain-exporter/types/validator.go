@@ -14,7 +14,7 @@ type (
 		DelegatorShares string      `json:"delegator_shares"`
 		Description     Description `json:"description"`
 		UnbondingHeight int64       `json:"unbonding_height"`
-		UnbondingTime   string      `json:"unbonding_time"`
+		UnbondingTime   time.Time   `json:"unbonding_time"`
 		Commission      Commission  `json:"commission"`
 	}
 

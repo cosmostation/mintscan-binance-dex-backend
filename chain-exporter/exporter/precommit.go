@@ -5,6 +5,7 @@ import (
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
@@ -20,9 +21,9 @@ func (ex *Exporter) getPreCommits(commit *tmtypes.Commit, vals *tmctypes.ResultV
 			continue // OK, some precommits can be missing.
 		}
 
-		valAddr := commitSig.ValidatorAddress.String()
+		valAddr := sdk.ConsAddress(commitSig.ValidatorAddress).String()
 
-		val := findValidatorByAddr(valAddr, vals)
+		val := findValidatorByBechAddr(valAddr, vals)
 		if val == nil {
 			return nil, fmt.Errorf("failed to find validator by address %s for block %d", valAddr, commit.Height)
 		}
@@ -42,11 +43,11 @@ func (ex *Exporter) getPreCommits(commit *tmtypes.Commit, vals *tmctypes.ResultV
 	return precommits, nil
 }
 
-// findValidatorByAddr finds a validator by a HEX address given a set of
+// findValidatorByBechAddr finds a validator by a Bech32 address given a set of
 // Tendermint validators for a particular block. If no validator is found, nil is returned.
-func findValidatorByAddr(addrHex string, vals *tmctypes.ResultValidators) *tmtypes.Validator {
+func findValidatorByBechAddr(addrBech string, vals *tmctypes.ResultValidators) *tmtypes.Validator {
 	for _, val := range vals.Validators {
-		if addrHex == val.Address.String() {
+		if addrBech == sdk.ConsAddress(val.Address).String() {
 			return val
 		}
 	}

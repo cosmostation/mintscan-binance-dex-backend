@@ -8,8 +8,6 @@ import (
 	log "github.com/xlab/suplog"
 
 	ctypes "github.com/InjectiveLabs/sdk-go/chain/types"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/client"
@@ -28,7 +26,6 @@ var (
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
 	l      log.Logger
-	cdc    *codec.LegacyAmino
 	client *client.Client
 	db     *db.Database
 }
@@ -58,7 +55,6 @@ func NewExporter() *Exporter {
 
 	return &Exporter{
 		log.DefaultLogger,
-		legacy.Cdc,
 		client,
 		db,
 	}
@@ -158,9 +154,18 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to get precommits: %s", err)
 	}
 
+	// v, _ := json.MarshalIndent(resultBlock, "", "\t")
+	// fmt.Println("Result Block:", string(v))
+	// v, _ = json.MarshalIndent(resultTxs, "", "\t")
+	// fmt.Println("Result Txns:", string(v))
+	// v, _ = json.MarshalIndent(resultValidators, "", "\t")
+	// fmt.Println("Result Validators:", string(v))
+	// v, _ = json.MarshalIndent(resultPreCommits, "", "\t")
+	// fmt.Println("Result Pre-Commits:", string(v))
+
 	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators, resultPreCommits)
 	if err != nil {
-		return fmt.Errorf("failed to insert exporterd data: %s", err)
+		return fmt.Errorf("failed to insert exported data: %s", err)
 	}
 
 	return nil

@@ -32,6 +32,7 @@ func (ex *Exporter) getValidators(vals []*types.Validator) (validators []*schema
 				CommissionMaxRate:       val.Commission.MaxRate,
 				CommissionMaxChangeRate: val.Commission.MaxChangeRate,
 				CommissionUpdateTime:    val.Commission.UpdateTime,
+				Timestamp:               val.Commission.UpdateTime, // same
 			}
 
 			validators = append(validators, val)

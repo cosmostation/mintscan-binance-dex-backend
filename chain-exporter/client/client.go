@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"google.golang.org/grpc"
+	log "github.com/xlab/suplog"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/codec/legacy"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
@@ -16,30 +18,36 @@ import (
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/config"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/types"
+	chainClient "github.com/InjectiveLabs/sdk-go/chain/client"
 )
 
 type Client struct {
-	cdc       *codec.LegacyAmino
-	rpcClient rpcclient.Client
-	grpcConn  *grpc.ClientConn
+	ctx          client.Context
+	cosmosClient chainClient.CosmosClient
+	rpcClient    rpcclient.Client
 }
 
 // NewClient creates a new Client with the given config.
 func NewClient(cfg config.NodeConfig) *Client {
 	rpcClient, err := rpchttp.NewWithTimeout(cfg.RPCNode, "/websocket", 10)
 	if err != nil {
-		panic("failed to init rpcClient: " + err.Error())
+		log.WithError(err).Fatalln("failed to init rpcClient")
 	}
 
-	grpcConn, err := grpc.Dial(cfg.GRPCNode, grpc.WithInsecure(), grpc.WithContextDialer(dialerFunc))
+	ctx, err := chainClient.NewClientContext(cfg.ChainID, nil)
 	if err != nil {
-		panic("failed to connect to the gRPC: " + cfg.GRPCNode)
+		log.WithError(err).Fatalln("failed to init cosmos client context")
+	}
+
+	cosmosClient, err := chainClient.NewCosmosClient(ctx, cfg.GRPCNode)
+	if err != nil {
+		log.WithError(err).Fatalln("failed to connect to the gRPC")
 	}
 
 	return &Client{
-		cdc:       legacy.Cdc,
-		rpcClient: rpcClient,
-		grpcConn:  grpcConn,
+		ctx:          ctx,
+		cosmosClient: cosmosClient,
+		rpcClient:    rpcClient,
 	}
 }
 
@@ -83,10 +91,22 @@ func (c Client) GetValidatorSet(height int64) (*tmctypes.ResultValidators, error
 	return c.rpcClient.Validators(context.Background(), &height, nil, nil)
 }
 
+func (c Client) TxDecoder() sdk.TxDecoder {
+	return c.ctx.TxConfig.TxDecoder()
+}
+
+func (c Client) JSONMarshaler() codec.JSONMarshaler {
+	return c.ctx.JSONMarshaler
+}
+
+func (c Client) Marshaler() codectypes.InterfaceRegistry {
+	return c.ctx.InterfaceRegistry
+}
+
 // GetValidators returns validators detail information in Tendemrint validators in active chain
 // An error returns if the query fails.
 func (c Client) GetValidators() ([]*types.Validator, error) {
-	stakingCli := staking.NewQueryClient(c.grpcConn)
+	stakingCli := staking.NewQueryClient(c.cosmosClient.QueryClient())
 	resp, err := stakingCli.Validators(context.Background(), &staking.QueryValidatorsRequest{})
 	if err != nil {
 		err = errors.Wrap(err, "failed to query validators from staking module")
@@ -109,8 +129,8 @@ func (c Client) GetValidators() ([]*types.Validator, error) {
 				Website:  val.Description.Website,
 				Details:  val.Description.Details,
 			}, // Description
-			UnbondingHeight: val.UnbondingHeight,        // int64
-			UnbondingTime:   val.UnbondingTime.String(), // string
+			UnbondingHeight: val.UnbondingHeight, // int64
+			UnbondingTime:   val.UnbondingTime,   // time.Time
 			Commission: types.Commission{
 				Rate:          val.Commission.Rate.String(),
 				MaxRate:       val.Commission.MaxRate.String(),
