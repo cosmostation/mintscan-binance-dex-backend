@@ -6,7 +6,6 @@ import "time"
 type Validator struct {
 	ID                      int32     `json:"id" sql:",pk"`
 	Moniker                 string    `json:"moniker"`
-	AccountAddress          string    `json:"account_address" sql:",notnull, unique"`
 	OperatorAddress         string    `json:"operator_address" sql:",notnull, unique"`
 	ConsensusAddress        string    `json:"consensus_address" sql:",notnull, unique"`
 	Jailed                  bool      `json:"jailed"`
@@ -14,8 +13,6 @@ type Validator struct {
 	Tokens                  string    `json:"tokens"`
 	VotingPower             int64     `json:"voting_power"`
 	DelegatorShares         string    `json:"delegator_shares"`
-	BondHeight              int64     `json:"bond_height" sql:"default:0"`
-	BondIntraTxCounter      int64     `json:"bond_intra_tx_counter" sql:"default:0"`
 	UnbondingHeight         int64     `json:"unbonding_height" sql:"default:0"`
 	UnbondingTime           string    `json:"unbonding_time"`
 	CommissionRate          string    `json:"commission_rate"`
@@ -29,7 +26,6 @@ type Validator struct {
 func NewValidator(v Validator) *Validator {
 	return &Validator{
 		Moniker:                 v.Moniker,
-		AccountAddress:          v.AccountAddress,
 		OperatorAddress:         v.OperatorAddress,
 		ConsensusAddress:        v.ConsensusAddress,
 		Jailed:                  v.Jailed,
@@ -37,8 +33,6 @@ func NewValidator(v Validator) *Validator {
 		Tokens:                  v.Tokens,
 		VotingPower:             v.VotingPower,
 		DelegatorShares:         v.DelegatorShares,
-		BondHeight:              v.BondHeight,
-		BondIntraTxCounter:      v.BondIntraTxCounter,
 		UnbondingHeight:         v.UnbondingHeight,
 		UnbondingTime:           v.UnbondingTime,
 		CommissionRate:          v.CommissionRate,

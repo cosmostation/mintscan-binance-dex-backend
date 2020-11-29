@@ -164,7 +164,7 @@ func (c Client) GetValidators() ([]models.Validator, error) {
 	for _, val := range resp.Validators {
 		vals = append(vals, models.Validator{
 			OperatorAddress: val.OperatorAddress, // string
-			ConsensusPubKey: val.ConsensusPubkey, // json.RawMessage
+			ConsensusPubKey: val.ConsensusPubkey, // string
 			Jailed:          val.Jailed,          // bool
 			Status:          val.Status.String(), // string
 			Tokens:          val.Tokens.String(), // string
