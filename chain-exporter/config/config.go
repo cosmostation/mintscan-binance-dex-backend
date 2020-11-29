@@ -9,8 +9,13 @@ import (
 
 // Config defines all necessary parameters.
 type Config struct {
-	Node NodeConfig `mapstructure:"node"`
-	DB   DBConfig   `mapstructure:"database"`
+	Node       NodeConfig       `mapstructure:"node"`
+	DB         DBConfig         `mapstructure:"database"`
+	Processing ProcessingConfig `mapstructure:"processing"`
+}
+
+type ProcessingConfig struct {
+	IgnoreLogs bool `mapstructure:"ignore_logs"`
 }
 
 // NodeConfig wraps all node endpoints that are used in this project.

@@ -25,9 +25,10 @@ var (
 
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
-	l      log.Logger
-	client *client.Client
-	db     *db.Database
+	l          log.Logger
+	client     *client.Client
+	db         *db.Database
+	ignoreLogs bool
 }
 
 // NewExporter returns Exporter
@@ -54,9 +55,10 @@ func NewExporter() *Exporter {
 	db.CreateTables()
 
 	return &Exporter{
-		log.DefaultLogger,
-		client,
-		db,
+		l:          log.DefaultLogger,
+		client:     client,
+		db:         db,
+		ignoreLogs: config.Processing.IgnoreLogs,
 	}
 }
 
@@ -105,7 +107,7 @@ func (ex *Exporter) sync() error {
 
 	// Ingest all blocks up to the latest height
 	for i := dbHeight + 1; i <= latestBlockHeight; i++ {
-		err = ex.process(i)
+		err = ex.process(i, ex.ignoreLogs)
 		if err != nil {
 			return err
 		}
@@ -117,7 +119,7 @@ func (ex *Exporter) sync() error {
 
 // process ingests chain data, such as block, transaction, validator set information
 // and save them in database
-func (ex *Exporter) process(height int64) error {
+func (ex *Exporter) process(height int64, ignoreLogs bool) error {
 	block, err := ex.client.GetBlock(height)
 	if err != nil {
 		return fmt.Errorf("failed to query block using rpc client: %s", err)
@@ -139,7 +141,7 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to get block: %s", err)
 	}
 
-	resultTxs, err := ex.getTxs(block)
+	resultTxs, err := ex.getTxs(block, ignoreLogs)
 	if err != nil {
 		return fmt.Errorf("failed to get transactions: %s", err)
 	}

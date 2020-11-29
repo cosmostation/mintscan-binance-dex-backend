@@ -40,7 +40,7 @@ type Message struct {
 }
 
 // getTxs parses transactions in a block and return transactions.
-func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.Transaction, err error) {
+func (ex *Exporter) getTxs(block *tmctypes.ResultBlock, ignoreLog bool) (transactions []*schema.Transaction, err error) {
 	txs, err := ex.client.GetTxs(block)
 	if err != nil {
 		return []*schema.Transaction{}, err
@@ -136,10 +136,13 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.
 
 		var txLog string
 		txInfo := txResult.TxResult.Info
-		if resultLog := txResult.TxResult.Log; json.Valid([]byte(resultLog)) {
-			txLog = resultLog
-		} else if len(txInfo) == 0 {
-			txInfo = resultLog
+
+		if !ignoreLog {
+			if resultLog := txResult.TxResult.Log; json.Valid([]byte(resultLog)) {
+				txLog = resultLog
+			} else if len(txInfo) == 0 {
+				txInfo = resultLog
+			}
 		}
 
 		t := &schema.Transaction{
