@@ -9,7 +9,7 @@ type Market struct {
 	Symbol            string    `json:"symbol"`
 	CurrentPrice      float64   `json:"current_price"`
 	Currency          string    `json:"currency"`
-	MarketCapRank     uint8     `json:"market_cap_rank"`
+	MarketCapRank     int       `json:"market_cap_rank"`
 	MarketCap         float64   `json:"market_cap"`
 	PercentChange1H   float64   `json:"percent_change_1h"`
 	PercentChange24H  float64   `json:"percent_change_24h"`

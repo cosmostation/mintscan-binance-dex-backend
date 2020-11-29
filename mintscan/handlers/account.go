@@ -7,22 +7,20 @@ import (
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
-
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
 // GetAccount returns account information
-func GetAccount(rw http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	address := vars["address"]
+func GetAccount(c *gin.Context) {
+	address := c.Params.ByName("address")
 
 	if address == "" {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "address is required")
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "address is required")
 		return
 	}
 
 	if len(address) != 42 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "address is invalid")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "address is invalid")
 		return
 	}
 
@@ -31,43 +29,43 @@ func GetAccount(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to request account information: %s\n", err)
 	}
 
-	models.Respond(rw, account)
+	models.Respond(c.Writer, account)
 	return
 }
 
 // GetAccountTxs returns transactions associated with an account
-func GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	address := vars["address"]
+func GetAccountTxs(c *gin.Context) {
+	q := c.Request.URL.Query()
+	address := c.Params.ByName("address")
 
 	if address == "" {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "address is required")
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "address is required")
 		return
 	}
 
 	if len(address) != 42 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "address is invalid")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "address is invalid")
 		return
 	}
 
 	page := int(1)
 	rows := int(10)
 
-	if len(r.URL.Query()["page"]) > 0 {
-		page, _ = strconv.Atoi(r.URL.Query()["page"][0])
+	if len(q["page"]) > 0 {
+		page, _ = strconv.Atoi(q["page"][0])
 	}
 
-	if len(r.URL.Query()["rows"]) > 0 {
-		rows, _ = strconv.Atoi(r.URL.Query()["rows"][0])
+	if len(q["rows"]) > 0 {
+		rows, _ = strconv.Atoi(q["rows"][0])
 	}
 
 	if rows < 1 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be less than")
 		return
 	}
 
 	if rows > 50 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 50")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be greater than 50")
 		return
 	}
 
@@ -122,6 +120,6 @@ func GetAccountTxs(rw http.ResponseWriter, r *http.Request) {
 		TxArray: txArray,
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }

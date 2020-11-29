@@ -4,6 +4,8 @@ go 1.15
 
 require (
 	github.com/InjectiveLabs/sdk-go v1.11.6
+	github.com/gin-contrib/cors v1.3.1
+	github.com/gin-gonic/gin v1.5.0
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/go-resty/resty/v2 v2.2.0
 	github.com/gorilla/mux v1.8.0

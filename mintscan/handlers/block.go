@@ -8,28 +8,30 @@ import (
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/schema"
+	"github.com/gin-gonic/gin"
 )
 
 // GetBlocks returns blocks based upon the request params
-func GetBlocks(rw http.ResponseWriter, r *http.Request) {
+func GetBlocks(c *gin.Context) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
 
-	if len(r.URL.Query()["before"]) > 0 {
-		before, _ = strconv.Atoi(r.URL.Query()["before"][0])
+	q := c.Request.URL.Query()
+	if len(q["before"]) > 0 {
+		before, _ = strconv.Atoi(q["before"][0])
 	}
 
-	if len(r.URL.Query()["after"]) > 0 {
-		after, _ = strconv.Atoi(r.URL.Query()["after"][0])
+	if len(q["after"]) > 0 {
+		after, _ = strconv.Atoi(q["after"][0])
 	}
 
-	if len(r.URL.Query()["limit"]) > 0 {
-		limit, _ = strconv.Atoi(r.URL.Query()["limit"][0])
+	if len(q["limit"]) > 0 {
+		limit, _ = strconv.Atoi(q["limit"][0])
 	}
 
 	if limit > 100 {
-		errors.ErrOverMaxLimit(rw, http.StatusUnauthorized)
+		errors.ErrOverMaxLimit(c.Writer, http.StatusUnauthorized)
 		return
 	}
 
@@ -63,7 +65,7 @@ func GetBlocks(rw http.ResponseWriter, r *http.Request) {
 		result.Paging.After = int32(result.Data[0].Height)
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }
 
@@ -94,10 +96,11 @@ func setBlocks(blocks []schema.Block) (*models.ResultBlocks, error) {
 					Result:    txResult,
 					TxHash:    tx.TxHash,
 					TxType:    tx.TxType,
+					TxFrom:    tx.EVMTxFrom,
+					TxFromAcc: tx.EVMTxFromAccAddr,
 					Messages:  msgs,
 					Memo:      tx.Memo,
 					Info:      tx.Info,
-					Log:       tx.Log,
 					Code:      tx.Code,
 					Timestamp: tx.Timestamp,
 				}

@@ -20,8 +20,8 @@ type (
 		CountryOrigin       string          `json:"country_origin"`
 		GenesisDate         json.RawMessage `json:"genesis_date"`
 		IcoData             json.RawMessage `json:"ico_data"`
-		MarketCapRank       uint8           `json:"market_cap_rank"`
-		CoingeckoRank       uint8           `json:"coingecko_rank"`
+		MarketCapRank       int             `json:"market_cap_rank"`
+		CoingeckoRank       int             `json:"coingecko_rank"`
 		CoingeckoScore      float64         `json:"coingecko_score"`
 		DeveloperScore      float64         `json:"developer_score"`
 		CommunityScore      float64         `json:"community_score"`
@@ -34,7 +34,7 @@ type (
 			AthChangePercentage                    json.RawMessage      `json:"ath_change_percentage"`
 			AthDate                                json.RawMessage      `json:"ath_date"`
 			MarketCap                              CoinMarketCurrencies `json:"market_cap"`
-			MarketCapRank                          uint8                `json:"market_cap_rank"`
+			MarketCapRank                          int                  `json:"market_cap_rank"`
 			TotalVolume                            CoinMarketCurrencies `json:"total_volume"`
 			High24H                                CoinMarketCurrencies `json:"high_24h"`
 			Low24H                                 CoinMarketCurrencies `json:"low_24h"`

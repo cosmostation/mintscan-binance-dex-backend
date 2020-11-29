@@ -6,30 +6,28 @@ import (
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 
 	ctypes "github.com/InjectiveLabs/sdk-go/chain/types"
 )
 
 // GetValidators returns validators on the active chain
-func GetValidators(rw http.ResponseWriter, r *http.Request) {
+func GetValidators(c *gin.Context) {
 	vals, err := s.db.QueryValidators()
 	if err != nil {
 		s.l.Printf("failed to query validators: %s", err)
 		return
 	}
 
-	models.Respond(rw, vals)
+	models.Respond(c.Writer, vals)
 	return
 }
 
 // GetValidator returns validator information on the active chain
-func GetValidator(rw http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	address := vars["address"]
-
+func GetValidator(c *gin.Context) {
+	address := c.Params.ByName("address")
 	if address == "" {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "address is required")
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "address is required")
 		return
 	}
 
@@ -40,7 +38,7 @@ func GetValidator(rw http.ResponseWriter, r *http.Request) {
 			s.l.Printf("failed to query validator by operator address: %s", err)
 			return
 		}
-		models.Respond(rw, result)
+		models.Respond(c.Writer, result)
 		return
 	case strings.HasPrefix(address, ctypes.Bech32PrefixAccAddr):
 		result, err := s.db.QueryValidatorByAccountAddr(address)
@@ -48,7 +46,7 @@ func GetValidator(rw http.ResponseWriter, r *http.Request) {
 			s.l.Printf("failed to query validator by account address: %s", err)
 			return
 		}
-		models.Respond(rw, result)
+		models.Respond(c.Writer, result)
 		return
 	case strings.HasPrefix(address, ctypes.Bech32PrefixConsAddr):
 		result, err := s.db.QueryValidatorByConsAddr(address)
@@ -56,7 +54,7 @@ func GetValidator(rw http.ResponseWriter, r *http.Request) {
 			s.l.Printf("failed to query validator by consensus address: %s", err)
 			return
 		}
-		models.Respond(rw, result)
+		models.Respond(c.Writer, result)
 		return
 	default:
 		result, err := s.db.QueryValidatorByMoniker(address)
@@ -64,7 +62,7 @@ func GetValidator(rw http.ResponseWriter, r *http.Request) {
 			s.l.Printf("failed to query validator by moniker: %s", err)
 			return
 		}
-		models.Respond(rw, result)
+		models.Respond(c.Writer, result)
 		return
 	}
 }

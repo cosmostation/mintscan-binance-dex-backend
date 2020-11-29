@@ -3,19 +3,18 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
-
-	"github.com/gorilla/mux"
 )
 
 // GetOrders returns order information based up on order id
-func GetOrders(rw http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+func GetOrders(c *gin.Context) {
+	id := c.Params.ByName("id")
 
 	if id == "" {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "order id is required")
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "order id is required")
 		return
 	}
 
@@ -25,6 +24,6 @@ func GetOrders(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	models.Respond(rw, order)
+	models.Respond(c.Writer, order)
 	return
 }

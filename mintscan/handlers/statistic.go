@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"net/http"
-
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
+	"github.com/gin-gonic/gin"
 )
 
 // GetAssetsChartHistory returns
-func GetAssetsChartHistory(rw http.ResponseWriter, r *http.Request) {
+func GetAssetsChartHistory(c *gin.Context) {
 	result := make([]models.AssetChartHistory, 0)
 
 	limit := int(24)
@@ -50,6 +49,6 @@ func GetAssetsChartHistory(rw http.ResponseWriter, r *http.Request) {
 		result = append(result, *tempResult)
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }

@@ -1,7 +1,6 @@
 package exporter
 
 import (
-	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -35,6 +34,11 @@ type CosmosTx interface {
 	GetSignaturesV2() ([]signing.SignatureV2, error)
 }
 
+type Message struct {
+	Type  string          `json:"type"`
+	Value json.RawMessage `json:"value"`
+}
+
 // getTxs parses transactions in a block and return transactions.
 func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.Transaction, err error) {
 	txs, err := ex.client.GetTxs(block)
@@ -53,19 +57,18 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.
 			return nil, err
 		}
 
-		msgsBuf := new(bytes.Buffer)
-		_ = msgsBuf.WriteByte('[')
 		txMsgs := tx.GetMsgs()
-		for idx, msg := range txMsgs {
-			msgsBz := ex.client.JSONMarshaler().MustMarshalJSON(msg)
-			_, _ = msgsBuf.Write(msgsBz)
+		msgs := make([]Message, 0, len(txMsgs))
+		var msgsBz []byte
 
-			if idx != len(txMsgs)-1 {
-				// not last
-				_ = msgsBuf.WriteByte(',')
-			}
+		for _, msg := range txMsgs {
+			msgBz := ex.client.JSONMarshaler().MustMarshalJSON(msg)
+			msgs = append(msgs, Message{
+				Type:  fmt.Sprintf("%s/%s", msg.Route(), msg.Type()),
+				Value: json.RawMessage(msgBz),
+			})
 		}
-		_ = msgsBuf.WriteByte(']')
+		msgsBz, _ = json.Marshal(msgs)
 
 		var txType string
 		var sigs []types.Signature
@@ -136,7 +139,7 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock) (transactions []*schema.
 			Height:           txResult.Height,
 			TxHash:           txResult.Hash.String(),
 			Code:             txResult.TxResult.Code,
-			Messages:         msgsBuf.String(),
+			Messages:         string(msgsBz),
 			Signatures:       string(sigsBz),
 			Events:           string(eventsBz),
 			Memo:             txMemo,

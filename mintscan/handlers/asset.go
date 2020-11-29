@@ -7,54 +7,57 @@ import (
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
+	"github.com/gin-gonic/gin"
 )
 
 // GetAsset returns asset based upon the request params
-func GetAsset(rw http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Query()["asset"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'asset' is not present")
+func GetAsset(c *gin.Context) {
+	q := c.Request.URL.Query()
+	if len(q["asset"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'asset' is not present")
 		return
 	}
 
-	asset := r.URL.Query()["asset"][0]
+	asset := q["asset"][0]
 
 	result, err := s.client.GetAsset(asset)
 	if err != nil {
 		s.l.Printf("failed to get asset detail information: %s\n", err)
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }
 
 // GetAssets returns assets based upon the request params
-func GetAssets(rw http.ResponseWriter, r *http.Request) {
+func GetAssets(c *gin.Context) {
 	onlyPrice := "false" // default is false, when true it only show assets price information
 
-	if len(r.URL.Query()["page"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
+	q := c.Request.URL.Query()
+	if len(q["page"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'page' is not present")
 		return
 	}
 
-	if len(r.URL.Query()["rows"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
+	if len(q["rows"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'rows' is not present")
 		return
 	}
 
-	if len(r.URL.Query()["only_price"]) > 0 {
-		onlyPrice = r.URL.Query()["only_price"][0]
+	if len(q["only_price"]) > 0 {
+		onlyPrice = q["only_price"][0]
 	}
 
-	page, _ := strconv.Atoi(r.URL.Query()["page"][0])
-	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
+	page, _ := strconv.Atoi(q["page"][0])
+	rows, _ := strconv.Atoi(q["rows"][0])
 
 	if rows < 1 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
 	if rows > 1000 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return
 	}
 
@@ -83,42 +86,44 @@ func GetAssets(rw http.ResponseWriter, r *http.Request) {
 			AssetInfoList: assetInfoList,
 		}
 
-		models.Respond(rw, result)
+		models.Respond(c.Writer, result)
 		return
 	}
 
-	models.Respond(rw, assets)
+	models.Respond(c.Writer, assets)
 	return
 }
 
 // GetAssetHolders returns asset holders based upon the request params
-func GetAssetHolders(rw http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Query()["asset"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'asset' is not present")
+func GetAssetHolders(c *gin.Context) {
+	q := c.Request.URL.Query()
+
+	if len(q["asset"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'asset' is not present")
 		return
 	}
 
-	if len(r.URL.Query()["page"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
+	if len(q["page"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'page' is not present")
 		return
 	}
 
-	if len(r.URL.Query()["rows"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
+	if len(q["rows"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'rows' is not present")
 		return
 	}
 
-	asset := r.URL.Query()["asset"][0]
-	page, _ := strconv.Atoi(r.URL.Query()["page"][0])
-	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
+	asset := q["asset"][0]
+	page, _ := strconv.Atoi(q["page"][0])
+	rows, _ := strconv.Atoi(q["rows"][0])
 
 	if rows < 1 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
 	if rows > 100 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return
 	}
 
@@ -127,32 +132,34 @@ func GetAssetHolders(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to get asset holders list: %s\n", err)
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }
 
 // GetAssetsImages returns images of all assets
-func GetAssetsImages(rw http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Query()["page"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
+func GetAssetsImages(c *gin.Context) {
+	q := c.Request.URL.Query()
+
+	if len(q["page"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'page' is not present")
 		return
 	}
 
-	if len(r.URL.Query()["rows"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
+	if len(q["rows"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'rows' is not present")
 		return
 	}
 
-	page, _ := strconv.Atoi(r.URL.Query()["page"][0])
-	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
+	page, _ := strconv.Atoi(q["page"][0])
+	rows, _ := strconv.Atoi(q["rows"][0])
 
 	if rows < 1 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
 	if rows > 100 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return
 	}
 
@@ -178,38 +185,40 @@ func GetAssetsImages(rw http.ResponseWriter, r *http.Request) {
 		ImageList: imageList,
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }
 
 // GetAssetTxs returns asset txs
-func GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Query()["txAsset"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'txAsset' is not present")
+func GetAssetTxs(c *gin.Context) {
+	q := c.Request.URL.Query()
+
+	if len(q["txAsset"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'txAsset' is not present")
 		return
 	}
 
-	if len(r.URL.Query()["page"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
+	if len(q["page"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'page' is not present")
 		return
 	}
 
-	if len(r.URL.Query()["rows"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
+	if len(q["rows"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'rows' is not present")
 		return
 	}
 
-	txAsset := r.URL.Query()["txAsset"][0]
-	page, _ := strconv.Atoi(r.URL.Query()["page"][0])
-	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
+	txAsset := q["txAsset"][0]
+	page, _ := strconv.Atoi(q["page"][0])
+	rows, _ := strconv.Atoi(q["rows"][0])
 
 	if rows < 1 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
 	if rows > 100 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return
 	}
 
@@ -264,38 +273,39 @@ func GetAssetTxs(rw http.ResponseWriter, r *http.Request) {
 		TxArray: txArray,
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }
 
 // GetAssetsMiniTokens returns a list of mini tokens based upon the request params.
-func GetAssetsMiniTokens(rw http.ResponseWriter, r *http.Request) {
+func GetAssetsMiniTokens(c *gin.Context) {
+	q := c.Request.URL.Query()
 	onlyPrice := "false" // default is false, when true it only show assets price information
 
-	if len(r.URL.Query()["page"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'page' is not present")
+	if len(q["page"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'page' is not present")
 		return
 	}
 
-	if len(r.URL.Query()["rows"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'rows' is not present")
+	if len(q["rows"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'rows' is not present")
 		return
 	}
 
-	if len(r.URL.Query()["only_price"]) > 0 {
-		onlyPrice = r.URL.Query()["only_price"][0]
+	if len(q["only_price"]) > 0 {
+		onlyPrice = q["only_price"][0]
 	}
 
-	page, _ := strconv.Atoi(r.URL.Query()["page"][0])
-	rows, _ := strconv.Atoi(r.URL.Query()["rows"][0])
+	page, _ := strconv.Atoi(q["page"][0])
+	rows, _ := strconv.Atoi(q["rows"][0])
 
 	if rows < 1 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be less than 1")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be less than 1")
 		return
 	}
 
 	if rows > 1000 {
-		errors.ErrInvalidParam(rw, http.StatusBadRequest, "'rows' cannot be greater than 100")
+		errors.ErrInvalidParam(c.Writer, http.StatusBadRequest, "'rows' cannot be greater than 100")
 		return
 	}
 
@@ -324,10 +334,10 @@ func GetAssetsMiniTokens(rw http.ResponseWriter, r *http.Request) {
 			AssetInfoList: assetInfoList,
 		}
 
-		models.Respond(rw, result)
+		models.Respond(c.Writer, result)
 		return
 	}
 
-	models.Respond(rw, assets)
+	models.Respond(c.Writer, assets)
 	return
 }

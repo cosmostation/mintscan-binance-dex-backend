@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"net/http"
-
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
+	"github.com/gin-gonic/gin"
 )
 
 // GetStatus returns current status on the active chain
-func GetStatus(rw http.ResponseWriter, r *http.Request) {
+func GetStatus(c *gin.Context) {
 	status, err := s.client.GetStatus()
 	if err != nil {
 		s.l.Printf("failed to query status: %s\n", err)
@@ -39,6 +38,6 @@ func GetStatus(rw http.ResponseWriter, r *http.Request) {
 		Timestamp:         status.SyncInfo.LatestBlockTime,
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }

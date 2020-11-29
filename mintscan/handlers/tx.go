@@ -7,33 +7,34 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/schema"
-
-	"github.com/gorilla/mux"
 )
 
 // GetTxs returns transactions based upon the request params
-func GetTxs(rw http.ResponseWriter, r *http.Request) {
+func GetTxs(c *gin.Context) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
 
-	if len(r.URL.Query()["before"]) > 0 {
-		before, _ = strconv.Atoi(r.URL.Query()["before"][0])
+	q := c.Request.URL.Query()
+	if len(q["before"]) > 0 {
+		before, _ = strconv.Atoi(q["before"][0])
 	}
 
-	if len(r.URL.Query()["after"]) > 0 {
-		after, _ = strconv.Atoi(r.URL.Query()["after"][0])
+	if len(q["after"]) > 0 {
+		after, _ = strconv.Atoi(q["after"][0])
 	}
 
-	if len(r.URL.Query()["limit"]) > 0 {
-		limit, _ = strconv.Atoi(r.URL.Query()["limit"][0])
+	if len(q["limit"]) > 0 {
+		limit, _ = strconv.Atoi(q["limit"][0])
 	}
 
 	if limit > 100 {
-		errors.ErrOverMaxLimit(rw, http.StatusUnauthorized)
+		errors.ErrOverMaxLimit(c.Writer, http.StatusUnauthorized)
 		return
 	}
 
@@ -43,7 +44,7 @@ func GetTxs(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(txs) <= 0 {
-		models.Respond(rw, models.ResultTxs{})
+		models.Respond(c.Writer, models.ResultTxs{})
 		return
 	}
 
@@ -68,19 +69,18 @@ func GetTxs(rw http.ResponseWriter, r *http.Request) {
 		result.Paging.After = result.Data[0].ID
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }
 
 // GetTxByTxHash returns certain transaction information by its tx hash
-func GetTxByTxHash(rw http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	hash := vars["hash"]
+func GetTxByTxHash(c *gin.Context) {
+	hash := c.Params.ByName("hash")
 
 	tx, err := s.db.QueryTxByHash(hash)
 	if err != nil {
 		s.l.Printf("failed to query tx: %s\n", err)
-		models.Respond(rw, models.TxData{})
+		models.Respond(c.Writer, models.TxData{})
 		return
 	}
 
@@ -89,35 +89,36 @@ func GetTxByTxHash(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to set tx: %s\n", err)
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }
 
 // GetTxsByTxType returns transactions based upon the request params
-func GetTxsByTxType(rw http.ResponseWriter, r *http.Request) {
+func GetTxsByTxType(c *gin.Context) {
 	before := int(0)
 	after := int(-1)
 	limit := int(100)
 
-	if len(r.URL.Query()["limit"]) > 0 {
-		limit, _ = strconv.Atoi(r.URL.Query()["limit"][0])
+	q := c.Request.URL.Query()
+	if len(q["limit"]) > 0 {
+		limit, _ = strconv.Atoi(q["limit"][0])
 	}
 
-	if len(r.URL.Query()["before"]) > 0 {
-		before, _ = strconv.Atoi(r.URL.Query()["before"][0])
+	if len(q["before"]) > 0 {
+		before, _ = strconv.Atoi(q["before"][0])
 	}
 
-	if len(r.URL.Query()["after"]) > 0 {
-		after, _ = strconv.Atoi(r.URL.Query()["after"][0])
+	if len(q["after"]) > 0 {
+		after, _ = strconv.Atoi(q["after"][0])
 	}
 
 	if limit > 100 {
-		errors.ErrOverMaxLimit(rw, http.StatusUnauthorized)
+		errors.ErrOverMaxLimit(c.Writer, http.StatusUnauthorized)
 		return
 	}
 
 	var txrp models.TxRequestPayload
-	err := json.NewDecoder(r.Body).Decode(&txrp)
+	err := json.NewDecoder(c.Request.Body).Decode(&txrp)
 	if err != nil {
 		s.l.Printf("failed to decode txrp: %s\n", err)
 	}
@@ -136,7 +137,7 @@ func GetTxsByTxType(rw http.ResponseWriter, r *http.Request) {
 	// Validate transaction message type
 	ok := models.ValidatorMsgType(txrp.TxType)
 	if !ok {
-		errors.ErrInvalidMessageType(rw, http.StatusUnauthorized)
+		errors.ErrInvalidMessageType(c.Writer, http.StatusUnauthorized)
 		return
 	}
 
@@ -170,7 +171,7 @@ func GetTxsByTxType(rw http.ResponseWriter, r *http.Request) {
 		result.Paging.After = result.Data[0].ID
 	}
 
-	models.Respond(rw, result)
+	models.Respond(c.Writer, result)
 	return
 }
 
@@ -198,6 +199,8 @@ func setTx(tx schema.Transaction) (*models.TxData, error) {
 		Result:     txResult,
 		TxHash:     tx.TxHash,
 		TxType:     tx.TxType,
+		TxFrom:     tx.EVMTxFrom,
+		TxFromAcc:  tx.EVMTxFromAccAddr,
 		Messages:   msgs,
 		Signatures: sigs,
 		Memo:       tx.Memo,
@@ -238,11 +241,12 @@ func setTxs(txs []schema.Transaction) (*models.ResultTxs, error) {
 			Result:     txResult,
 			TxHash:     tx.TxHash,
 			TxType:     tx.TxType,
+			TxFrom:     tx.EVMTxFrom,
+			TxFromAcc:  tx.EVMTxFromAccAddr,
 			Messages:   msgs,
 			Signatures: sigs,
 			Memo:       tx.Memo,
 			Info:       tx.Info,
-			Log:        tx.Log,
 			Code:       tx.Code,
 			Timestamp:  tx.Timestamp,
 		}

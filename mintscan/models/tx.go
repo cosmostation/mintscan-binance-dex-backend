@@ -12,9 +12,10 @@ type (
 		Result    bool      `json:"result"`
 		TxHash    string    `json:"tx_hash"`
 		TxType    string    `json:"tx_type"`
+		TxFrom    string    `json:"tx_from"`     // for EVM
+		TxFromAcc string    `json:"tx_from_acc"` // for EVM
 		Messages  []Message `json:"messages"`
 		Memo      string    `json:"memo"`
-		Log       string    `json:"logs"`
 		Info      string    `json:"info"`
 		Code      uint32    `json:"code"`
 		Timestamp time.Time `json:"timestamp"`
@@ -41,6 +42,8 @@ type (
 		Result     bool        `json:"result"`
 		TxHash     string      `json:"tx_hash"`
 		TxType     string      `json:"tx_type"`
+		TxFrom     string      `json:"tx_from"`     // for EVM
+		TxFromAcc  string      `json:"tx_from_acc"` // for EVM
 		Messages   []Message   `json:"messages"`
 		Signatures []Signature `json:"signatures"`
 		Memo       string      `json:"memo"`
@@ -52,11 +55,10 @@ type (
 
 	// Signature wraps tx signature
 	Signature struct {
-		Pubkey        string `json:"pubkey"`
-		Address       string `json:"address"`
-		Sequence      string `json:"sequence"`
-		Signature     string `json:"signature"`
-		AccountNumber string `json:"account_number"`
+		Pubkey    string `json:"pubkey"`
+		Address   string `json:"address"`
+		Sequence  uint64 `json:"sequence"`
+		Signature string `json:"signature"`
 	}
 )
 

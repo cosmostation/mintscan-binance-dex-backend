@@ -7,7 +7,8 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	log "github.com/xlab/suplog"
 
@@ -40,33 +41,37 @@ func main() {
 		log.Fatal(errors.Wrap(err, "failed to ping database"))
 	}
 
-	r := mux.NewRouter()
-	r = r.PathPrefix("/v1").Subrouter()
-	r.HandleFunc("/account/{address}", handlers.GetAccount).Methods("GET")
-	r.HandleFunc("/account/txs/{address}", handlers.GetAccountTxs).Methods("GET")
-	r.HandleFunc("/asset", handlers.GetAsset).Methods("GET")
-	r.HandleFunc("/assets", handlers.GetAssets).Methods("GET")
-	r.HandleFunc("/assets/mini-tokens", handlers.GetAssetsMiniTokens).Methods("GET")
-	r.HandleFunc("/assets/txs", handlers.GetAssetTxs).Methods("GET")
-	r.HandleFunc("/asset-holders", handlers.GetAssetHolders).Methods("GET")
-	r.HandleFunc("/assets-images", handlers.GetAssetsImages).Methods("GET")
-	r.HandleFunc("/blocks", handlers.GetBlocks).Methods("GET")
-	r.HandleFunc("/fees", handlers.GetFees).Methods("GET")
-	r.HandleFunc("/validators", handlers.GetValidators).Methods("GET")
-	r.HandleFunc("/validator/{address}", handlers.GetValidator).Methods("GET")
-	r.HandleFunc("/market", handlers.GetCoinMarketData).Methods("GET")
-	r.HandleFunc("/market/chart", handlers.GetCoinMarketChartData).Methods("GET")
-	r.HandleFunc("/orders/{id}", handlers.GetOrders).Methods("GET")
-	r.HandleFunc("/stats/assets/chart", handlers.GetAssetsChartHistory).Methods("GET")
-	r.HandleFunc("/status", handlers.GetStatus).Methods("GET")
-	r.HandleFunc("/tokens", handlers.GetTokens).Methods("GET")
-	r.HandleFunc("/txs", handlers.GetTxs).Methods("GET")
-	r.HandleFunc("/txs", handlers.GetTxsByTxType).Methods("POST")
-	r.HandleFunc("/txs/{hash}", handlers.GetTxByTxHash).Methods("GET")
+	r := gin.Default()
 
-	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) { // catch-all
-		w.Write([]byte("No route is found matching the URL"))
-	})
+	if Version != "dev" && os.Getenv("GIN_MODE") != "debug" {
+		gin.SetMode(gin.ReleaseMode)
+	} else {
+		gin.SetMode(gin.DebugMode)
+	}
+
+	r.Use(cors.Default())
+	v1 := r.Group("/v1")
+	v1.GET("/account/:address", handlers.GetAccount)
+	v1.GET("/accountTxs/:address", handlers.GetAccountTxs)
+	v1.GET("/asset", handlers.GetAsset)
+	v1.GET("/assets", handlers.GetAssets)
+	v1.GET("/assets/mini-tokens", handlers.GetAssetsMiniTokens)
+	v1.GET("/assets/txs", handlers.GetAssetTxs)
+	v1.GET("/asset-holders", handlers.GetAssetHolders)
+	v1.GET("/assets-images", handlers.GetAssetsImages)
+	v1.GET("/blocks", handlers.GetBlocks)
+	v1.GET("/fees", handlers.GetFees)
+	v1.GET("/validators", handlers.GetValidators)
+	v1.GET("/validator/:address", handlers.GetValidator)
+	v1.GET("/market", handlers.GetCoinMarketData)
+	v1.GET("/market/chart", handlers.GetCoinMarketChartData)
+	v1.GET("/orders/:id", handlers.GetOrders)
+	v1.GET("/stats/assets/chart", handlers.GetAssetsChartHistory)
+	v1.GET("/status", handlers.GetStatus)
+	v1.GET("/tokens", handlers.GetTokens)
+	v1.GET("/txs", handlers.GetTxs)
+	v1.POST("/txs", handlers.GetTxsByTxType)
+	v1.GET("/txs/:hash", handlers.GetTxByTxHash)
 
 	// Create a new server
 	sm := &http.Server{

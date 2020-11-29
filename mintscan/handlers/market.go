@@ -7,16 +7,19 @@ import (
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
+	"github.com/gin-gonic/gin"
 )
 
 // GetCoinMarketData returns market data from CoinGecko API
-func GetCoinMarketData(rw http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Query()["id"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'id' is not present")
+func GetCoinMarketData(c *gin.Context) {
+	q := c.Request.URL.Query()
+
+	if len(q["id"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'id' is not present")
 		return
 	}
 
-	id := r.URL.Query()["id"][0]
+	id := q["id"][0]
 
 	data, err := s.client.GetCoinMarketData(id)
 	if err != nil {
@@ -39,18 +42,20 @@ func GetCoinMarketData(rw http.ResponseWriter, r *http.Request) {
 		LastUpdated:       data.MarketData.LastUpdated,
 	}
 
-	models.Respond(rw, marketData)
+	models.Respond(c.Writer, marketData)
 	return
 }
 
 // GetCoinMarketChartData returns market chart data from CoinGecko API
-func GetCoinMarketChartData(rw http.ResponseWriter, r *http.Request) {
-	if len(r.URL.Query()["id"]) <= 0 {
-		errors.ErrRequiredParam(rw, http.StatusBadRequest, "'id' is not present")
+func GetCoinMarketChartData(c *gin.Context) {
+	q := c.Request.URL.Query()
+
+	if len(q["id"]) <= 0 {
+		errors.ErrRequiredParam(c.Writer, http.StatusBadRequest, "'id' is not present")
 		return
 	}
 
-	id := r.URL.Query()["id"][0]
+	id := q["id"][0]
 
 	// Current time and its minus 24 hours
 	to := time.Now().UTC()
@@ -61,6 +66,6 @@ func GetCoinMarketChartData(rw http.ResponseWriter, r *http.Request) {
 		s.l.Printf("failed to fetch coin market chart data: %s\n", err)
 	}
 
-	models.Respond(rw, marketChartData)
+	models.Respond(c.Writer, marketChartData)
 	return
 }
