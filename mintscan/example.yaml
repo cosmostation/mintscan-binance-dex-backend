@@ -3,7 +3,6 @@ chain_id: "888"
 "888":
   node:
     rpc_node: ""
-    grpc_node: ""
     exchange_api_endpoint: ""
   database:
     host: ""

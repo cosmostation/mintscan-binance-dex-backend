@@ -11,8 +11,11 @@ type (
 		Height    int64     `json:"height"`
 		Result    bool      `json:"result"`
 		TxHash    string    `json:"tx_hash"`
+		TxType    string    `json:"tx_type"`
 		Messages  []Message `json:"messages"`
 		Memo      string    `json:"memo"`
+		Log       string    `json:"logs"`
+		Info      string    `json:"info"`
 		Code      uint32    `json:"code"`
 		Timestamp time.Time `json:"timestamp"`
 	}
@@ -37,9 +40,12 @@ type (
 		Height     int64       `json:"height"`
 		Result     bool        `json:"result"`
 		TxHash     string      `json:"tx_hash"`
+		TxType     string      `json:"tx_type"`
 		Messages   []Message   `json:"messages"`
 		Signatures []Signature `json:"signatures"`
 		Memo       string      `json:"memo"`
+		Log        string      `json:"logs"`
+		Info       string      `json:"info"`
 		Code       uint32      `json:"code"`
 		Timestamp  time.Time   `json:"timestamp"`
 	}
@@ -67,26 +73,24 @@ func ValidatorMsgType(msgType string) bool {
 	msgTypes := []struct {
 		msg, name string
 	}{
-		{"CreateOrderMsg", "dex/NewOrder"},
-		{"CancelOrderMsg", "dex/CancelOrder"},
-		{"TokenIssueMsg", "tokens/IssueMsg"},
-		{"TokenBurnMsg", "tokens/BurnMsg"},
-		{"TimeLockMsg", "tokens/TimeLockMsg"},
-		{"TokenFreezeMsg", "tokens/FreezeMsg"},
-		{"TokenUnfreezeMsg", "tokens/UnfreezeMsg"},
-		{"TimeUnlockMsg", "tokens/TimeUnlockMsg"},
-		{"TimeRelockMsg", "tokens/TimeRelockMsg"},
-		{"HTLTMsg", "tokens/HTLTMsg"},
-		{"DepositHTLTMsg", "tokens/DepositHTLTMsg"},
-		{"ClaimHTLTMsg  ", "tokens/ClaimHTLTMsg"},
-		{"RefundHTLTMsg ", "tokens/RefundHTLTMsg"},
-		{"DexListMsg", "dex/ListMsg"},
-		{"MintMsg   ", "tokens/MintMsg"},
+		{"MsgRegisterDerivativeMarket", "orders/MsgRegisterDerivativeMarket"},
+		{"MsgSuspendDerivativeMarket", "orders/MsgSuspendDerivativeMarket"},
+		{"MsgResumeDerivativeMarket", "orders/MsgResumeDerivativeMarket"},
+		{"MsgRegisterDerivativeMarket", "orders/MsgRegisterDerivativeMarket"},
+		{"MsgCreateDerivativeOrder", "orders/MsgCreateDerivativeOrder"},
+		{"MsgRegisterSpotMarket", "orders/MsgRegisterSpotMarket"},
+		{"MsgSuspendSpotMarket", "orders/MsgSuspendSpotMarket"},
+		{"MsgResumeSpotMarket", "orders/MsgResumeSpotMarket"},
+		{"MsgCreateSpotOrder", "orders/MsgCreateSpotOrder"},
+		{"MsgRequestFillSpotOrder", "orders/MsgRequestFillSpotOrder"},
+		{"MsgRequestSoftCancelSpotOrder", "orders/MsgRequestSoftCancelSpotOrder"},
+
+		{"MsgEthereumTx", "evm/MsgEthereumTx"},
+
 		{"SendMsg", "cosmos-sdk/Send"},
 		{"SubmitProposalMsg", "cosmos-sdk/MsgSubmitProposal"},
 		{"DepositMsg       ", "cosmos-sdk/MsgDeposit"},
 		{"VoteMsg          ", "cosmos-sdk/MsgVote"},
-		{"SetAccountFlagsMsg", "scripts/SetAccountFlagsMsg"},
 		{"MsgCreateValidator        ", "cosmos-sdk/MsgCreateValidator"},
 		{"MsgRemoveValidator        ", "cosmos-sdk/MsgRemoveValidator"},
 		{"MsgCreateValidatorProposal", "cosmos-sdk/MsgCreateValidatorProposal"},

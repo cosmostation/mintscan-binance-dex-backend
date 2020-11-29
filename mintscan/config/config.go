@@ -18,7 +18,6 @@ type Config struct {
 // NodeConfig wraps all node endpoints that are used in this project.
 type NodeConfig struct {
 	RPCNode             string `mapstructure:"rpc_node"`
-	GRPCNode            string `mapstructure:"grpc_node"`
 	ExchangeAPIEndpoint string `mapstructure:"exchange_api_endpoint"`
 	ChainID             string `mapstructure:"chain_id"`
 }

@@ -122,26 +122,6 @@ func (db *Database) QueryLatestBlockHeight() (int64, error) {
 	return block.Height, nil
 }
 
-// QueryTotalTxsNum queries total number of transactions up until that height
-func (db *Database) QueryTotalTxsNum(height int64) (int64, error) {
-	var block schema.Block
-	err := db.Model(&block).
-		Where("height = ?", height).
-		Limit(1).
-		Order("id DESC").
-		Select()
-
-	if err == pg.ErrNoRows {
-		return 0, fmt.Errorf("found no rows in block table: %s", err)
-	}
-
-	if err != nil {
-		return 0, fmt.Errorf("unexpected database error: %s", err)
-	}
-
-	return block.TotalTxs, nil
-}
-
 // QueryTx queries particular transaction with height
 func (db *Database) QueryTx(height int64) (txs []schema.Transaction, err error) {
 	err = db.Model(&txs).

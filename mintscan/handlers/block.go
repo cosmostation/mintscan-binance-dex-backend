@@ -93,8 +93,11 @@ func setBlocks(blocks []schema.Block) (*models.ResultBlocks, error) {
 					Height:    tx.Height,
 					Result:    txResult,
 					TxHash:    tx.TxHash,
+					TxType:    tx.TxType,
 					Messages:  msgs,
 					Memo:      tx.Memo,
+					Info:      tx.Info,
+					Log:       tx.Log,
 					Code:      tx.Code,
 					Timestamp: tx.Timestamp,
 				}
@@ -111,7 +114,6 @@ func setBlocks(blocks []schema.Block) (*models.ResultBlocks, error) {
 			ParentHash:    block.ParentHash,
 			NumPrecommits: block.NumPrecommits,
 			NumTxs:        block.NumTxs,
-			TotalTxs:      block.TotalTxs,
 			Txs:           resultTxs,
 			Timestamp:     block.Timestamp,
 		}
