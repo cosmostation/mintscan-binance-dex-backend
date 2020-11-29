@@ -3,12 +3,12 @@ package client
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/legacy"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/pkg/errors"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
@@ -26,14 +26,14 @@ type Client struct {
 
 // NewClient creates a new Client with the given config.
 func NewClient(cfg config.NodeConfig) *Client {
-	grpcConn, err := grpc.Dial(cfg.GRPCNode, grpc.WithInsecure(), grpc.WithContextDialer(dialerFunc))
-	if err != nil {
-		panic("failed to connect to the gRPC: " + cfg.GRPCNode)
-	}
-
 	rpcClient, err := rpchttp.NewWithTimeout(cfg.RPCNode, "/websocket", 10)
 	if err != nil {
 		panic("failed to init rpcClient: " + err.Error())
+	}
+
+	grpcConn, err := grpc.Dial(cfg.GRPCNode, grpc.WithInsecure(), grpc.WithContextDialer(dialerFunc))
+	if err != nil {
+		panic("failed to connect to the gRPC: " + cfg.GRPCNode)
 	}
 
 	return &Client{
@@ -115,7 +115,7 @@ func (c Client) GetValidators() ([]*types.Validator, error) {
 				Rate:          val.Commission.Rate.String(),
 				MaxRate:       val.Commission.MaxRate.String(),
 				MaxChangeRate: val.Commission.MaxChangeRate.String(),
-				UpdateTime:    val.Commission.UpdateTime.String(),
+				UpdateTime:    val.Commission.UpdateTime,
 			}, // Commission
 		})
 	}

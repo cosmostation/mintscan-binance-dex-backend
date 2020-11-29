@@ -7,6 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/pkg/errors"
+	"google.golang.org/grpc"
+
+	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 	resty "github.com/go-resty/resty/v2"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
@@ -20,6 +24,7 @@ import (
 // are needed for this project
 type Client struct {
 	rpcClient       rpcclient.Client
+	grpcConn        *grpc.ClientConn
 	exchangeClient  *resty.Client
 	coinGeckoClient *resty.Client
 }
@@ -39,10 +44,16 @@ func NewClient(cfg config.NodeConfig, marketCfg config.MarketConfig) *Client {
 		panic("failed to init rpcClient: " + err.Error())
 	}
 
+	grpcConn, err := grpc.Dial(cfg.GRPCNode, grpc.WithInsecure(), grpc.WithContextDialer(dialerFunc))
+	if err != nil {
+		panic("failed to connect to the gRPC: " + cfg.GRPCNode)
+	}
+
 	return &Client{
-		rpcClient,
-		exchangeClient,
-		coinGeckoClient,
+		rpcClient:       rpcClient,
+		grpcConn:        grpcConn,
+		exchangeClient:  exchangeClient,
+		coinGeckoClient: coinGeckoClient,
 	}
 }
 
@@ -141,22 +152,42 @@ func (c *Client) GetCoinMarketChartData(id string, from string, to string) (data
 
 // GetValidators returns validators detail information on Tendermint validators in active chain
 // An error is returns if the query fails.
-func (c *Client) GetValidators() (validators []models.Validator, err error) {
-	resp, err := c.exchangeClient.R().Get("/stake/validators")
+func (c Client) GetValidators() ([]models.Validator, error) {
+	stakingCli := staking.NewQueryClient(c.grpcConn)
+	resp, err := stakingCli.Validators(context.Background(), &staking.QueryValidatorsRequest{})
 	if err != nil {
+		err = errors.Wrap(err, "failed to query validators from staking module")
 		return []models.Validator{}, err
 	}
 
-	if resp.IsError() {
-		return []models.Validator{}, fmt.Errorf("failed to request validators: %d", resp.StatusCode())
+	vals := make([]models.Validator, 0, len(resp.Validators))
+	for _, val := range resp.Validators {
+		vals = append(vals, models.Validator{
+			OperatorAddress: val.OperatorAddress, // string
+			ConsensusPubKey: val.ConsensusPubkey, // json.RawMessage
+			Jailed:          val.Jailed,          // bool
+			Status:          val.Status.String(), // string
+			Tokens:          val.Tokens.String(), // string
+			Power:           val.ConsensusPower(),
+			DelegatorShares: val.DelegatorShares.String(), // string
+			Description: models.Description{
+				Moniker:  val.Description.Moniker,
+				Identity: val.Description.Identity,
+				Website:  val.Description.Website,
+				Details:  val.Description.Details,
+			}, // Description
+			UnbondingHeight: val.UnbondingHeight,        // int64
+			UnbondingTime:   val.UnbondingTime.String(), // string
+			Commission: models.Commission{
+				Rate:          val.Commission.Rate.String(),
+				MaxRate:       val.Commission.MaxRate.String(),
+				MaxChangeRate: val.Commission.MaxChangeRate.String(),
+				UpdateTime:    val.Commission.UpdateTime,
+			}, // Commission
+		})
 	}
 
-	err = json.Unmarshal(resp.Body(), &validators)
-	if err != nil {
-		return []models.Validator{}, err
-	}
-
-	return validators, nil
+	return vals, nil
 }
 
 // GetAsset returns particular asset information given an asset name.

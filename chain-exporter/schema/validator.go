@@ -21,7 +21,7 @@ type Validator struct {
 	CommissionRate          string    `json:"commission_rate"`
 	CommissionMaxRate       string    `json:"commission_max_rate"`
 	CommissionMaxChangeRate string    `json:"commission_max_change_rate"`
-	CommissionUpdateTime    string    `json:"commission_update_time"`
+	CommissionUpdateTime    time.Time `json:"commission_update_time"`
 	Timestamp               time.Time `json:"timestamp" sql:"default:now()"`
 }
 

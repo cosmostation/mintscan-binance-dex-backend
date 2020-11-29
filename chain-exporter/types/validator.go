@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type (
 	// Validator defines the structure for validator information
 	Validator struct {
@@ -26,9 +28,9 @@ type (
 
 	// Commission wrpas general commission information about a validator
 	Commission struct {
-		Rate          string `json:"rate"`
-		MaxRate       string `json:"max_rate"`
-		MaxChangeRate string `json:"max_change_rate"`
-		UpdateTime    string `json:"update_time"`
+		Rate          string    `json:"rate"`
+		MaxRate       string    `json:"max_rate"`
+		MaxChangeRate string    `json:"max_change_rate"`
+		UpdateTime    time.Time `json:"update_time"`
 	}
 )

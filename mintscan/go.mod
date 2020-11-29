@@ -6,6 +6,7 @@ require (
 	github.com/InjectiveLabs/sdk-go v1.11.1
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/bugsnag/panicwrap v1.2.0 // indirect
+	github.com/cosmos/cosmos-sdk v0.39.2
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/go-resty/resty/v2 v2.2.0
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect
@@ -18,6 +19,7 @@ require (
 	github.com/tendermint/tendermint v0.34.0-rc6
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/xlab/suplog v1.0.0
+	google.golang.org/grpc v1.33.2
 	mellium.im/sasl v0.2.1 // indirect
 )
 
