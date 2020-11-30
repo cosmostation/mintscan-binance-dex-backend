@@ -8,6 +8,7 @@ import (
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/errors"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
 	"github.com/gin-gonic/gin"
+	"github.com/shopspring/decimal"
 )
 
 // GetCoinMarketData returns market data from CoinGecko API
@@ -29,16 +30,16 @@ func GetCoinMarketData(c *gin.Context) {
 	marketData := &models.Market{
 		Name:              data.Name,
 		Symbol:            data.Symbol,
-		CurrentPrice:      data.MarketData.CurrentPrice.Usd,
+		CurrentPrice:      decimal.NewFromFloat(data.MarketData.CurrentPrice.Usd).StringFixedBank(2),
 		Currency:          "usd",
 		MarketCapRank:     data.MarketCapRank,
-		MarketCap:         data.MarketData.MarketCap.Usd,
-		PercentChange1H:   data.MarketData.PriceChangePercentage1HInCurrency.Usd,
-		PercentChange24H:  data.MarketData.PriceChangePercentage24HInCurrency.Usd,
-		PercentChange7D:   data.MarketData.PriceChangePercentage7DInCurrency.Usd,
-		TotalVolume:       data.MarketData.TotalVolume.Usd,
-		TotalSupply:       data.MarketData.TotalSupply,
-		CirculatingSupply: data.MarketData.CirculatingSupply,
+		MarketCap:         decimal.NewFromFloat(data.MarketData.MarketCap.Usd).StringFixedBank(0),
+		PercentChange1H:   decimal.NewFromFloat(data.MarketData.PriceChangePercentage1HInCurrency.Usd).StringFixedBank(2),
+		PercentChange24H:  decimal.NewFromFloat(data.MarketData.PriceChangePercentage24HInCurrency.Usd).StringFixedBank(2),
+		PercentChange7D:   decimal.NewFromFloat(data.MarketData.PriceChangePercentage7DInCurrency.Usd).StringFixedBank(2),
+		TotalVolume:       decimal.NewFromFloat(data.MarketData.TotalVolume.Usd).StringFixedBank(0),
+		TotalSupply:       decimal.NewFromFloat(data.MarketData.TotalSupply).StringFixedBank(0),
+		CirculatingSupply: decimal.NewFromFloat(data.MarketData.CirculatingSupply).StringFixedBank(0),
 		LastUpdated:       data.MarketData.LastUpdated,
 	}
 

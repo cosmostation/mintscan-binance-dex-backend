@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/shopspring/decimal v1.2.0
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	github.com/tendermint/tendermint v0.34.0-rc6
