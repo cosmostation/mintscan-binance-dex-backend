@@ -3,7 +3,7 @@ module github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan
 go 1.15
 
 require (
-	github.com/InjectiveLabs/sdk-go v1.11.6
+	github.com/InjectiveLabs/sdk-go v1.12.3
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-pg/pg v8.0.6+incompatible
