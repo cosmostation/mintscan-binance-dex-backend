@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"strings"
 
 	"github.com/pkg/errors"
 	log "github.com/xlab/suplog"
@@ -71,15 +72,20 @@ func (c Client) GetLatestBlockHeight() (int64, error) {
 // GetTxs queries for all the transactions in a block height.
 // It uses `Tx` RPC method to query for the transaction.
 func (c Client) GetTxs(block *tmctypes.ResultBlock) ([]*ctypes.ResultTx, error) {
-	txs := make([]*ctypes.ResultTx, len(block.Block.Txs), len(block.Block.Txs))
+	txs := make([]*ctypes.ResultTx, 0, len(block.Block.Txs))
 
-	for i, tmTx := range block.Block.Txs {
+	for _, tmTx := range block.Block.Txs {
 		tx, err := c.rpcClient.Tx(context.Background(), tmTx.Hash(), true)
 		if err != nil {
+			if strings.HasSuffix(err.Error(), "not found") {
+				log.WithError(err).Errorln("failed to get Tx by hash")
+				continue
+			}
+
 			return nil, err
 		}
 
-		txs[i] = tx
+		txs = append(txs, tx)
 	}
 
 	return txs, nil
