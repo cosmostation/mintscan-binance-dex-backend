@@ -3,7 +3,7 @@ module github.com/cosmostation/mintscan-binance-dex-backend/stats-exporter
 go 1.13
 
 require (
-	github.com/binance-chain/go-sdk v1.2.2
+	github.com/binance-chain/go-sdk v1.2.6
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/go-resty/resty/v2 v2.2.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
