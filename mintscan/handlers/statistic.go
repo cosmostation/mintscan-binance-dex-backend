@@ -1,35 +1,19 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
 )
 
-// Statistic is a statistic handler
-type Statistic struct {
-	l      *log.Logger
-	client *client.Client
-	db     *db.Database
-}
-
-// NewStatistic creates a new statistic handler with the given params
-func NewStatistic(l *log.Logger, client *client.Client, db *db.Database) *Statistic {
-	return &Statistic{l, client, db}
-}
-
 // GetAssetsChartHistory returns
-func (s *Statistic) GetAssetsChartHistory(rw http.ResponseWriter, r *http.Request) {
+func GetAssetsChartHistory(rw http.ResponseWriter, r *http.Request) {
 	result := make([]models.AssetChartHistory, 0)
 
 	limit := int(24)
 
 	for _, assetName := range models.ChosenAssetNames {
-		asset, err := s.client.Asset(assetName)
+		asset, err := s.client.GetAsset(assetName)
 		if err != nil {
 			s.l.Printf("failed to get asset detail information: %s\n", err)
 		}
@@ -66,6 +50,6 @@ func (s *Statistic) GetAssetsChartHistory(rw http.ResponseWriter, r *http.Reques
 		result = append(result, *tempResult)
 	}
 
-	utils.Respond(rw, result)
+	models.Respond(rw, result)
 	return
 }

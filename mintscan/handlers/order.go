@@ -1,31 +1,16 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/client"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/db"
 	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/errors"
-	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/utils"
+	"github.com/cosmostation/mintscan-binance-dex-backend/mintscan/models"
 
 	"github.com/gorilla/mux"
 )
 
-// Order is a order handler
-type Order struct {
-	l      *log.Logger
-	client *client.Client
-	db     *db.Database
-}
-
-// NewOrder creates a new order handler with the given params
-func NewOrder(l *log.Logger, client *client.Client, db *db.Database) *Order {
-	return &Order{l, client, db}
-}
-
 // GetOrders returns order information based up on order id
-func (o *Order) GetOrders(rw http.ResponseWriter, r *http.Request) {
+func GetOrders(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -34,11 +19,12 @@ func (o *Order) GetOrders(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	order, err := o.client.Order(id)
+	order, err := s.client.GetOrder(id)
 	if err != nil {
-		o.l.Printf("failed to request order information: %s\n", err)
+		s.l.Printf("failed to request order information: %s\n", err)
+		return
 	}
 
-	utils.Respond(rw, order)
+	models.Respond(rw, order)
 	return
 }

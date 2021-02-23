@@ -8,14 +8,11 @@ import (
 )
 
 // getValidators parses validators information and wrap into Precommit schema struct
-func (ex *Exporter) getValidators(vals []*types.Validator) ([]*schema.Validator, error) {
-	validators := make([]*schema.Validator, 0)
-
-	// Looping through validators and insert them if not already exists in database
+func (ex *Exporter) getValidators(vals []*types.Validator) (validators []*schema.Validator, err error) {
 	for _, val := range vals {
 		ok, err := ex.db.ExistValidator(val.ConsensusAddress)
 		if !ok {
-			tempVal := &schema.Validator{
+			val := &schema.Validator{
 				Moniker:                 val.Description.Moniker,
 				AccountAddress:          val.AccountAddress,
 				OperatorAddress:         val.OperatorAddress,
@@ -35,7 +32,7 @@ func (ex *Exporter) getValidators(vals []*types.Validator) ([]*schema.Validator,
 				CommissionUpdateTime:    val.Commission.UpdateTime,
 			}
 
-			validators = append(validators, tempVal)
+			validators = append(validators, val)
 		}
 
 		if err != nil {

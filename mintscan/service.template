@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+cat << EOF > $HOME/mintscan.service
+[Unit] 
+Description=Running a Mintscan API for Binance Chain
+ConditionPathExists=${GOPATH}/bin/mintscan
+After=network.target 
+
+[Service] 
+Type=simple 
+User=ubuntu
+Group=ubuntu
+LimitNOFILE=65535 
+Restart=on-failure 
+RestartSec=10 
+StartLimitInterval=60 
+ExecStart=${GOPATH}/bin/mintscan
+
+# make sure log directory exists and owned by syslog 
+PermissionsStartOnly=true 
+ExecStartPre=/bin/mkdir -p /var/log/mintscan
+ExecStartPre=/bin/chown syslog:adm /var/log/mintscan
+ExecStartPre=/bin/chmod 755 /var/log/mintscan
+StandardOutput=syslog 
+StandardError=syslog 
+SyslogIdentifier=mintscan 
+
+[Install] 
+WantedBy=multi-user.target
+EOF

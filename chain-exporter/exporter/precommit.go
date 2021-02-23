@@ -10,31 +10,33 @@ import (
 )
 
 // getPreCommits parses validators information and wrap into Precommit schema struct
-func (ex *Exporter) getPreCommits(commit *tmtypes.Commit, vals *tmctypes.ResultValidators) ([]*schema.PreCommit, error) {
-	precommits := make([]*schema.PreCommit, 0)
+func (ex *Exporter) getPreCommits(commit *tmtypes.Commit, vals *tmctypes.ResultValidators) (precommits []*schema.PreCommit, err error) {
+	if len(commit.Precommits) <= 0 {
+		return []*schema.PreCommit{}, nil
+	}
 
-	if len(commit.Precommits) > 0 {
-		for _, precommit := range commit.Precommits {
-			if precommit != nil { // avoid nil-Vote
-				valAddr := precommit.ValidatorAddress.String()
-
-				val := findValidatorByAddr(valAddr, vals)
-				if val == nil {
-					return nil, fmt.Errorf("failed to find validator by address %s for block %d", valAddr, precommit.Height)
-				}
-
-				tempPreCommit := &schema.PreCommit{
-					Height:           precommit.Height,
-					Round:            precommit.Round,
-					ValidatorAddress: valAddr,
-					VotingPower:      val.VotingPower,
-					ProposerPriority: val.ProposerPriority,
-					Timestamp:        precommit.Timestamp,
-				}
-
-				precommits = append(precommits, tempPreCommit)
-			}
+	for _, precommit := range commit.Precommits {
+		if precommit == nil { // avoid nil-Vote
+			return []*schema.PreCommit{}, nil
 		}
+
+		valAddr := precommit.ValidatorAddress.String()
+
+		val := findValidatorByAddr(valAddr, vals)
+		if val == nil {
+			return nil, fmt.Errorf("failed to find validator by address %s for block %d", valAddr, precommit.Height)
+		}
+
+		pc := schema.NewPrecommit(schema.PreCommit{
+			Height:           precommit.Height,
+			Round:            precommit.Round,
+			ValidatorAddress: valAddr,
+			VotingPower:      val.VotingPower,
+			ProposerPriority: val.ProposerPriority,
+			Timestamp:        precommit.Timestamp,
+		})
+
+		precommits = append(precommits, pc)
 	}
 
 	return precommits, nil

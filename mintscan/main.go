@@ -18,65 +18,72 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var (
+	// Version is a project's version string.
+	Version = "Development"
+
+	// Commit is commit hash of this project.
+	Commit = ""
+)
+
 func main() {
 	l := log.New(os.Stdout, "Mintscan API ", log.Lshortfile|log.LstdFlags)
 
-	cfg := config.ParseConfig()
+	// Parse config from configuration file (config.yaml).
+	config := config.ParseConfig()
 
 	client := client.NewClient(
-		cfg.Node,
-		cfg.Market,
+		config.Node,
+		config.Market,
 	)
 
-	db := db.Connect(cfg.DB)
+	db := db.Connect(config.DB)
 	err := db.Ping()
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "failed to ping database"))
 	}
 
 	r := mux.NewRouter()
-
-	getR := r.Methods(http.MethodGet).PathPrefix("/v1").Subrouter()
-	getR.HandleFunc("/account/{address}", handlers.NewAccount(l, client, db).GetAccount)
-	getR.HandleFunc("/account/txs/{address}", handlers.NewAccount(l, client, db).GetAccountTxs)
-	getR.HandleFunc("/asset", handlers.NewAsset(l, client, db).GetAsset)
-	getR.HandleFunc("/assets", handlers.NewAsset(l, client, db).GetAssets)
-	getR.HandleFunc("/assets/txs", handlers.NewAsset(l, client, db).GetAssetTxs)
-	getR.HandleFunc("/asset-holders", handlers.NewAsset(l, client, db).GetAssetHolders)
-	getR.HandleFunc("/assets-images", handlers.NewAsset(l, client, db).GetAssetsImages)
-	getR.HandleFunc("/blocks", handlers.NewBlock(l, client, db).GetBlocks)
-	getR.HandleFunc("/fees", handlers.NewFee(l, client, db).GetFees)
-	getR.HandleFunc("/validators", handlers.NewValidator(l, client, db, cfg.Node.NetworkType).GetValidators)
-	getR.HandleFunc("/validator/{address}", handlers.NewValidator(l, client, db, cfg.Node.NetworkType).GetValidator)
-	getR.HandleFunc("/market", handlers.NewMarket(l, client, db).GetCoinMarketData)
-	getR.HandleFunc("/market/chart", handlers.NewMarket(l, client, db).GetCoinMarketChartData)
-	getR.HandleFunc("/orders/{id}", handlers.NewOrder(l, client, db).GetOrders)
-	getR.HandleFunc("/stats/assets/chart", handlers.NewStatistic(l, client, db).GetAssetsChartHistory)
-	getR.HandleFunc("/status", handlers.NewStatus(l, client, db).GetStatus)
-	getR.HandleFunc("/tokens", handlers.NewToken(l, client, db).GetTokens)
-	getR.HandleFunc("/txs", handlers.NewTransaction(l, client, db).GetTxs)
-	getR.HandleFunc("/txs/{hash}", handlers.NewTransaction(l, client, db).GetTxByHash)
-
-	postR := r.Methods(http.MethodPost).PathPrefix("/v1").Subrouter()
-	postR.HandleFunc("/txs", handlers.NewTransaction(l, client, db).GetTxsByType)
+	r = r.PathPrefix("/v1").Subrouter()
+	r.HandleFunc("/account/{address}", handlers.GetAccount).Methods("GET")
+	r.HandleFunc("/account/txs/{address}", handlers.GetAccountTxs).Methods("GET")
+	r.HandleFunc("/asset", handlers.GetAsset).Methods("GET")
+	r.HandleFunc("/assets", handlers.GetAssets).Methods("GET")
+	r.HandleFunc("/assets/mini-tokens", handlers.GetAssetsMiniTokens).Methods("GET")
+	r.HandleFunc("/assets/txs", handlers.GetAssetTxs).Methods("GET")
+	r.HandleFunc("/asset-holders", handlers.GetAssetHolders).Methods("GET")
+	r.HandleFunc("/assets-images", handlers.GetAssetsImages).Methods("GET")
+	r.HandleFunc("/blocks", handlers.GetBlocks).Methods("GET")
+	r.HandleFunc("/fees", handlers.GetFees).Methods("GET")
+	r.HandleFunc("/validators", handlers.GetValidators).Methods("GET")
+	r.HandleFunc("/validator/{address}", handlers.GetValidator).Methods("GET")
+	r.HandleFunc("/market", handlers.GetCoinMarketData).Methods("GET")
+	r.HandleFunc("/market/chart", handlers.GetCoinMarketChartData).Methods("GET")
+	r.HandleFunc("/orders/{id}", handlers.GetOrders).Methods("GET")
+	r.HandleFunc("/stats/assets/chart", handlers.GetAssetsChartHistory).Methods("GET")
+	r.HandleFunc("/status", handlers.GetStatus).Methods("GET")
+	r.HandleFunc("/tokens", handlers.GetTokens).Methods("GET")
+	r.HandleFunc("/txs", handlers.GetTxs).Methods("GET")
+	r.HandleFunc("/txs", handlers.GetTxsByTxType).Methods("POST")
+	r.HandleFunc("/txs/{hash}", handlers.GetTxByTxHash).Methods("GET")
 
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) { // catch-all
 		w.Write([]byte("No route is found matching the URL"))
 	})
 
-	// create a new server
+	// Create a new server
 	sm := &http.Server{
-		Addr:         ":" + cfg.Web.Port,
-		Handler:      handlers.MiddlewareLogRequest(r),
+		Addr:         ":" + config.Web.Port,
+		Handler:      handlers.Middleware(r, client, db, l),
 		ErrorLog:     l,
-		ReadTimeout:  50 * time.Second,  // max time to read request from the client
-		WriteTimeout: 10 * time.Second,  // max time to write response to the client
-		IdleTimeout:  120 * time.Second, // max time for connections using TCP Keep-Alive
+		ReadTimeout:  50 * time.Second, // max time to read request from the client
+		WriteTimeout: 10 * time.Second, // max time to write response to the client
 	}
 
-	// start the server
+	// Start the API server
 	go func() {
-		l.Printf("Server is running on http://localhost:%s\n", cfg.Web.Port)
+		l.Printf("Server is running on http://localhost:%s\n", config.Web.Port)
+		l.Printf("Version: %s | Commit: %s", Version, Commit)
 
 		err := sm.ListenAndServe()
 		if err != nil {
@@ -84,12 +91,16 @@ func main() {
 		}
 	}()
 
-	// trap sigterm or interupt and gracefully shutdown the server
+	TrapSignal(sm)
+}
+
+// TrapSignal traps sigterm or interupt and gracefully shutdown the server
+func TrapSignal(sm *http.Server) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, os.Kill)
 
-	// Block until a signal is received.
+	// block until a signal is received.
 	sig := <-c
 
 	// gracefully shutdown the server, waiting max 30 seconds for current operations to complete
@@ -97,5 +108,5 @@ func main() {
 	defer cancel()
 	sm.Shutdown(ctx)
 
-	l.Println("Gracefully shutting down the server: ", sig)
+	log.Println("Gracefully shutting down the server: ", sig)
 }

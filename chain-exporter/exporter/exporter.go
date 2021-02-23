@@ -16,6 +16,14 @@ import (
 	amino "github.com/tendermint/go-amino"
 )
 
+var (
+	// Version is this application's version.
+	Version = "Development"
+
+	// Commit is this application's commit hash.
+	Commit = ""
+)
+
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
 	l      *log.Logger
@@ -26,19 +34,23 @@ type Exporter struct {
 
 // NewExporter returns Exporter
 func NewExporter() *Exporter {
-	l := log.New(os.Stdout, "Chain Exporter ", log.Lshortfile|log.LstdFlags) // [TODO] Project Version
+	l := log.New(os.Stdout, "Chain Exporter ", log.Lshortfile|log.LstdFlags)
 
-	cfg := config.ParseConfig()
+	// Parse config from configuration file (config.yaml).
+	config := config.ParseConfig()
 
-	client := client.NewClient(cfg.Node)
+	// Create new client with node configruation.
+	client := client.NewClient(config.Node)
 
-	db := db.Connect(cfg.DB)
-
+	// Create connection with PostgreSQL database and
+	// Ping database to verify connection is success.
+	db := db.Connect(config.DB)
 	err := db.Ping()
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "failed to ping database."))
 	}
 
+	// Create database tables if not exist already
 	db.CreateTables()
 
 	return &Exporter{
@@ -49,8 +61,11 @@ func NewExporter() *Exporter {
 	}
 }
 
-// Start starts to synchronize blockchain data
+// Start starts to synchronize Binance Chain data.
 func (ex *Exporter) Start() error {
+	ex.l.Println("Starting Chain Exporter...")
+	ex.l.Printf("Version: %s | Commit Hash: %s", Version, Commit)
+
 	go func() {
 		for {
 			ex.l.Println("start - sync blockchain")
@@ -78,7 +93,7 @@ func (ex *Exporter) sync() error {
 	}
 
 	// Query latest block height on the active network
-	latestBlockHeight, err := ex.client.LatestBlockHeight()
+	latestBlockHeight, err := ex.client.GetLatestBlockHeight()
 	if latestBlockHeight == -1 {
 		log.Fatal(errors.Wrap(err, "failed to query the latest block height on the active network"))
 	}
@@ -104,29 +119,30 @@ func (ex *Exporter) sync() error {
 // process ingests chain data, such as block, transaction, validator set information
 // and save them in database
 func (ex *Exporter) process(height int64) error {
-	block, err := ex.client.Block(height)
+	block, err := ex.client.GetBlock(height)
 	if err != nil {
 		return fmt.Errorf("failed to query block using rpc client: %s", err)
-	}
-
-	valSet, err := ex.client.ValidatorSet(block.Block.LastCommit.Height())
-	if err != nil {
-		return fmt.Errorf("failed to query validator set using rpc client: %s", err)
-	}
-
-	vals, err := ex.client.Validators()
-	if err != nil {
-		return fmt.Errorf("failed to query validators using rpc client: %s", err)
-	}
-
-	resultBlock, err := ex.getBlock(block) // TODO: Reward Fees Calculation
-	if err != nil {
-		return fmt.Errorf("failed to get block: %s", err)
 	}
 
 	resultTxs, err := ex.getTxs(block)
 	if err != nil {
 		return fmt.Errorf("failed to get transactions: %s", err)
+	}
+
+	valSet, err := ex.client.GetValidatorSet(block.Block.LastCommit.Height())
+	if err != nil {
+		return fmt.Errorf("failed to query validator set using rpc client: %s", err)
+	}
+
+	vals, err := ex.client.GetValidators()
+	if err != nil {
+		return fmt.Errorf("failed to query validators using rpc client: %s", err)
+	}
+
+	// TODO: Reward Fees Calculation
+	resultBlock, err := ex.getBlock(block)
+	if err != nil {
+		return fmt.Errorf("failed to get block: %s", err)
 	}
 
 	resultValidators, err := ex.getValidators(vals)
