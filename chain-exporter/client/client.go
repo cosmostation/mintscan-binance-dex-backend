@@ -2,7 +2,9 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/binance-chain/go-sdk/client/rpc"
@@ -26,6 +28,11 @@ type Client struct {
 	explorerClient    *resty.Client
 	rpcClient         rpc.Client
 }
+
+var (
+	controler = make(chan struct{}, 40)
+	wg        = new(sync.WaitGroup)
+)
 
 // NewClient creates a new Client with the given config.
 func NewClient(cfg config.NodeConfig) *Client {
@@ -74,15 +81,39 @@ func (c Client) GetLatestBlockHeight() (int64, error) {
 // It uses `Tx` RPC method to query for the transaction.
 func (c Client) GetTxs(block *tmctypes.ResultBlock) ([]*rpc.ResultTx, error) {
 	txs := make([]*rpc.ResultTx, len(block.Block.Txs), len(block.Block.Txs))
+	var err error
+	retryFlag := false
 
 	for i, tmTx := range block.Block.Txs {
-		tx, err := c.rpcClient.Tx(tmTx.Hash(), true)
-		if err != nil {
-			return nil, err
-		}
+		hash := tmTx.Hash()
+		controler <- struct{}{}
+		wg.Add(1)
+		go func(i int, hash []byte) {
+			defer func() {
+				<-controler
+				wg.Done()
+			}()
 
-		txs[i] = tx
+			txs[i], err = c.rpcClient.Tx(hash, true)
+			if err != nil {
+				retryFlag = true
+				fmt.Println(hash)
+				return
+			}
+		}(i, hash)
 	}
+	wg.Wait()
+
+	if retryFlag {
+		return nil, fmt.Errorf("can not get all of txs, retry get tx in block height = %d", block.Block.Height)
+	}
+
+	// tx, err := c.rpcClient.Tx(hash, true)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// txs[i] = tx
 
 	return txs, nil
 }

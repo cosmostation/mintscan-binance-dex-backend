@@ -124,6 +124,11 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to query block using rpc client: %s", err)
 	}
 
+	resultTxs, err := ex.getTxs(block)
+	if err != nil {
+		return fmt.Errorf("failed to get transactions: %s", err)
+	}
+
 	valSet, err := ex.client.GetValidatorSet(block.Block.LastCommit.Height())
 	if err != nil {
 		return fmt.Errorf("failed to query validator set using rpc client: %s", err)
@@ -138,11 +143,6 @@ func (ex *Exporter) process(height int64) error {
 	resultBlock, err := ex.getBlock(block)
 	if err != nil {
 		return fmt.Errorf("failed to get block: %s", err)
-	}
-
-	resultTxs, err := ex.getTxs(block)
-	if err != nil {
-		return fmt.Errorf("failed to get transactions: %s", err)
 	}
 
 	resultValidators, err := ex.getValidators(vals)
