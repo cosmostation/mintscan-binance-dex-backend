@@ -35,7 +35,7 @@ func NewClient(cfg config.NodeConfig) *Client {
 		log.WithError(err).Fatalln("failed to init rpcClient")
 	}
 
-	ctx, err := chainClient.NewClientContext(cfg.ChainID, nil)
+	ctx, err := chainClient.NewClientContext(cfg.ChainID, "", nil)
 	if err != nil {
 		log.WithError(err).Fatalln("failed to init cosmos client context")
 	}
@@ -122,11 +122,11 @@ func (c Client) GetValidators() ([]*types.Validator, error) {
 	vals := make([]*types.Validator, 0, len(resp.Validators))
 	for _, val := range resp.Validators {
 		vals = append(vals, &types.Validator{
-			OperatorAddress: val.OperatorAddress, // string
-			ConsensusPubKey: val.ConsensusPubkey, // string
-			Jailed:          val.Jailed,          // bool
-			Status:          val.Status.String(), // string
-			Tokens:          val.Tokens.String(), // string
+			OperatorAddress: val.OperatorAddress,          // string
+			ConsensusPubKey: val.ConsensusPubkey.String(), // string
+			Jailed:          val.Jailed,                   // bool
+			Status:          val.Status.String(),          // string
+			Tokens:          val.Tokens.String(),          // string
 			Power:           val.ConsensusPower(),
 			DelegatorShares: val.DelegatorShares.String(), // string
 			Description: types.Description{

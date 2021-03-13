@@ -8,10 +8,10 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/xlab/suplog"
 
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
-	"github.com/tendermint/tendermint/crypto"
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
@@ -23,7 +23,7 @@ type CosmosTx interface {
 	GetMsgs() []sdk.Msg
 	ValidateBasic() error
 	GetSigners() []sdk.AccAddress
-	GetPubKeys() []crypto.PubKey
+	GetPubKeys() []cryptotypes.PubKey
 	GetGas() uint64
 	GetFee() sdk.Coins
 	FeePayer() sdk.AccAddress
