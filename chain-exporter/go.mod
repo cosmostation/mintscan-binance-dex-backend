@@ -3,7 +3,7 @@ module github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-export
 go 1.15
 
 require (
-	github.com/InjectiveLabs/sdk-go v1.16.0
+	github.com/InjectiveLabs/sdk-go v1.16.2
 	github.com/cosmos/cosmos-sdk v0.42.1
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/jinzhu/inflection v1.0.0 // indirect

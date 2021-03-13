@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/types"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
@@ -121,12 +122,12 @@ func (c Client) GetValidators() ([]*types.Validator, error) {
 
 	vals := make([]*types.Validator, 0, len(resp.Validators))
 	for _, val := range resp.Validators {
-		vals = append(vals, &types.Validator{
-			OperatorAddress: val.OperatorAddress,          // string
-			ConsensusPubKey: val.ConsensusPubkey.String(), // string
-			Jailed:          val.Jailed,                   // bool
-			Status:          val.Status.String(),          // string
-			Tokens:          val.Tokens.String(),          // string
+
+		v := &types.Validator{
+			OperatorAddress: val.OperatorAddress, // string
+			Jailed:          val.Jailed,          // bool
+			Status:          val.Status.String(), // string
+			Tokens:          val.Tokens.String(), // string
 			Power:           val.ConsensusPower(),
 			DelegatorShares: val.DelegatorShares.String(), // string
 			Description: types.Description{
@@ -143,7 +144,17 @@ func (c Client) GetValidators() ([]*types.Validator, error) {
 				MaxChangeRate: val.Commission.MaxChangeRate.String(),
 				UpdateTime:    val.Commission.UpdateTime,
 			}, // Commission
-		})
+		}
+
+		var pubKey cryptotypes.PubKey
+		if err := c.ctx.InterfaceRegistry.UnpackAny(val.ConsensusPubkey, &pubKey); err != nil {
+			err = errors.Wrap(err, "failed to unpack val cons pubkey")
+			return nil, err
+		}
+
+		v.ConsensusPubKey = sdk.MustBech32ifyPubKey(sdk.Bech32PubKeyTypeConsPub, pubKey)
+
+		vals = append(vals, v)
 	}
 
 	return vals, nil
