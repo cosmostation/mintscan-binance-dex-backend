@@ -11,9 +11,7 @@ RUN go mod download
 COPY . .
 
 #build binary
-RUN rm go.sum
 RUN go install
-RUN make install
 
 #build main container
 FROM alpine:latest
