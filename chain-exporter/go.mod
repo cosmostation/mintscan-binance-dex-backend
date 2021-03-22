@@ -3,15 +3,15 @@ module github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-export
 go 1.15
 
 require (
-	github.com/InjectiveLabs/sdk-go v1.16.5
-	github.com/cosmos/cosmos-sdk v0.42.1
+	github.com/InjectiveLabs/sdk-go v1.16.9
+	github.com/cosmos/cosmos-sdk v0.42.2
 	github.com/go-pg/pg v8.0.6+incompatible
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	github.com/tendermint/tendermint v0.34.8
-	github.com/xlab/suplog v1.1.0
+	github.com/xlab/suplog v1.2.1
 	mellium.im/sasl v0.2.1 // indirect
 )
 
