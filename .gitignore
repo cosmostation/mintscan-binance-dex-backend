@@ -1,2 +1,13 @@
-.DS_Store
 var/
+
+# IDE
+.idea/
+*.iml
+.root/
+
+# OS
+.DS_Store
+*.swp
+*.swo
+.vscode
+.idea
