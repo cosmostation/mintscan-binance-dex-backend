@@ -8,31 +8,16 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/xlab/suplog"
 
-	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
+	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/types"
 	evm "github.com/InjectiveLabs/sdk-go/chain/evm/types"
 )
-
-type CosmosTx interface {
-	GetMsgs() []sdk.Msg
-	ValidateBasic() error
-	GetSigners() []sdk.AccAddress
-	GetPubKeys() []cryptotypes.PubKey
-	GetGas() uint64
-	GetFee() sdk.Coins
-	FeePayer() sdk.AccAddress
-	FeeGranter() sdk.AccAddress
-	GetMemo() string
-	GetSignatures() [][]byte
-	GetTimeoutHeight() uint64
-	GetSignaturesV2() ([]signing.SignatureV2, error)
-}
 
 type Message struct {
 	Type  string          `json:"type"`
@@ -83,8 +68,13 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock, ignoreLog bool) (transac
 			if len(opts) > 0 {
 				if typeURL := opts[0].GetTypeUrl(); typeURL == "/injective.evm.v1beta1.ExtensionOptionsEthereumTx" {
 					txType = "evm"
+				} else if typeURL == "/injective.types.v1beta1.ExtensionOptionsWeb3Tx" {
+					txType = "cosmos-web3"
 				}
 			}
+		}
+		if len(txType) == 0 {
+			txType = "cosmos"
 		}
 
 		if txType == "evm" {
@@ -99,8 +89,7 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock, ignoreLog bool) (transac
 			}
 
 			evmTxData, _ = json.Marshal(impl.Data)
-		} else if impl, ok := tx.(CosmosTx); ok {
-			txType = "cosmos"
+		} else if impl, ok := tx.(authsigning.Tx); ok {
 			txMemo = impl.GetMemo()
 			txSignatures, _ := impl.GetSignaturesV2()
 			txPubKeys := impl.GetPubKeys()
@@ -121,7 +110,9 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock, ignoreLog bool) (transac
 				}
 			}
 		} else {
-			log.WithField("tx_type", fmt.Sprintf("%T", tx)).Warningln("skipping unknown Tx implementation")
+			err := errors.Errorf("unknown tx type: %T (expected %s)", tx, txType)
+			log.WithField("tx_type", fmt.Sprintf("%T", tx)).WithField("expected_type", txType).Warningln("skipping unknown Tx implementation")
+			return nil, err
 		}
 
 		sigsBz, err := json.Marshal(sigs)

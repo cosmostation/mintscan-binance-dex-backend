@@ -135,11 +135,11 @@ func GetTxsByTxType(c *gin.Context) {
 	}
 
 	// Validate transaction message type
-	ok := models.ValidatorMsgType(txrp.TxType)
-	if !ok {
-		errors.ErrInvalidMessageType(c.Writer, http.StatusUnauthorized)
-		return
-	}
+	// ok := models.ValidatorMsgType(txrp.TxType)
+	// if !ok {
+	// 	errors.ErrInvalidMessageType(c.Writer, http.StatusUnauthorized)
+	// 	return
+	// }
 
 	txs, err := s.db.QueryTxsByType(txrp.TxType, txrp.StartTime, txrp.EndTime, before, after, limit)
 	if err != nil {
