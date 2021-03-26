@@ -25,10 +25,11 @@ var (
 
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
-	l          log.Logger
-	client     *client.Client
-	db         *db.Database
-	ignoreLogs bool
+	l             log.Logger
+	client        *client.Client
+	db            *db.Database
+	ignoreLogs    bool
+	genesisHeight int
 }
 
 // NewExporter returns Exporter
@@ -55,10 +56,11 @@ func NewExporter() *Exporter {
 	db.CreateTables()
 
 	return &Exporter{
-		l:          log.DefaultLogger,
-		client:     client,
-		db:         db,
-		ignoreLogs: config.Processing.IgnoreLogs,
+		l:             log.DefaultLogger,
+		client:        client,
+		db:            db,
+		ignoreLogs:    config.Processing.IgnoreLogs,
+		genesisHeight: config.Processing.GenesisHeight,
 	}
 }
 
@@ -99,10 +101,8 @@ func (ex *Exporter) sync() error {
 		log.Fatal(errors.Wrap(err, "failed to query the latest block height on the active network"))
 	}
 
-	// Synchronizing blocks from the scratch will return 0 and will ingest accordingly.
-	// Skip the first block since it has no pre-commits
 	if dbHeight == 0 {
-		dbHeight = 1
+		dbHeight = int64(ex.genesisHeight)
 	}
 
 	// Ingest all blocks up to the latest height

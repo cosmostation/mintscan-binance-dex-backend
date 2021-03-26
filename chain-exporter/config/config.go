@@ -15,7 +15,8 @@ type Config struct {
 }
 
 type ProcessingConfig struct {
-	IgnoreLogs bool `mapstructure:"ignore_logs"`
+	GenesisHeight int  `mapstructure:"genesis_height"`
+	IgnoreLogs    bool `mapstructure:"ignore_logs"`
 }
 
 // NodeConfig wraps all node endpoints that are used in this project.
