@@ -37,6 +37,8 @@ github.com/DataDog/zstd v1.4.5 h1:EndNeuB0l9syBZhut0wns3gV1hL8zX8LIu6ZiVHWLIQ=
 github.com/DataDog/zstd v1.4.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
 github.com/InjectiveLabs/sdk-go v1.17.1 h1:ubvUv0UazgIw1E/bi8Zbru3ORUwg5l4kXU6DSjnEDJM=
 github.com/InjectiveLabs/sdk-go v1.17.1/go.mod h1:yPlIfvLoltjjwxBstGcT2XcX5W4hBMb9dva1QnAkVXs=
+github.com/InjectiveLabs/sdk-go v1.17.2 h1:5HC5fYGgWrjEio2k4ie2uWdXcVIJX0sfYu1SDJkgWJs=
+github.com/InjectiveLabs/sdk-go v1.17.2/go.mod h1:yPlIfvLoltjjwxBstGcT2XcX5W4hBMb9dva1QnAkVXs=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/OneOfOne/xxhash v1.2.2 h1:KMrpdQIwFcEqXDklaen+P1axHaj9BSKzvpUUfnHldSE=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
@@ -143,6 +145,8 @@ github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f/go.mod h1:E3G3o1h8I7cfc
 github.com/cosmos/cosmos-sdk v0.40.1/go.mod h1:vlgqdPpUGSxgqSbZea6fjszoLkPKwCuiqSBySLlv4ro=
 github.com/cosmos/cosmos-sdk v0.42.2 h1:t2jIxV5DGN1ynOwuSIvQUUHr7tAePN1AG5ArM7o8qos=
 github.com/cosmos/cosmos-sdk v0.42.2/go.mod h1:xiLp1G8mumj82S5KLJGCAyeAlD+7VNomg/aRSJV12yk=
+github.com/cosmos/cosmos-sdk v0.42.3 h1:VFYq7spDBBIlygAxwcI79Xh2JuIrG1ZCPKpvqKghIZs=
+github.com/cosmos/cosmos-sdk v0.42.3/go.mod h1:xiLp1G8mumj82S5KLJGCAyeAlD+7VNomg/aRSJV12yk=
 github.com/cosmos/go-bip39 v0.0.0-20180819234021-555e2067c45d/go.mod h1:tSxLoYXyBmiFeKpvmq4dzayMdCjCnu8uqmCysIGBT2Y=
 github.com/cosmos/go-bip39 v1.0.0 h1:pcomnQdrdH22njcAatO0yWojsUnCO3y2tNoV1cb6hHY=
 github.com/cosmos/go-bip39 v1.0.0/go.mod h1:RNJv0H/pOIVgxw6KS7QeX2a0Uo0aKUlfhZ4xuwvCdJw=
