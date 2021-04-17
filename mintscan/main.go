@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"time"
 
+	ctypes "github.com/InjectiveLabs/sdk-go/chain/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -29,6 +31,10 @@ var (
 func main() {
 	// Parse config from configuration file (config.yaml).
 	config := config.ParseConfig()
+
+	sdkConfig := sdk.GetConfig()
+	ctypes.SetBech32Prefixes(sdkConfig)
+	ctypes.SetBip44CoinType(sdkConfig)
 
 	client := client.NewClient(
 		config.Node,

@@ -9,6 +9,7 @@ import (
 
 	ctypes "github.com/InjectiveLabs/sdk-go/chain/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/client"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/config"
@@ -101,7 +102,7 @@ func (ex *Exporter) sync() error {
 		log.Fatal(errors.Wrap(err, "failed to query the latest block height on the active network"))
 	}
 
-	if dbHeight == 0 {
+	if dbHeight == 0 && ex.genesisHeight > 0 {
 		dbHeight = int64(ex.genesisHeight)
 	}
 
@@ -125,9 +126,15 @@ func (ex *Exporter) process(height int64, ignoreLogs bool) error {
 		return fmt.Errorf("failed to query block using rpc client: %s", err)
 	}
 
-	valSet, err := ex.client.GetValidatorSet(block.Block.LastCommit.GetHeight())
-	if err != nil {
-		return fmt.Errorf("failed to query validator set using rpc client: %s", err)
+	var valSet *tmctypes.ResultValidators
+	if lastHeight := block.Block.LastCommit.GetHeight(); lastHeight > 0 {
+		valSet, err = ex.client.GetValidatorSet(lastHeight)
+		if err != nil {
+			return fmt.Errorf("failed to query validator set using rpc client: %s", err)
+		}
+	} else {
+		// failed to query validator set using rpc client: RPC error -32603
+		// Internal error: height must be greater than 0, but got 0
 	}
 
 	vals, err := ex.client.GetValidators()

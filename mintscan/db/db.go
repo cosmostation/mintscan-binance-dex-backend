@@ -7,6 +7,7 @@ import (
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/config"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/models"
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan/schema"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/go-pg/pg"
 	"github.com/go-pg/pg/orm"
@@ -187,6 +188,24 @@ func (db *Database) QueryTxByHash(hash string) (tx schema.Transaction, err error
 	}
 
 	return tx, nil
+}
+
+func (db *Database) QueryTxsBySigner(signerAddress sdk.AccAddress, limit int) (txs []schema.Transaction, err error) {
+	err = db.Model(&txs).
+		Where(fmt.Sprintf(`(signatures->0 @> '{"address":"%s"}')`, signerAddress.String())).
+		Limit(limit).
+		Order("id DESC").
+		Select()
+
+	if err == pg.ErrNoRows {
+		return []schema.Transaction{}, fmt.Errorf("found no rows in block table: %s", err)
+	}
+
+	if err != nil {
+		return []schema.Transaction{}, fmt.Errorf("unexpected database error: %s", err)
+	}
+
+	return txs, nil
 }
 
 // QueryTxsByType queries transactions with tx type, start time and end time and return them.

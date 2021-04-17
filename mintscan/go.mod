@@ -3,7 +3,8 @@ module github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan
 go 1.16
 
 require (
-	github.com/InjectiveLabs/sdk-go v1.17.1
+	github.com/InjectiveLabs/sdk-go v1.18.0
+	github.com/cosmos/cosmos-sdk v0.42.4
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-pg/pg v8.0.6+incompatible
@@ -13,7 +14,7 @@ require (
 	github.com/shopspring/decimal v1.2.0
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
-	github.com/tendermint/tendermint v0.34.8
+	github.com/tendermint/tendermint v0.34.9
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/xlab/suplog v1.3.0
 	mellium.im/sasl v0.2.1 // indirect
