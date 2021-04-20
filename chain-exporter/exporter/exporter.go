@@ -31,6 +31,7 @@ type Exporter struct {
 	db            *db.Database
 	ignoreLogs    bool
 	genesisHeight int
+	allowSyncGap  bool
 }
 
 // NewExporter returns Exporter
@@ -62,6 +63,7 @@ func NewExporter() *Exporter {
 		db:            db,
 		ignoreLogs:    config.Processing.IgnoreLogs,
 		genesisHeight: config.Processing.GenesisHeight,
+		allowSyncGap:  config.Processing.AllowSyncGap,
 	}
 }
 
@@ -102,8 +104,10 @@ func (ex *Exporter) sync() error {
 		log.Fatal(errors.Wrap(err, "failed to query the latest block height on the active network"))
 	}
 
-	if dbHeight == 0 && ex.genesisHeight > 0 {
-		dbHeight = int64(ex.genesisHeight)
+	if ex.genesisHeight > 0 {
+		if dbHeight == 0 || ex.allowSyncGap {
+			dbHeight = int64(ex.genesisHeight)
+		}
 	}
 
 	// Ingest all blocks up to the latest height

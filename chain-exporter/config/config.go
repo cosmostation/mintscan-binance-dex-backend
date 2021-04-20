@@ -16,6 +16,7 @@ type Config struct {
 
 type ProcessingConfig struct {
 	GenesisHeight int  `mapstructure:"genesis_height"`
+	AllowSyncGap  bool `mapstructure:"allow_sync_gap"`
 	IgnoreLogs    bool `mapstructure:"ignore_logs"`
 }
 
