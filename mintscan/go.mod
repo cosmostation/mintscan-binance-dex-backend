@@ -3,7 +3,7 @@ module github.com/InjectiveLabs/injective-explorer-mintscan-backend/mintscan
 go 1.16
 
 require (
-	github.com/InjectiveLabs/sdk-go v1.20.3
+	github.com/InjectiveLabs/sdk-go v1.20.4
 	github.com/cosmos/cosmos-sdk v0.42.4
 	github.com/cosmos/iavl v0.15.3 // indirect
 	github.com/ethereum/go-ethereum v1.9.25 // indirect
