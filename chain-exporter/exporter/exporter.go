@@ -10,6 +10,7 @@ import (
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/codec"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/config"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/db"
+	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/prometheus"
 
 	"github.com/pkg/errors"
 
@@ -23,6 +24,13 @@ var (
 	// Commit is this application's commit hash.
 	Commit = ""
 )
+
+var metrics prometheus.ExporterMetrics
+
+func init(){
+	 metrics = prometheus.NewMetricsForExporter()
+	 prometheus.RegisterMetricsForExporter(metrics)
+}
 
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
@@ -52,6 +60,9 @@ func NewExporter() *Exporter {
 
 	// Create database tables if not exist already
 	db.CreateTables()
+
+	// Start Metric Scraping
+	go prometheus.StartMetricScraping(config.Prometheus)
 
 	return &Exporter{
 		l,
@@ -111,6 +122,7 @@ func (ex *Exporter) sync() error {
 			return err
 		}
 		ex.l.Printf("synced block %d/%d \n", i, latestBlockHeight)
+		metrics.BlockNumber.WithLabelValues().Set(float64(i))
 	}
 
 	return nil
