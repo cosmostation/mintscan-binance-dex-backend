@@ -14,6 +14,7 @@ type Config struct {
 	Node   NodeConfig   `mapstructure:"node"`
 	DB     DBConfig     `mapstructure:"database"`
 	Market MarketConfig `mapstructure:"market"`
+	Prometheus PrometheusConfig `mapstructure:"prometheus"`
 }
 
 // NodeConfig wraps all node endpoints that are used in this project.
@@ -37,6 +38,13 @@ type DBConfig struct {
 // MarketConfig wraps all required params for market endpoints.
 type MarketConfig struct {
 	CoinGeckoEndpoint string `mapstructure:"coingecko_endpoint"`
+}
+
+// PrometheusConfig wraps all required params for metrics scraping.
+type PrometheusConfig struct {
+	Port     string `mapstructure:"port"`
+	Path     string `mapstructure:"path"`
+	Namespace     string `mapstructure:"namespace"`
 }
 
 // ParseConfig attempts to read and parse config.yaml from the given path
