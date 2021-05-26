@@ -44,6 +44,7 @@ type MarketConfig struct {
 type PrometheusConfig struct {
 	Port string `mapstructure:"port"`
 	Path string `mapstructure:"path"`
+	Namespace string `mapstructure:"namespace"`
 }
 
 // ParseConfig attempts to read and parse config.yaml from the given path

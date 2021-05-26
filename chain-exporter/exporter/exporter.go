@@ -27,11 +27,6 @@ var (
 
 var metrics prometheus.ExporterMetrics
 
-func init(){
-	 metrics = prometheus.NewMetricsForExporter()
-	 prometheus.RegisterMetricsForExporter(metrics)
-}
-
 // Exporter wraps the required params to export blockchain
 type Exporter struct {
 	l      *log.Logger
@@ -60,6 +55,9 @@ func NewExporter() *Exporter {
 
 	// Create database tables if not exist already
 	db.CreateTables()
+
+	metrics = prometheus.NewMetricsForExporter(config.Prometheus)
+	prometheus.RegisterMetricsForExporter(metrics)
 
 	// Start Metric Scraping
 	go prometheus.StartMetricScraping(config.Prometheus)

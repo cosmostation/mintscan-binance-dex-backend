@@ -13,10 +13,10 @@ type ExporterMetrics struct{
 }
 
 // NewMetricsForExporter creates new metrics for exporter
-func NewMetricsForExporter() ExporterMetrics {
+func NewMetricsForExporter(cfg config.PrometheusConfig) ExporterMetrics {
 	blockNumber := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: "chain_exporter",
+			Namespace: cfg.Namespace,
 			Name: "block_height",
 			Help: "Height of block",
 		}, []string{})
