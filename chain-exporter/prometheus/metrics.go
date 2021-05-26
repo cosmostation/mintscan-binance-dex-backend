@@ -7,29 +7,32 @@ import (
 	"net/http"
 )
 
+// ExporterMetrics wraps metrics for exporter
 type ExporterMetrics struct{
 	BlockNumber   *prometheus.GaugeVec
 }
 
+// NewMetricsForExporter creates new metrics for exporter
 func NewMetricsForExporter() ExporterMetrics {
-
 	blockNumber := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "block_number",
-			Help: "Number of block",
-		},
-		[]string{})
-
+			Namespace: "exporter",
+			Name: "block_height",
+			Help: "Height of block",
+		}, []string{})
+	// set initial value
 	blockNumber.WithLabelValues().Set(float64(0))
 
 	return ExporterMetrics{blockNumber}
 }
 
+// RegisterMetricsForExporter registers metrics for exporter
 func RegisterMetricsForExporter(metrics ExporterMetrics){
 	prometheus.Register(metrics.BlockNumber)
 }
 
+// StartMetricScraping starts metrics scraping in metrics path
 func StartMetricScraping(cfg config.PrometheusConfig) {
-	http.Handle("/metrics", promhttp.Handler())
+	http.Handle(cfg.Path, promhttp.Handler())
 	http.ListenAndServe(":" + cfg.Port, nil)
 }

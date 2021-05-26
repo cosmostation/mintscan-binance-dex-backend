@@ -124,6 +124,7 @@ func (ex *Exporter) sync() error {
 		ex.l.Printf("synced block %d/%d \n", i, latestBlockHeight)
 		metrics.BlockNumber.WithLabelValues().Set(float64(i))
 	}
+	//metrics.BlockNumber.WithLabelValues().Set(float64(latestBlockHeight))
 
 	return nil
 }

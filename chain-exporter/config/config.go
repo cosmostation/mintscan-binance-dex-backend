@@ -43,6 +43,7 @@ type MarketConfig struct {
 // PrometheusConfig wraps required parameters for prometheus metrics scraping
 type PrometheusConfig struct {
 	Port string `mapstructure:"port"`
+	Path string `mapstructure:"path"`
 }
 
 // ParseConfig attempts to read and parse config.yaml from the given path
