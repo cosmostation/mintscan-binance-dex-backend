@@ -16,7 +16,7 @@ type ExporterMetrics struct{
 func NewMetricsForExporter() ExporterMetrics {
 	blockNumber := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: "exporter",
+			Namespace: "chain_exporter",
 			Name: "block_height",
 			Help: "Height of block",
 		}, []string{})
