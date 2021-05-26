@@ -18,8 +18,8 @@ func NewMetricsForExporter(cfg config.PrometheusConfig) ExporterMetrics {
 	blockNumber := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: cfg.Namespace,
-			Name: "block_number",
-			Help: "Number of block",
+			Name: "block_height",
+			Help: "Height of block",
 		},
 		[]string{})
 
