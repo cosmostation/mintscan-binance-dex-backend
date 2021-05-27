@@ -1,3 +1,4 @@
+### Go ###
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -14,5 +15,16 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-# configuration 
+### Go Patch ###
+/vendor/
+/Godeps/
+## Config
 config.yaml
+
+## GoLand
+.idea
+
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
