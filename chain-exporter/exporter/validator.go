@@ -3,6 +3,7 @@ package exporter
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/InjectiveLabs/injective-explorer-mintscan-backend/chain-exporter/schema"
@@ -12,8 +13,16 @@ import (
 // getValidators parses validators information and wrap into Precommit schema struct
 func (ex *Exporter) getValidators(vals []*types.Validator) (validators []*schema.Validator, err error) {
 	for _, val := range vals {
-		pubkey := sdk.MustGetPubKeyFromBech32(sdk.Bech32PubKeyTypeConsPub, val.ConsensusPubKey)
-		consensusAddress := sdk.GetConsAddress(pubkey).String()
+		pubKey := new(ed25519.PubKey)
+		bech32PrefixConsPub := sdk.GetConfig().GetBech32ConsensusPubPrefix()
+
+		pubKeyData, err := sdk.GetFromBech32(val.ConsensusPubKey, bech32PrefixConsPub)
+		if err != nil {
+			return nil, err
+		}
+
+		copy(pubKey.Key[:], pubKeyData)
+		consensusAddress := sdk.GetConsAddress(pubKey).String()
 
 		ok, err := ex.db.ExistValidator(consensusAddress)
 		if !ok {

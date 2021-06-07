@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gogo/protobuf/proto"
 	"github.com/pkg/errors"
 	log "github.com/xlab/suplog"
 
@@ -49,7 +50,7 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock, ignoreLog bool) (transac
 		for _, msg := range txMsgs {
 			msgBz := ex.client.JSONMarshaler().MustMarshalJSON(msg)
 			msgs = append(msgs, Message{
-				Type:  fmt.Sprintf("%s/%s", msg.Route(), msg.Type()),
+				Type:  fmt.Sprintf("/%s", proto.MessageName(msg)),
 				Value: json.RawMessage(msgBz),
 			})
 		}
@@ -92,7 +93,7 @@ func (ex *Exporter) getTxs(block *tmctypes.ResultBlock, ignoreLog bool) (transac
 		} else if impl, ok := tx.(authsigning.Tx); ok {
 			txMemo = impl.GetMemo()
 			txSignatures, _ := impl.GetSignaturesV2()
-			txPubKeys := impl.GetPubKeys()
+			txPubKeys, _ := impl.GetPubKeys()
 			txSigners := impl.GetSigners()
 			sigs = make([]types.Signature, len(txSignatures))
 
