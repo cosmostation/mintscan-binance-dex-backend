@@ -102,8 +102,8 @@ func (c Client) TxDecoder() sdk.TxDecoder {
 	return c.ctx.TxConfig.TxDecoder()
 }
 
-func (c Client) JSONMarshaler() codec.JSONMarshaler {
-	return c.ctx.JSONMarshaler
+func (c Client) JSONMarshaler() codec.JSONCodec {
+	return c.ctx.JSONCodec
 }
 
 func (c Client) Marshaler() codectypes.InterfaceRegistry {
@@ -128,7 +128,7 @@ func (c Client) GetValidators() ([]*types.Validator, error) {
 			Jailed:          val.Jailed,          // bool
 			Status:          val.Status.String(), // string
 			Tokens:          val.Tokens.String(), // string
-			Power:           val.ConsensusPower(),
+			Power:           val.ConsensusPower(sdk.NewInt(1000000000000000000)),
 			DelegatorShares: val.DelegatorShares.String(), // string
 			Description: types.Description{
 				Moniker:  val.Description.Moniker,
@@ -152,7 +152,7 @@ func (c Client) GetValidators() ([]*types.Validator, error) {
 			return nil, err
 		}
 
-		v.ConsensusPubKey = sdk.MustBech32ifyPubKey(sdk.Bech32PubKeyTypeConsPub, pubKey)
+		v.ConsensusPubKey = sdk.MustBech32ifyAddressBytes(sdk.Bech32PrefixConsPub, pubKey.Bytes())
 
 		vals = append(vals, v)
 	}
