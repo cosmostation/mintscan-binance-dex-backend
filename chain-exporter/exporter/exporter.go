@@ -129,11 +129,6 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to get transactions: %s", err)
 	}
 
-	valSet, err := ex.client.GetValidatorSet(block.Block.LastCommit.Height())
-	if err != nil {
-		return fmt.Errorf("failed to query validator set using rpc client: %s", err)
-	}
-
 	vals, err := ex.client.GetValidators()
 	if err != nil {
 		return fmt.Errorf("failed to query validators using rpc client: %s", err)
@@ -150,12 +145,7 @@ func (ex *Exporter) process(height int64) error {
 		return fmt.Errorf("failed to get validators: %s", err)
 	}
 
-	resultPreCommits, err := ex.getPreCommits(block.Block.LastCommit, valSet)
-	if err != nil {
-		return fmt.Errorf("failed to get precommits: %s", err)
-	}
-
-	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators, resultPreCommits)
+	err = ex.db.InsertExportedData(resultBlock, resultTxs, resultValidators)
 	if err != nil {
 		return fmt.Errorf("failed to insert exporterd data: %s", err)
 	}

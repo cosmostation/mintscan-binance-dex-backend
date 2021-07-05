@@ -184,7 +184,7 @@ func (db *Database) ExistValidator(valAddr string) (bool, error) {
 // RunInTransaction runs a function in a transaction.
 // if function returns an error transaction is rollbacked, otherwise transaction is committed.
 func (db *Database) InsertExportedData(block *schema.Block, txs []*schema.Transaction,
-	vals []*schema.Validator, precommits []*schema.PreCommit) error {
+	vals []*schema.Validator) error {
 
 	err := db.RunInTransaction(func(tx *pg.Tx) error {
 		err := tx.Insert(block)
@@ -203,13 +203,6 @@ func (db *Database) InsertExportedData(block *schema.Block, txs []*schema.Transa
 			err := tx.Insert(&vals)
 			if err != nil {
 				return fmt.Errorf("failed to insert validators: %s", err)
-			}
-		}
-
-		if len(precommits) > 0 {
-			err := tx.Insert(&precommits)
-			if err != nil {
-				return fmt.Errorf("failed to insert precommits: %s", err)
 			}
 		}
 
