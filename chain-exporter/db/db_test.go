@@ -29,7 +29,6 @@ func TestCreate_Tables(t *testing.T) {
 
 	tables := []interface{}{
 		(*schema.Block)(nil),
-		(*schema.PreCommit)(nil),
 		(*schema.Transaction)(nil),
 		(*schema.Validator)(nil),
 		(*schema.StatAssetInfoList1H)(nil),
