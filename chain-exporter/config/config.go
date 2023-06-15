@@ -6,14 +6,14 @@ import (
 
 	"github.com/spf13/viper"
 
-	cmtypes "github.com/binance-chain/go-sdk/common/types"
+	cmtypes "github.com/bnb-chain/go-sdk/common/types"
 )
 
 // Config defines all necessary parameters.
 type Config struct {
-	Node   NodeConfig   `mapstructure:"node"`
-	DB     DBConfig     `mapstructure:"database"`
-	Market MarketConfig `mapstructure:"market"`
+	Node       NodeConfig       `mapstructure:"node"`
+	DB         DBConfig         `mapstructure:"database"`
+	Market     MarketConfig     `mapstructure:"market"`
 	Prometheus PrometheusConfig `mapstructure:"prometheus"`
 }
 
@@ -42,9 +42,9 @@ type MarketConfig struct {
 
 // PrometheusConfig wraps all required params for metrics scraping.
 type PrometheusConfig struct {
-	Port     string `mapstructure:"port"`
-	Path     string `mapstructure:"path"`
-	Namespace     string `mapstructure:"namespace"`
+	Port      string `mapstructure:"port"`
+	Path      string `mapstructure:"path"`
+	Namespace string `mapstructure:"namespace"`
 }
 
 // ParseConfig attempts to read and parse config.yaml from the given path

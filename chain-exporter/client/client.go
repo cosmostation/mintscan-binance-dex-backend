@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/binance-chain/go-sdk/client/rpc"
+	"github.com/bnb-chain/go-sdk/client/rpc"
 
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/codec"
 	"github.com/cosmostation/mintscan-binance-dex-backend/chain-exporter/config"

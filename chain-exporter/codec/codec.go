@@ -3,7 +3,7 @@ package codec
 import (
 	amino "github.com/tendermint/go-amino"
 
-	"github.com/binance-chain/go-sdk/types"
+	"github.com/bnb-chain/go-sdk/types"
 )
 
 // Codec is amino codec to serialize Binance Chain interfaces and data.

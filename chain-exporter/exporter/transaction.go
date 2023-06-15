@@ -8,8 +8,8 @@ import (
 
 	tmctypes "github.com/tendermint/tendermint/rpc/core/types"
 
-	ctypes "github.com/binance-chain/go-sdk/common/types"
-	txtypes "github.com/binance-chain/go-sdk/types/tx"
+	ctypes "github.com/bnb-chain/go-sdk/common/types"
+	txtypes "github.com/bnb-chain/go-sdk/types/tx"
 )
 
 // getTxs parses transactions in a block and return transactions.
